@@ -64,35 +64,4 @@ When the primary checkout is on a branch other than `main` and its working tree 
 
 ## After the pull request merges
 
-When the pull request for a worktree's branch has merged, retire that worktree and rearm the primary checkout. Do this from the primary checkout. If you are inside the worktree, leave it first.
-
-1. Confirm the pull request is merged. Match it by the worktree's branch:
-
-```sh
-gh pr list --state merged --head <branch> --json number,state,title
-```
-
-If that list is empty, stop. Do not remove a worktree whose pull request is still open, closed without merging, or missing.
-
-2. Look at the worktree. If a tracked file is modified, or an untracked file is source, stop and report. Do not force it. If the only leftovers are generated files (`node_modules`, `dist`, and other ignored build output), force is allowed.
-
-```sh
-git worktree remove "../worktrees/<prefix>-<slug>"
-```
-
-When only generated files block the remove:
-
-```sh
-git worktree remove --force "../worktrees/<prefix>-<slug>"
-```
-
-3. Delete the local branch. `git branch -d <branch>` is enough when the commits are in `main`. A squash merge will refuse `-d`. If the pull request is merged and `-d` refuses, delete it with `git branch -D <branch>`. The squash merge deletes the remote branch. Do not delete it a second time.
-
-4. Rearm the primary checkout:
-
-```sh
-git checkout main
-git pull --ff-only origin main
-```
-
-The primary checkout is then on the latest `main`, and the finished worktree is gone. Start the next branch as a new worktree. Do not start it in the primary checkout.
+Follow `../quest-remove-worktree/SKILL.md`.

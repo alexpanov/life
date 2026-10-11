@@ -17,9 +17,10 @@ Load the relevant task skill:
 - Background updates and offline UX: [.ai/skills/life-realtime-ux/SKILL.md](.ai/skills/life-realtime-ux/SKILL.md)
 - Parallel work: [.ai/skills/quest-legion/SKILL.md](.ai/skills/quest-legion/SKILL.md)
 - Worktree placement: [.ai/skills/quest-worktrees/SKILL.md](.ai/skills/quest-worktrees/SKILL.md)
+- Merged worktree removal: [.ai/skills/quest-remove-worktree/SKILL.md](.ai/skills/quest-remove-worktree/SKILL.md)
 - Pull requests: [.ai/skills/quest-pr/SKILL.md](.ai/skills/quest-pr/SKILL.md)
 
-Keep the primary checkout on `main`. Extra worktrees belong in the sibling `worktrees` folder. Load the worktree skill and move any that sit beside the main line. When a worktree's pull request has merged, remove that worktree, check out `main`, and pull, so the next pull request can start.
+Keep the primary checkout on `main`. Extra worktrees belong in the sibling `worktrees` folder. Load the worktree skill and move any that sit beside the main line. When a worktree's pull request has merged, including when you find it already merged, load the merged worktree removal skill and follow every step. Do not stop at the merge.
 
 Inspect current source, package scripts and Git status before acting. Preserve other agents' work. Follow the user's current scope and the host's higher-priority rules. Report executed checks and observed deployment results; never turn a goal into an unverified claim.
 

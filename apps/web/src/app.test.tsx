@@ -37,8 +37,10 @@ describe("home navigation", () => {
       });
       await controller.flush();
     });
-    expect(screen.getByRole("heading", { name: "Home" })).toBeVisible();
-    expect(screen.getByRole("link", { name: /Drink water/ })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Home" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Drink water" })).toBeVisible();
+    expect(screen.getByText("Fill a glass")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Complete quest" })).toBeVisible();
     expect(screen.queryByLabelText("Today I feel")).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Pray for a quest" }),
@@ -51,7 +53,7 @@ describe("home navigation", () => {
     expect(screen.getByRole("navigation", { name: "Main navigation" })).toHaveTextContent(
       "Home",
     );
-    await user.click(screen.getByRole("link", { name: /Drink water/ }));
+    await user.click(screen.getByRole("link", { name: "Make progress" }));
     await user.type(
       screen.getByLabelText("What progress did you make?"),
       "Filled the glass",
@@ -59,19 +61,67 @@ describe("home navigation", () => {
     await user.click(screen.getByRole("button", { name: "Save progress" }));
     expect(screen.getByText(/Filled the glass/)).toBeVisible();
   });
-  it("asks what is up and will not start until a realm is picked", async () => {
+  it("asks once and starts in the only place", async () => {
     const { user } = await setup();
     expect(screen.getByText("What's up, boss? What are we up to?")).toBeVisible();
-    await user.type(screen.getByLabelText("What are we up to?"), "Walk the block");
-    await user.click(screen.getByRole("button", { name: "Continue" }));
-    const start = screen.getByRole("button", { name: "Start" });
-    expect(start).toBeDisabled();
-    const realm = screen.getByRole("option", { name: "Home" });
-    await user.selectOptions(screen.getByLabelText("Which realm?"), realm);
-    expect(start).toBeEnabled();
-    await user.click(start);
-    expect(screen.getByRole("link", { name: /Walk the block/ })).toBeVisible();
+    expect(
+      screen.queryByText("What are we up to?", { exact: true }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Which realm?")).not.toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Home" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Home" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Start" })).not.toBeInTheDocument();
+    await user.type(
+      screen.getByRole("textbox", {
+        name: "What's up, boss? What are we up to?",
+      }),
+      "Walk the block",
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("heading", { name: "Walk the block" })).toBeVisible();
+    expect(screen.getByText("Do this one. Then tell me how it went.")).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Home" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Start" })).not.toBeInTheDocument();
+  });
+  it("starts the quest when a realm is tapped", async () => {
+    const { controller, user } = await setup();
+    await act(async () => {
+      controller.send({ type: "add-realm", name: "Church", location: "" });
+      controller.send({ type: "add-realm", name: "Work", location: "" });
+      await controller.flush();
+    });
+    expect(screen.queryByRole("button", { name: "Home" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Continue" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Which realm?")).not.toBeInTheDocument();
+    await user.type(
+      screen.getByRole("textbox", {
+        name: "What's up, boss? What are we up to?",
+      }),
+      "Pray",
+    );
+    await user.click(screen.getByRole("button", { name: "Church" }));
+    expect(screen.getByRole("heading", { name: "Pray" })).toBeVisible();
+    expect(screen.getByText("Do this one. Then tell me how it went.")).toBeVisible();
+  });
+  it("lists several quests he can open", async () => {
+    const { controller, user } = await setup();
+    await act(async () => {
+      controller.send({
+        type: "add-quest",
+        quest: { title: "Drink water", nextMove: "Fill a glass", xp: 10 },
+      });
+      controller.send({
+        type: "add-quest",
+        quest: { title: "Walk", nextMove: "Step outside", xp: 10 },
+      });
+      await controller.flush();
+    });
+    expect(screen.queryByRole("heading", { name: "Home" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Drink water/ })).toBeVisible();
+    expect(screen.getByText("Fill a glass")).toBeVisible();
+    expect(screen.getByText("Step outside")).toBeVisible();
+    await user.click(screen.getByRole("link", { name: /Walk/ }));
+    expect(screen.getByRole("heading", { name: "Walk" })).toBeVisible();
   });
   it("opens Home instead of a removed screen", async () => {
     for (const route of [
@@ -95,13 +145,13 @@ describe("home navigation", () => {
   });
   it("keeps the hero line when the quest starts", async () => {
     const { controller, user } = await setup();
-    await user.type(screen.getByLabelText("What are we up to?"), "Call home");
-    await user.click(screen.getByRole("button", { name: "Continue" }));
-    await user.selectOptions(
-      screen.getByLabelText("Which realm?"),
-      screen.getByRole("option", { name: "Home" }),
+    await user.type(
+      screen.getByRole("textbox", {
+        name: "What's up, boss? What are we up to?",
+      }),
+      "Call home",
     );
-    await user.click(screen.getByRole("button", { name: "Start" }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
     await controller.flush();
     const game = controller.getSnapshot().game;
     expect(

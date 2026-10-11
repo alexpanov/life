@@ -56,7 +56,7 @@ Forgetting memories, unlocked traits, stories and wisdom is a soft-delete routin
 
 ## Home
 
-Call the home destination Home and keep its stable root route. Home lists the hero's open quests. When none are open, Niko asks what they are up to. That answer becomes a quest, and the quest cannot start until the hero picks a realm. Put Home in the bottom navigation. Do not label Home as Port, and do not use a circular home button. Do not route to an Explore menu, a Niko lore page, inventory, settings and saves, notifications, invite, power-ups, or driving mode.
+Call the home destination Home and keep its stable root route. One open quest fills Home: what it is, the next step, and a way to continue. Several open quests are a list he can open. When none are open, Niko asks once what they are up to. Do not repeat that question as a field label. That answer becomes a quest. Do not list a realm named Home. One real realm starts with the answer. Several real realms are taps, and tapping one starts the quest. Put Home in the bottom navigation. Do not label Home as Port, and do not use a circular home button. Do not route to an Explore menu, a Niko lore page, inventory, settings and saves, notifications, invite, power-ups, or driving mode.
 
 Keep primary task screens focused. Do not add a stay-in-touch block or an enable-notifications prompt.
 

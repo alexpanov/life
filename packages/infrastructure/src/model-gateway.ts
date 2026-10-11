@@ -1,6 +1,7 @@
 import { surfaceGuidance } from "../../core/src/surface";
 import { Effect } from "effect";
 import { z } from "zod";
+import * as O from "../../foundation/src/option";
 import { NIKO_PROMPTS } from "../../core/src/sidekick";
 import { powerupTemplateSchema } from "../../core/src/powerups";
 import {
@@ -14,6 +15,10 @@ export interface ModelGatewayEnv {
   LIFE_LLM_MODEL?: string;
   LIFE_LLM_API_KEY?: string;
   LIFE_LLM_ALLOWED_USER_ID?: string;
+}
+/** Caller the host already proved. Request headers, query, and body are not this proof. */
+export interface HostCallerProof {
+  readonly userId: string;
 }
 export type ModelFetch = (
   input: string | URL | Request,
@@ -167,6 +172,7 @@ export async function handleNicoGateway(
   request: Request,
   env: ModelGatewayEnv,
   fetcher: ModelFetch = fetch,
+  caller: O.Option<HostCallerProof> = O.none(),
 ): Promise<Response> {
   const path = new URL(request.url).pathname;
   if (path !== "/api/nico/status" && path !== "/api/nico/propose")
@@ -197,14 +203,16 @@ export async function handleNicoGateway(
         ].includes(endpoint.hostname)
       );
     })();
-  const authenticated = Boolean(
-    request.headers.get("oai-authenticated-user-id"),
+  const provenUserId = O.match(
+    caller,
+    () => "",
+    (proof) => proof.userId,
   );
+  const authenticated = provenUserId.length > 0;
   const authorized =
     authenticated &&
     Boolean(env.LIFE_LLM_ALLOWED_USER_ID) &&
-    request.headers.get("oai-authenticated-user-id") ===
-      env.LIFE_LLM_ALLOWED_USER_ID;
+    provenUserId === env.LIFE_LLM_ALLOWED_USER_ID;
   if (path === "/api/nico/status")
     return request.method === "GET"
       ? json({

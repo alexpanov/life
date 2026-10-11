@@ -11,6 +11,7 @@ import {
   type NicoChatRequest,
 } from "../../packages/application/src/nico-model";
 import * as O from "../../packages/foundation/src/option";
+import type { HostCallerProof } from "../../packages/infrastructure/src/model-gateway";
 const env: ModelGatewayEnv = {
   LIFE_LLM_PROTOCOL: "anthropic",
   LIFE_LLM_ENDPOINT: "https://api.anthropic.com/v1/messages",
@@ -30,7 +31,8 @@ const input: NicoChatRequest = {
   storyChoices: [],
 };
 const proposal = { version: 1, kind: "say", text: "One useful next step." };
-const req = (user = "owner", body = JSON.stringify(input)) =>
+const provenOwner: O.Option<HostCallerProof> = O.some({ userId: "owner" });
+const req = (user = "forged-caller", body = JSON.stringify(input)) =>
   new Request("https://life.test/api/nico/propose", {
     method: "POST",
     headers: {
@@ -43,13 +45,34 @@ const forbiddenFetch: ModelFetch = async () => {
   throw Error("Must not fetch");
 };
 describe("model gateway", () => {
-  it("requires trusted owner authentication before provider access", async () => {
+  it("spends the model key only after the host proves the allowed caller", async () => {
     expect(
-      (await handleNicoGateway(req("other"), env, forbiddenFetch)).status,
+      (await handleNicoGateway(req("owner"), env, forbiddenFetch)).status,
+    ).toBe(403);
+    expect(
+      (
+        await handleNicoGateway(
+          req("owner"),
+          env,
+          forbiddenFetch,
+          O.some({ userId: "other" }),
+        )
+      ).status,
     ).toBe(403);
     expect((await handleNicoGateway(req(""), env, forbiddenFetch)).status).toBe(
       403,
     );
+    const allowed = await handleNicoGateway(
+      req("other"),
+      env,
+      async () =>
+        Response.json({
+          content: [{ type: "text", text: JSON.stringify(proposal) }],
+        }),
+      provenOwner,
+    );
+    expect(allowed.status).toBe(200);
+    expect(await allowed.json()).toEqual(proposal);
   });
   it("reports missing configuration and rejects invalid JSON", async () => {
     expect(
@@ -58,11 +81,19 @@ describe("model gateway", () => {
           req(),
           { LIFE_LLM_ALLOWED_USER_ID: "owner" },
           forbiddenFetch,
+          provenOwner,
         )
       ).status,
     ).toBe(503);
     expect(
-      (await handleNicoGateway(req("owner", "not json"), env, forbiddenFetch))
+      (
+        await handleNicoGateway(
+          req("owner", "not json"),
+          env,
+          forbiddenFetch,
+          provenOwner,
+        )
+      )
         .status,
     ).toBe(400);
     expect(
@@ -74,6 +105,7 @@ describe("model gateway", () => {
           ),
           env,
           forbiddenFetch,
+          provenOwner,
         )
       ).status,
     ).toBe(400);
@@ -90,6 +122,7 @@ describe("model gateway", () => {
             req(),
             { ...env, LIFE_LLM_ENDPOINT: endpoint },
             forbiddenFetch,
+            provenOwner,
           )
         ).status,
       ).toBe(503);
@@ -111,9 +144,11 @@ describe("model gateway", () => {
         content: [{ type: "text", text: JSON.stringify(proposal) }],
       });
     };
-    expect(await (await handleNicoGateway(req(), env, fetcher)).json()).toEqual(
-      proposal,
-    );
+    expect(
+      await (
+        await handleNicoGateway(req(), env, fetcher, provenOwner)
+      ).json(),
+    ).toEqual(proposal);
   });
   it("sends OpenAI-compatible format", async () => {
     const response = await handleNicoGateway(
@@ -133,6 +168,7 @@ describe("model gateway", () => {
           choices: [{ message: { content: JSON.stringify(proposal) } }],
         });
       },
+      provenOwner,
     );
     expect(await response.json()).toEqual(proposal);
   });
@@ -148,7 +184,7 @@ describe("model gateway", () => {
         throw Error("secret-only-server");
       },
     ]) {
-      const response = await handleNicoGateway(req(), env, fetcher);
+      const response = await handleNicoGateway(req(), env, fetcher, provenOwner);
       expect(response.status).toBe(502);
       expect(await response.text()).not.toContain("secret-only-server");
     }
@@ -160,6 +196,7 @@ describe("model gateway", () => {
           req("owner", "x".repeat(128001)),
           env,
           forbiddenFetch,
+          provenOwner,
         )
       ).status,
     ).toBe(400);
@@ -169,13 +206,16 @@ describe("model gateway", () => {
           req(),
           env,
           async () => new Response("x".repeat(64001)),
+          provenOwner,
         )
       ).status,
     ).toBe(502);
   });
-  it("status exposes no credentials", async () => {
+  it("status exposes no credentials and ignores a caller header", async () => {
     const response = await handleNicoGateway(
-      new Request("https://life.test/api/nico/status"),
+      new Request("https://life.test/api/nico/status", {
+        headers: { "oai-authenticated-user-id": "owner" },
+      }),
       env,
       forbiddenFetch,
     );
@@ -184,6 +224,18 @@ describe("model gateway", () => {
       available: false,
       authenticated: false,
       authorized: false,
+    });
+    const proven = await handleNicoGateway(
+      new Request("https://life.test/api/nico/status"),
+      env,
+      forbiddenFetch,
+      provenOwner,
+    );
+    expect(await proven.json()).toEqual({
+      configured: true,
+      available: true,
+      authenticated: true,
+      authorized: true,
     });
   });
 });

@@ -37,7 +37,7 @@ Alex subsequently requested model integration now. The gateway is implemented, b
 
 ## Gateway operation
 
-`/api/nico/status` returns configuration/authorization booleans only. `/api/nico/propose` requires a Sites-authenticated user matching `LIFE_LLM_ALLOWED_USER_ID`. Configure `LIFE_LLM_PROTOCOL` (`anthropic` or `openai-compatible`), full `LIFE_LLM_ENDPOINT`, `LIFE_LLM_MODEL`, and secret `LIFE_LLM_API_KEY` in hosted runtime settings. Supported hosts are api.anthropic.com, api.openai.com, openrouter.ai and api.x.ai. Endpoint and model must actually support the selected protocol.
+`/api/nico/status` returns configuration/authorization booleans only. `/api/nico/propose` spends the model key only when the host proves a caller id matching `LIFE_LLM_ALLOWED_USER_ID`. A request header is not that proof. Configure `LIFE_LLM_PROTOCOL` (`anthropic` or `openai-compatible`), full `LIFE_LLM_ENDPOINT`, `LIFE_LLM_MODEL`, and secret `LIFE_LLM_API_KEY` in hosted runtime settings. Supported hosts are api.anthropic.com, api.openai.com, openrouter.ai and api.x.ai. Endpoint and model must actually support the selected protocol.
 
 The gateway sends canonical server-owned instructions, validates request and response, limits response tokens, rejects redirects and does not execute proposed game routines. This is an owner-only pilot: local game energy is not server billing enforcement, and no multi-user paid service should be enabled before durable quotas. Onboarding/completion replies and thoughts remain simulated. No provider compatibility is claimed from mocked tests alone.
 

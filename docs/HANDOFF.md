@@ -38,4 +38,4 @@ Node 22+: `npm ci`, then `npm start`. Development explicitly uses the simulator.
 
 `npm run build` produces the Vite app, service workers, Telegram entry and `dist/server/index.js`. The latter bundles static assets and routes /api/nico/* to the server gateway. `.openai/hosting.json` preserves Sites identity. Keep provider secrets in runtime settings. `docs/ENVIRONMENT.md` explains dotenvx for local server processes; the Worker does not decrypt dotenvx files itself.
 
-The gateway depends on Sites stripping/injecting authenticated-user headers. A different host must replace that identity adapter. Never expose the paid model endpoint by trusting client-supplied IDs. Before opening it to multiple players, add durable server quotas and authenticated account/persistence mapping.
+The gateway spends the model key only when the host passes a proven caller id. A request header is not that proof. Never expose the paid model endpoint by trusting client-supplied IDs. Before opening it to multiple players, add durable server quotas and authenticated account/persistence mapping.

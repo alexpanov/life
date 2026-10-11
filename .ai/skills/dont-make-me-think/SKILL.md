@@ -18,4 +18,4 @@ Read `../../CONTRACT.md`. Treat the mobile player’s attention as the constrain
 
 Do not replace domain rules with UI conditionals. Call typed commands and routines; render their results. Keep mocked model output behind the same Effect service boundary as a future live model.
 
-Keep Home one thumb tap away in the bottom navigation. Home is the open-quest list. When no quest is open, Niko asks what the hero is up to, and the quest cannot start until a realm is picked. Do not add an Explore menu, a Niko lore page, or a stay-in-touch block.
+Keep Home one thumb tap away in the bottom navigation. One open quest fills Home. Several open quests are a list he can open. When no quest is open, Niko asks once what the hero is up to. Do not repeat that question as a field label. A realm named Home is the screen, not a choice. One real realm starts with the answer. Several real realms are taps that start the quest. Do not add an Explore menu, a Niko lore page, or a stay-in-touch block.

@@ -786,6 +786,27 @@ footer {
 .focus-actions > * {
   width: 100%;
 }
+.quest-home {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: calc(100svh - 210px);
+}
+.quest-list {
+  display: flex;
+  flex-direction: column;
+}
+.quest-list > a {
+  display: block;
+  min-height: 88px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--paint-border);
+  color: var(--paint-text);
+  text-decoration: none;
+}
+.quest-list h4 {
+  margin-bottom: 6px;
+}
 .app-shell button,
 .app-shell [role="button"],
 .app-shell select {

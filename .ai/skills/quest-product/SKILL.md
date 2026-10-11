@@ -9,7 +9,7 @@ Apply the enduring purpose first: help the hero live a good life, the life the L
 
 Read `../../CONTRACT.md` relative to this file's directory. Trace the current player journey and save behavior before changing presentation.
 
-- Make the next action clear: an open quest, or, when none is open, Niko asks what the hero is up to and the answer starts a quest after a realm is chosen. Keep suggestions rare and dismissible.
+- Make the next action clear: one open quest fills Home, several are a list he can open, and when none is open Niko asks once what the hero is up to. Do not repeat that question as a field label. Do not offer a realm named Home. One real realm starts with the answer. Tapping one of several real realms starts the quest. Keep suggestions rare and dismissible.
 - Keep realms persistent places the player can return to. Preserve their open quests and dungeon associations. Model discovery internally without exposing a tutorial about hidden exploration state.
 - Keep completed and abandoned quest outcomes distinct. Let Niko learn useful, bounded context from both; feed it into later suggestions without asserting psychological diagnoses. Reset Niko's learning independently of player progress.
 - Label who speaks. Give game/system, Niko and fictional dispatch distinct presentation. Use text labels plus icon and typography differences. Keep domain process names out of player copy.

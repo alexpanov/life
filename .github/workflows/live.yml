@@ -1,6 +1,6 @@
 name: Test and deploy life
 # About 60 seconds from workflow creation to verified live content.
-# One or two Playwright smoke tests. Development database first, then live.
+# The website publish does not wait on the database.
 on:
   push:
     branches: [main]
@@ -12,24 +12,13 @@ concurrency:
   group: life-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  live:
+  check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    permissions:
-      contents: read
-      actions: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     env:
       SITE_BASE: /life/
     steps:
       - uses: actions/checkout@v6
-      - uses: supabase/setup-cli@v1
-        with:
-          version: 2.120.0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -42,45 +31,63 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Typecheck, lint, tests and build
         run: node scripts/check-release.mjs
-      # Ubuntu runner includes Chrome. One required smoke test; do not add a third.
       - name: Smoke tests
         run: npm run test:browser
-      - name: Apply database to development
-        if: github.ref == 'refs/heads/main'
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_DEV_PROJECT_REF }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DEV_DB_PASSWORD }}
-        run: |
-          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_PROJECT_REF" ] || [ -z "$SUPABASE_DB_PASSWORD" ]; then
-            echo "Development Supabase secrets are missing."
-            exit 1
-          fi
-          supabase db push --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD" --yes
-      - name: Apply database to live
-        if: github.ref == 'refs/heads/main'
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_LIVE_PROJECT_REF }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_LIVE_DB_PASSWORD }}
-        run: |
-          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_PROJECT_REF" ] || [ -z "$SUPABASE_DB_PASSWORD" ]; then
-            echo "Live Supabase secrets are missing."
-            exit 1
-          fi
-          supabase db push --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD" --yes
-      - if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@v5
-      - if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v4
+      - if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: dist
+          retention-days: 1
+  site:
+    needs: check
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: dist
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
-      - if: github.event_name != 'pull_request'
+      - id: deployment
         uses: actions/deploy-pages@v4
-        id: deployment
       - name: Verify deployed commit and measure full elapsed time
-        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           LIVE_URL: ${{ steps.deployment.outputs.page_url }}
         run: node scripts/verify-deployment.mjs
+  database:
+    needs: check
+    if: github.ref == 'refs/heads/main' && secrets.SUPABASE_ACCESS_TOKEN != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.120.0
+      - name: Apply database to development
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_DEV_PROJECT_REF }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DEV_DB_PASSWORD }}
+        run: supabase db push --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD" --yes
+      - name: Apply database to live
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_LIVE_PROJECT_REF }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_LIVE_DB_PASSWORD }}
+        run: supabase db push --project-ref "$SUPABASE_PROJECT_REF" --password "$SUPABASE_DB_PASSWORD" --yes

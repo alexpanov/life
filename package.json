@@ -1,0 +1,16 @@
+{
+  "name": "quest-os",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A local-first, extensible real-world RPG. No accounts, build dependencies, or API keys required.",
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "build:share": "node build.mjs --share"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

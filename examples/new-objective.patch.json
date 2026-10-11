@@ -1,0 +1,16 @@
+{
+  "kind": "questos.patch",
+  "version": 1,
+  "operations": [
+    {
+      "type": "addQuest",
+      "quest": {
+        "title": "Verify the next destination",
+        "detail": "Check the address and current hours before driving.",
+        "nextMove": "Find a current, reliable source for the destination.",
+        "category": "side",
+        "xp": 40
+      }
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "checks": 15,
+  "passed": 15,
+  "results": [
+    {
+      "check": "Desktop board renders seeded 3/5 objectives and five inventory items",
+      "result": "PASS"
+    },
+    {
+      "check": "Completion writes a save and a fresh rendered page restores it (storage adapter)",
+      "result": "PASS"
+    },
+    {
+      "check": "Main quest completes; undo reverses its count, reward, and inventory",
+      "result": "PASS"
+    },
+    {
+      "check": "Untrusted objective text is escaped; impossible closure applies no penalty",
+      "result": "PASS"
+    },
+    {
+      "check": "Independent player, new dungeon, objective creation, and edit controls work",
+      "result": "PASS"
+    },
+    {
+      "check": "Practice reward, daily cap, and recovery-mode controls work",
+      "result": "PASS"
+    },
+    {
+      "check": "Decay simulator previews level loss and return without changing the save",
+      "result": "PASS"
+    },
+    {
+      "check": "Module preview, installation, and duplicate-install rejection work",
+      "result": "PASS"
+    },
+    {
+      "check": "ChatGPT patches require approval; handoffs exclude other players",
+      "result": "PASS"
+    },
+    {
+      "check": "JSON backup download and explicit full-state restore work",
+      "result": "PASS"
+    },
+    {
+      "check": "Fictional call answers; driving mode makes the game board inert",
+      "result": "PASS"
+    },
+    {
+      "check": "390px touch layout: all four screens and the handoff dialog fit without horizontal overflow",
+      "result": "PASS"
+    },
+    {
+      "check": "Unavailable storage uses working session mode and clearly requests a backup",
+      "result": "PASS"
+    },
+    {
+      "check": "An unreadable save is preserved instead of being silently overwritten",
+      "result": "PASS"
+    },
+    {
+      "check": "No uncaught JavaScript errors across the rendered interaction checks",
+      "result": "PASS"
+    }
+  ],
+  "scope": "Unmodified app rendered inline in Chromium. 1440px desktop and 390px touch viewport. Storage adapter used for save/restore flow.",
+  "not_tested": [
+    "Physical iPhone or Safari",
+    "Actual file:// opening",
+    "Live hosting",
+    "Real localStorage persistence across browser restarts",
+    "Service worker offline navigation"
+  ],
+  "environment_limitation": "Installed browser blocks localhost and file URL navigation with ERR_BLOCKED_BY_ADMINISTRATOR. No restrictions were changed."
+}

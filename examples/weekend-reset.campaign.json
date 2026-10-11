@@ -1,0 +1,27 @@
+{
+  "kind": "questos.campaign",
+  "version": 1,
+  "name": "Home base",
+  "subtitle": "Win back the weekend",
+  "quests": [
+    {
+      "title": "Clear one neglected task",
+      "nextMove": "Choose the smallest useful task you have been putting off.",
+      "category": "main",
+      "xp": 50
+    },
+    {
+      "title": "Do something useful for someone",
+      "detail": "Pick a concrete action that the person would actually appreciate.",
+      "nextMove": "Ask what would help, then choose one action.",
+      "category": "main",
+      "xp": 80
+    },
+    {
+      "title": "Prepare one thing for tomorrow",
+      "nextMove": "Put tomorrow's first task and its supplies in one place.",
+      "category": "main",
+      "xp": 50
+    }
+  ]
+}

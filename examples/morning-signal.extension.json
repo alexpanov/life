@@ -1,0 +1,23 @@
+{
+  "kind": "questos.extension",
+  "version": 1,
+  "id": "morning-signal",
+  "name": "Morning Signal",
+  "description": "A reusable focus mission and a new voice on the line.",
+  "quests": [
+    {
+      "title": "Complete one focused work block",
+      "detail": "Choose one useful task. Finish one uninterrupted block of work. You decide the duration.",
+      "nextMove": "Pick the single task that matters most today.",
+      "category": "side",
+      "xp": 60
+    }
+  ],
+  "skills": [{ "name": "Focus", "halfLifeDays": 21 }],
+  "calls": [
+    {
+      "caller": "NIGHT SHIFT",
+      "text": "The terminal is awake. Choose one useful action. No ten-step plan. Report back when it is complete."
+    }
+  ]
+}

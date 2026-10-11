@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quest Functional Core"
+  short_description: "Build typed, deterministic Effect domain code"
+  default_prompt: "Use $quest-functional-core to complete the requested QuestOS change."

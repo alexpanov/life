@@ -1,0 +1,57 @@
+name: Test and deploy life
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: life-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    env:
+      SITE_BASE: /life/
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/cache@v4
+        id: dependencies
+        with:
+          path: node_modules
+          key: life-${{ runner.os }}-node22-${{ hashFiles('package-lock.json') }}
+      - if: steps.dependencies.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+      - name: Typecheck, lint, tests and build
+        run: node scripts/check-release.mjs
+      # Ubuntu runner includes Chrome; no browser download in the release path.
+      - name: Only browser test — play live
+        run: npm run test:browser
+      - if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+      - if: github.event_name != 'pull_request'
+        uses: actions/deploy-pages@v4
+        id: deployment
+      - name: Verify deployed commit and measure full elapsed time
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LIVE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: node scripts/verify-deployment.mjs

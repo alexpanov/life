@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quest Product Invariants"
+  short_description: "Preserve quests, realms, Niko and player agency"
+  default_prompt: "Use $quest-product to complete the requested QuestOS change."

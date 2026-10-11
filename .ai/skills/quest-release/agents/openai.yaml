@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quest Tests and Release"
+  short_description: "Verify behavior and measure deployment latency"
+  default_prompt: "Use $quest-release to complete the requested QuestOS change."

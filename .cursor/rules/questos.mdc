@@ -1,0 +1,6 @@
+---
+description: QuestOS architecture, gameplay, testing and collaboration contract
+alwaysApply: true
+---
+
+Read the repository-root `AGENTS.md` and `.ai/CONTRACT.md` before editing. Load the relevant `.ai/skills/*/SKILL.md` named in AGENTS.md. These are the canonical instructions; do not maintain a separate Cursor version of the product or engineering rules.

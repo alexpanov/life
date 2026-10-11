@@ -1,0 +1,12 @@
+# QuestOS agent entry point
+
+Read [.ai/CONTRACT.md](.ai/CONTRACT.md) before changing this repository. It is the canonical engineering and product agreement for every model and editor.
+
+Load the relevant task skill:
+
+- Domain, effects, persistence: [.ai/skills/quest-functional-core/SKILL.md](.ai/skills/quest-functional-core/SKILL.md)
+- Gameplay, Niko, interface: [.ai/skills/quest-product/SKILL.md](.ai/skills/quest-product/SKILL.md)
+- Tests, CI, deployment: [.ai/skills/quest-release/SKILL.md](.ai/skills/quest-release/SKILL.md)
+- Parallel work: [.ai/skills/quest-legion/SKILL.md](.ai/skills/quest-legion/SKILL.md)
+
+Inspect current source, package scripts and Git status before acting. Preserve other agents' work. Follow the user's current scope and the host's higher-priority rules. Report executed checks and observed deployment results; never turn a goal into an unverified claim.

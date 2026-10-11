@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quest Agent Legion"
+  short_description: "Coordinate agents with explicit file ownership"
+  default_prompt: "Use $quest-legion to complete the requested QuestOS change."

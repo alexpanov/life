@@ -1,21 +1,6 @@
-// Cache only this application's shell. Never intercept external or non-GET requests.
-const CACHE = 'questos-shell-v0.3.1-' + self.registration.scope;
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
-self.addEventListener('install', event => { event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL))); self.skipWaiting(); });
-self.addEventListener('activate', event => { event.waitUntil(caches.open(CACHE).then(() => self.clients.claim())); });
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) return;
-  event.respondWith(fetch(event.request).then(response => {
-    if (response.ok && !event.request.url.includes('?')) {
-      const copy = response.clone();
-      event.waitUntil(caches.open(CACHE).then(cache => cache.put(event.request, copy)));
-    }
-    return response;
-  }).catch(async () => {
-    const cache = await caches.open(CACHE);
-    const cached = await cache.match(event.request);
-    if (cached) return cached;
-    if (event.request.mode === 'navigate') return (await cache.match(new URL('./index.html', self.registration.scope).href)) || Response.error();
-    return Response.error();
-  }));
-});
+const CACHE='life-8dc642c6dc74-'+self.registration.scope;
+const ASSETS=["/","/starter/","/assets/index-DsJ4EHLm.css","/assets/index-UCxL5K-h.js"];
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if((key.startsWith('questos')||(key.startsWith('life-')&&key.endsWith(self.registration.scope)))&&key!==CACHE)await caches.delete(key);await self.clients.claim();})()));
+self.addEventListener('fetch',event=>{const request=event.request,url=new URL(request.url);if(request.method!=='GET'||url.origin!==self.location.origin||url.pathname.endsWith('build-info.json'))return;
+ event.respondWith(fetch(request).then(response=>{if(response.ok&&url.pathname.startsWith("/")){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put(request,copy)));}return response;}).catch(async()=>{const saved=await caches.match(request);if(saved)return saved;if(request.mode==='navigate'){const home=await caches.match(self.registration.scope);if(home)return home;}return Response.error();}));});

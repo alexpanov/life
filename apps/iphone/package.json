@@ -1,0 +1,10 @@
+{
+  "name": "@questos/iphone",
+  "version": "0.4.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start --ios",
+    "bundle": "expo export --platform ios"
+  }
+}

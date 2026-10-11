@@ -4,3 +4,8 @@ node_modules/
 .vercel/
 __pycache__/
 qa/test-save.json
+
+native-dist/
+apps/iphone/.expo/
+playwright-report/
+test-results/

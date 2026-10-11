@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router";
 import type { FormEvent } from "react";
 import type { GameView, PageActions } from "../ui-types";
 import { Area } from "../components/presentation";
-import { Button } from "../components/ui/button";
+import { Button } from "../../../../packages/design/src/index";
 import { H1 } from "../../../../packages/design/src/type";
 export function QuestPage({
   view,

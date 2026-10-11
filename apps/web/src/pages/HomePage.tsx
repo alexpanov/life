@@ -18,7 +18,7 @@ import type {
 } from "../../../../packages/core/src/index";
 import type { GameView, PageActions } from "../ui-types";
 import { Sender, Area, Field } from "../components/presentation";
-import { Button } from "../components/ui/button";
+import { Button } from "../../../../packages/design/src/index";
 import { Body, H1 } from "../../../../packages/design/src/type";
 
 export function HomePage({

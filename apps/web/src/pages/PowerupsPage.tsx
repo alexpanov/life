@@ -10,7 +10,7 @@ import {
 import * as O from "../../../../packages/foundation/src/option";
 import * as E from "../../../../packages/foundation/src/either";
 import type { PageActions } from "../ui-types";
-import { Button } from "../components/ui/button";
+import { Button } from "../../../../packages/design/src/index";
 import { H1 } from "../../../../packages/design/src/type";
 
 const resolver: Resolver<PowerupFormValues> = (values) => {

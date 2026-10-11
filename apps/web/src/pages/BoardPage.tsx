@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Button } from "../components/ui/button";
+import { Button } from "../../../../packages/design/src/index";
 import { H1 } from "../../../../packages/design/src/type";
 import type { PageActions, GameView } from "../ui-types";
 export function BoardPage({

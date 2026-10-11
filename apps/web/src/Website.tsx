@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { ArrowUpRight, Compass } from "lucide-react";
+import { ArrowUpRight, Compass } from "../../../packages/design/src/index";
 import type { GameController } from "../../../packages/application/src/controller";
 import * as O from "../../../packages/foundation/src/option";
 import { incomingInvitationRepository } from "./invitation";

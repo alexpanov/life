@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { Button } from "../components/ui/button";
+import { Button } from "../../../../packages/design/src/index";
 import { invitationUrl } from "../invitation";
 import { H1 } from "../../../../packages/design/src/type";
 export function InvitePage({ code }: { code: string }) {

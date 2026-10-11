@@ -14,7 +14,7 @@
     "start": "vite --host 127.0.0.1",
     "ios:bundle": "cd apps/iphone && expo export --platform ios --output-dir ../../native-dist",
     "ios:start": "cd apps/iphone && expo start --ios",
-    "lint": "eslint packages apps scripts",
+    "lint": "eslint packages apps scripts vite.config.ts",
     "format": "prettier --write packages apps scripts *.ts *.json",
     "test:unit": "vitest run --project unit",
     "test:integration": "vitest run --project integration",

@@ -19,6 +19,13 @@ import {
 import { Link, Route, Routes, useNavigate } from "react-router";
 import { Compass, Radio, ArrowRight, Shield, Download } from "lucide-react";
 import {
+  Button,
+  choiceTitleSpace,
+  dangerText,
+  formSave,
+  playerSwitch,
+} from "../../../packages/design/src/index";
+import {
   serializeGame,
   selectGame,
   getHandoff,
@@ -46,7 +53,6 @@ import { BoardPage } from "./pages/BoardPage";
 import { SkillsPage } from "./pages/SkillsPage";
 import { InventoryPage } from "./pages/InventoryPage";
 export { Sender } from "./components/presentation";
-import { Button } from "./components/ui/button";
 import { Dialog } from "./components/ui/dialog";
 import { browserContext } from "./repository";
 export function App({
@@ -553,7 +559,7 @@ export function App({
       >
         <Sender />
         {mission && <p>Current mission: {mission.title}</p>}
-        <H3 className="my-4">{candidate?.title}</H3>
+        <H3 className={choiceTitleSpace}>{candidate?.title}</H3>
         <p>{candidate?.nextMove}</p>
         <div className="actions">
           <Button
@@ -603,7 +609,7 @@ export function App({
           name={modal === "call" ? call?.caller : undefined}
         />
         {error && (
-          <p role="alert" className="text-[var(--paint-danger)]">
+          <p role="alert" className={dangerText}>
             {error}
           </p>
         )}
@@ -788,7 +794,7 @@ export function App({
                   key={p.id}
                   type="button"
                   variant="secondary"
-                  className="mr-2 mb-3"
+                  className={playerSwitch}
                   onClick={() => {
                     send({ type: "switch-player", playerId: p.id });
                     setModal(null);
@@ -914,7 +920,7 @@ export function App({
             </>
           )}
           {modal && !["reset", "handoff", "call", "about"].includes(modal) && (
-            <Button className="mt-5" type="submit">
+            <Button className={formSave} type="submit">
               {modal === "import"
                 ? "Review JSON"
                 : modal === "memory"

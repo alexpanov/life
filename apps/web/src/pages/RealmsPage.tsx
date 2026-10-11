@@ -1,6 +1,11 @@
-import { ArrowRight, Plus } from "lucide-react";
 import { Panel } from "../components/presentation";
-import { Button } from "../components/ui/button";
+import {
+  ArrowRight,
+  Button,
+  gridMd,
+  Plus,
+  realmTitleSpace,
+} from "../../../../packages/design/src/index";
 import { H1, H2, H4 } from "../../../../packages/design/src/type";
 import type { PageActions, GameView } from "../ui-types";
 export function RealmsPage({
@@ -20,14 +25,14 @@ export function RealmsPage({
           New realm
         </Button>
       </div>
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className={gridMd}>
         {player.realms.map((r) => (
           <details key={r.id} className="quiet-details">
             <summary>{r.name}</summary>
             <small>
               {r.id === realm.id ? "CURRENT" : r.home ? "HOME" : "REALM"}
             </small>
-            <H2 className="my-3">{r.name}</H2>
+            <H2 className={realmTitleSpace}>{r.name}</H2>
             <p>{r.location}</p>
             <div className="actions">
               <Button

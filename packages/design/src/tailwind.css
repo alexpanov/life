@@ -1,0 +1,5 @@
+@import "tailwindcss" source(".");
+@theme {
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}

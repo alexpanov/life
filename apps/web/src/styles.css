@@ -14,12 +14,8 @@
 @import "@fontsource/ibm-plex-sans/latin-400-italic.css";
 @import "@fontsource/ibm-plex-sans/latin-600.css";
 @import "@fontsource/ibm-plex-sans/latin-700.css";
-@import "tailwindcss";
+@import "../../../packages/design/src/tailwind.css";
 @import "../../../packages/design/src/typography.css";
-@theme {
-  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --font-sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
 :root {
   --paint-background: #030b0c;
   --paint-surface: #071719;

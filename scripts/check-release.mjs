@@ -5,7 +5,7 @@ const results = await Promise.all(
   commands.map(
     (command) =>
       new Promise((resolve) => {
-        const child = spawn("npm", ["run", command], {
+        const child = spawn("pnpm", ["run", command], {
           stdio: "inherit",
           env: process.env,
         });

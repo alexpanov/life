@@ -17,7 +17,7 @@ export function InventoryPage({
       <div className="grid sm:grid-cols-2 gap-4">
         {view.inventory.map((item, index) => (
           <Panel key={`${item.name}-${index}`}>
-            <Package className="text-cyan-200 mb-4" />
+            <Package className="text-[var(--paint-signal)] mb-4" />
             <h3>{item.name}</h3>
             <small>{item.source}</small>
           </Panel>

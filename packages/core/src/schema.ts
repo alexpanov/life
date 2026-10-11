@@ -75,6 +75,12 @@ export const patchSchema = z.object({
     )
     .max(50),
 });
+const questLineSchema = z.object({
+  id: text,
+  speaker: z.enum(["hero", "nico"]),
+  text: text,
+  at: timestamp,
+});
 const questSchema = questInputSchema.extend({
   id: text,
   status: statusSchema,
@@ -82,6 +88,7 @@ const questSchema = questInputSchema.extend({
   createdAt: timestamp,
   completedAt: timestamp.nullable().optional(),
   blockedReason: text.optional(),
+  lines: z.array(questLineSchema).max(5000).default([]),
 });
 const campaignSave = z.object({
   id: text,
@@ -173,6 +180,7 @@ const player = z.object({
   skills: z.array(skill).max(50),
   bonusLoot: z.array(text).optional(),
   modules: z.array(z.unknown()).optional(),
+  lines: z.array(questLineSchema).max(5000).default([]),
   events: z
     .array(
       z.object({

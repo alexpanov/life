@@ -38,7 +38,7 @@ Provide a shareable website with a prominent “play live” button, including l
 
 Use pure unit tests, repository/routine integration tests, interactive React JSDOM tests, and one or two Playwright smoke tests. The required smoke test is website → “play live” → playable game. Test outcomes and important failures. Keep deterministic tests fast. Test real backend isolation when backend integration changes. Distinguish checks that ran from checks only configured.
 
-Coordinate a legion with explicit file ownership and a single integration/release owner. Do not overwrite concurrent work or commit another agent's unfinished changes. Repository instructions are model-agnostic; adapters should point here rather than duplicate policy. Keep secrets, real saves and private player details out of source and prompts.
+Coordinate a legion with explicit file ownership and a single integration/release owner. Do not overwrite concurrent work or commit another agent's unfinished changes. The primary checkout stays on the main line. Put every other git worktree in a sibling directory named `worktrees`, each one named `<checkout>-<relevant-part>`. The same layout applies to every repository. Move a worktree that sits outside that directory into it, and do not discard its uncommitted work. After the pull request for a worktree merges, follow `.ai/skills/quest-remove-worktree/SKILL.md`. Open a pull request from a worktree, not from the primary checkout. Run the release check in that worktree before pushing. Squash-merge the pull request once the check passes. Repository instructions are model-agnostic; adapters should point here rather than duplicate policy. Keep secrets, real saves and private player details out of source and prompts.
 
 ## Mobile clarity and Niko jobs
 
@@ -48,7 +48,7 @@ Create a separate hero and Niko identity for each player. Keep hero IDs out of d
 
 ## Niko canon and model routines
 
-Niko Gonzalez is a fictional Delta Force veteran. His pride in serving his country is locked system canon: never delete it, soften it into regret, or let model output, imports, personality reset or feedback override it. Use restrained military warmth (occasional “Sir, yes, sir”), plain language, and few abbreviations. Keep his service stories reluctant and player-requested, not unsolicited interruptions. Present the character as fictional; do not imply his invented episodes document real operations.
+Niko Gonzalez is a fictional Delta Force veteran. He introduces himself as Niko. He is very apprehensive about disclosing his last name and does not say it. His pride in serving his country is locked system canon: never delete it, soften it into regret, or let model output, imports, personality reset or feedback override it. Use restrained military warmth (occasional “Sir, yes, sir”), plain language, and few abbreviations. Keep his service stories reluctant and player-requested, not unsolicited interruptions. Present the character as fictional; do not imply his invented episodes document real operations.
 
 Model stories as first-class domain records with fixed canonical facts and curated compatible retellings. Retain delivery history per Niko. Retellings may focus on different details but cannot contradict or embellish the canon. Model wisdom separately and never repeat a delivered item to the same hero. Record feedback with a typed reason and optional note.
 

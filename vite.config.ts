@@ -1,11 +1,19 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import { assertBrowserBuildEnv } from "./packages/infrastructure/src/public-supabase";
 export default defineConfig({
   base: process.env["SITE_BASE"] ?? "/",
   plugins: [
     react(),
     tailwindcss(),
+    {
+      name: "life-client-secret-guard",
+      config() {
+        const result = assertBrowserBuildEnv(process.env);
+        if (result._tag === "Left") throw new Error(result.left);
+      },
+    },
     {
       name: "life-local-model-status",
       configureServer(server) {

@@ -1,0 +1,12 @@
+/// Player-owned snapshot. Matches supabase/migrations/20261011045425_game_saves.sql.
+model GameSave {
+  userId        String   @map("user_id") @db.Uuid
+  slot          String
+  payload       String
+  backupPayload String   @default("") @map("backup_payload")
+  backupPresent Boolean  @default(false) @map("backup_present")
+  updatedAt     DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@id([userId, slot])
+  @@map("game_saves")
+}

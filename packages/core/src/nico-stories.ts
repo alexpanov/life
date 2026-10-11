@@ -4,6 +4,7 @@ import type {
   NicoContentTarget,
   NicoTrait,
   Sidekick,
+  DeepReadonly,
 } from "./types";
 /** Fictional character canon. Retellings select a viewpoint, never invent new facts. */
 export const NICO_STORIES = [
@@ -52,6 +53,15 @@ export const NICO_STORIES = [
       "You asked about the doors. Yes, there were encounters involving squatters. I will leave the private details there.",
     ],
   },
+  {
+    id: "farm",
+    title: "Growing up",
+    core: "Niko grew up working a farm. That work taught him to finish what he started.",
+    retellings: [
+      "I grew up on a farm. The work did not care how I felt about it. You finish the row, then you start the next one.",
+      "Before any of the later years, I was a farm kid. Early mornings, animals, and a job that was done only when it was done.",
+    ],
+  },
 ] as const;
 export const NICO_WISDOM = [
   {
@@ -84,9 +94,9 @@ export const contentRecords = (
     tellingCount: 0,
     lastToldAt: O.none(),
   }));
-export const activeNicoTraits = (nico: Sidekick) =>
+export const activeNicoTraits = (nico: DeepReadonly<Sidekick>) =>
   nico.traits.filter((t) => O.isNone(t.deletedAt));
-export const activeNicoMemories = (nico: Sidekick) =>
+export const activeNicoMemories = (nico: DeepReadonly<Sidekick>) =>
   nico.snippets.filter((t) => O.isNone(t.deletedAt));
 /** Called only inside a transition's private draft. */
 export function forgetNicoContent(

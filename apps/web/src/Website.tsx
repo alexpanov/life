@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { ArrowUpRight, Compass } from "lucide-react";
 import type { GameController } from "../../../packages/application/src/controller";
 import * as O from "../../../packages/foundation/src/option";
@@ -24,13 +24,23 @@ export function LifeCoin() {
 export function Website({
   controller,
   initiallyPlaying = false,
+  whenPlaying,
 }: {
-  controller: GameController;
+  controller?: GameController;
   initiallyPlaying?: boolean;
+  whenPlaying?: ReactNode;
 }) {
   const [invitation] = useState(incomingInvitationRepository);
   const [playing, setPlaying] = useState(initiallyPlaying);
-  if (playing) return <App controller={controller} />;
+  if (playing) {
+    if (whenPlaying) return whenPlaying;
+    if (controller) return <App controller={controller} />;
+    return (
+      <main className="app-shell">
+        <p>Opening your game.</p>
+      </main>
+    );
+  }
   return (
     <main className="landing">
       <header className="landing-header">

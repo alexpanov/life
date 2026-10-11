@@ -15,4 +15,4 @@ Read `../../CONTRACT.md` relative to this file's directory. Use the host's avail
 6. Let the coordinator handle dependency installs, final formatting of shared files, commits, pushes, migrations and deployment unless explicitly reassigned. Never publish while another agent still writes to the release tree. In a shared checkout, do not assume a commit contains only your task.
 7. Finish with one truthful integrated report. Distinguish delivered code, locally checked behavior, CI results and observed live behavior. Record unresolved blockers instead of burying them in agent handoffs.
 
-Use isolated worktrees when the host supports them and parallel changes cannot have disjoint paths. Keep branch/rebase operations under a named owner. Do not create parallel agents merely to multiply activity; use them to remove independent bottlenecks.
+Use isolated worktrees when the host supports them and parallel changes cannot have disjoint paths. Place and clean them up with `../quest-worktrees/SKILL.md`. Keep branch/rebase operations under a named owner. Do not create parallel agents merely to multiply activity; use them to remove independent bottlenecks.

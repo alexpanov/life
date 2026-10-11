@@ -15,6 +15,7 @@ import type {
   Extension,
   CampaignTemplate,
   RuleEnvironment,
+  DeepReadonly,
 } from "./types";
 import { createSidekick, normalizeSidekick } from "./sidekick";
 import {
@@ -87,6 +88,7 @@ export function createRules(env: RuleEnvironment) {
       blockedReason: "",
       verified: false,
       suggestionKey: clean(input.suggestionKey, 100),
+      lines: [],
     };
   }
   function makeCampaign(
@@ -159,6 +161,7 @@ export function createRules(env: RuleEnvironment) {
       bonusLoot: [],
       modules: [],
       events: [],
+      lines: [],
       settings: {
         sound: false,
         autoCalls: false,
@@ -178,28 +181,40 @@ export function createRules(env: RuleEnvironment) {
       players: [player],
     };
   }
-  function activePlayer(state: GameState): Player {
+  function activePlayer<S extends DeepReadonly<GameState>>(
+    state: S,
+  ): S["players"][number] {
     return (
       state.players.find((p) => p.id === state.activePlayerId) ||
       state.players[0]!
     );
   }
-  function activeCampaign(player: Player): Campaign {
+  function activeCampaign<P extends DeepReadonly<Player>>(
+    player: P,
+  ): P["campaigns"][number] {
     return (
       player.campaigns.find((c) => c.id === player.activeCampaignId) ||
       player.campaigns[0]!
     );
   }
-  function activeRealm(player: Player): Realm {
+  function activeRealm<P extends DeepReadonly<Player>>(
+    player: P,
+  ): P["realms"][number] {
     return (
       player.realms.find((r) => r.id === player.activeRealmId) ||
       player.realms[0]!
     );
   }
-  function realmCampaigns(player: Player, realmId = player.activeRealmId) {
+  function realmCampaigns<P extends DeepReadonly<Player>>(
+    player: P,
+    realmId = player.activeRealmId,
+  ) {
     return player.campaigns.filter((c) => c.realmId === realmId);
   }
-  function realmQuests(player: Player, realmId = player.activeRealmId) {
+  function realmQuests<P extends DeepReadonly<Player>>(
+    player: P,
+    realmId = player.activeRealmId,
+  ) {
     return realmCampaigns(player, realmId).flatMap((c) => c.quests);
   }
   function enterRealm(player: Player, realmId: string, now = env.now()) {
@@ -275,12 +290,12 @@ export function createRules(env: RuleEnvironment) {
     player: Player,
     mood: Mood,
     now = env.now(),
-    adjustScore: (quest: Quest, mood: Mood) => number = () => 0,
+    adjustScore: (quest: DeepReadonly<Quest>, mood: Mood) => number = () => 0,
   ): O.Option<QuestOffer> {
     must(MOODS.includes(mood), "Choose how you feel.");
     player.checkin = O.some({ mood, at: now });
     const realm = activeRealm(player);
-    const score = (q: Quest) => {
+    const score = (q: DeepReadonly<Quest>) => {
       const title = q.title.toLowerCase(),
         text = q.detail.toLowerCase();
       if (mood === "tired")
@@ -393,7 +408,7 @@ export function createRules(env: RuleEnvironment) {
         ]),
       ].slice(-200);
   }
-  function readinessAt(skill: Skill, now = env.now()) {
+  function readinessAt(skill: DeepReadonly<Skill>, now = env.now()) {
     if (!skill.xp) return 0;
     if (skill.paused) return clamp(skill.readiness, 0, 100);
     const elapsedDays = Math.max(
@@ -406,12 +421,12 @@ export function createRules(env: RuleEnvironment) {
       100,
     );
   }
-  function potentialLevel(skill: Skill) {
+  function potentialLevel(skill: DeepReadonly<Skill>) {
     return skill.xp > 0
       ? Math.min(99, 1 + Math.floor(Math.sqrt(skill.xp / 40)))
       : 0;
   }
-  function currentLevel(skill: Skill, now = env.now()) {
+  function currentLevel(skill: DeepReadonly<Skill>, now = env.now()) {
     return skill.xp > 0
       ? Math.max(
           1,
@@ -419,7 +434,7 @@ export function createRules(env: RuleEnvironment) {
         )
       : 0;
   }
-  function totalXP(player: Player) {
+  function totalXP(player: DeepReadonly<Player>) {
     return (
       player.campaigns.reduce(
         (sum, c) =>
@@ -432,7 +447,7 @@ export function createRules(env: RuleEnvironment) {
   function rankForXP(xp: number) {
     return 1 + Math.floor(Math.sqrt(Math.max(0, xp) / 100));
   }
-  function progress(campaign: Campaign) {
+  function progress(campaign: DeepReadonly<Campaign>) {
     const main = campaign.quests.filter((q) => q.category === "main");
     const available = main.filter((q) => q.status !== "impossible");
     const done = available.filter((q) => q.status === "done").length;
@@ -457,7 +472,7 @@ export function createRules(env: RuleEnvironment) {
         campaign.quests.find((q) => q.status === "pending"),
     );
   }
-  function inventory(player: Player) {
+  function inventory(player: DeepReadonly<Player>) {
     return [
       ...player.bonusLoot.map((name) => ({ name, source: "Bonus loot" })),
       ...player.campaigns.flatMap((c) =>
@@ -593,7 +608,9 @@ export function createRules(env: RuleEnvironment) {
       now,
     );
   }
-  function campaignTemplate(campaign: Campaign): CampaignTemplate {
+  function campaignTemplate(
+    campaign: DeepReadonly<Campaign>,
+  ): CampaignTemplate {
     return {
       kind: "questos.campaign",
       version: VERSION,
@@ -729,6 +746,18 @@ export function createRules(env: RuleEnvironment) {
                 : O.none(),
             blockedReason: clean(q.blockedReason, 500),
             verified: false,
+            lines: (q.lines ?? []).flatMap((line) => {
+              const text = clean(line.text, 2000);
+              if (!text) return [];
+              return [
+                {
+                  id: clean(line.id, 100) || uid("line"),
+                  speaker: line.speaker,
+                  text,
+                  at: timestamp(line.at),
+                },
+              ];
+            }),
           };
         });
         return {
@@ -890,6 +919,32 @@ export function createRules(env: RuleEnvironment) {
             ...(e.sessionId ? { sessionId: clean(e.sessionId, 100) } : {}),
           }))
         : [];
+      for (const event of [...events].reverse()) {
+        if (event.type !== "quest-progress" || !event.questId) continue;
+        const found = campaigns
+          .flatMap((campaign) => campaign.quests)
+          .find((item) => item.id === event.questId);
+        if (!found || found.lines.some((line) => line.id === event.id))
+          continue;
+        found.lines.push({
+          id: event.id,
+          speaker: "hero",
+          text: event.text,
+          at: event.at,
+        });
+      }
+      const keptLines = (p.lines ?? []).flatMap((line) => {
+        const text = clean(line.text, 2000);
+        if (!text) return [];
+        return [
+          {
+            id: clean(line.id, 100) || uid("line"),
+            speaker: line.speaker,
+            text,
+            at: timestamp(line.at),
+          },
+        ];
+      });
       return {
         id,
         name: clean(p.name, 60) || "Player",
@@ -937,6 +992,7 @@ export function createRules(env: RuleEnvironment) {
           : [],
         modules,
         events,
+        lines: keptLines,
         settings: {
           sound: Boolean(p.settings?.sound),
           autoCalls: Boolean(p.settings?.autoCalls),
@@ -1102,7 +1158,7 @@ export function createRules(env: RuleEnvironment) {
     );
     return draft;
   }
-  function agentBrief(player: Player, now = env.now()) {
+  function agentBrief(player: DeepReadonly<Player>, now = env.now()) {
     const campaign = activeCampaign(player);
     const payload = {
       player: player.name,

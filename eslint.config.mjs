@@ -52,6 +52,9 @@ export default [
       "dist/**",
       "native-dist/**",
       "packages/infrastructure/src/generated/**",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
     ],
   },
   {

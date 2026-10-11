@@ -19,6 +19,13 @@ export interface NicoChatRequest {
   storyChoices: readonly { id: string; title: string; core: string }[];
 }
 const say = (text: string) => ({ version: 1, kind: "say", text });
+export const NIKO_INTRODUCTION =
+  "Hi, I’m Niko. I’d like to be your sidekick. What are you up to?";
+export const NIKO_LAST_NAME_REFUSAL =
+  "I’m Niko. My last name stays with me. I don’t like giving it, and I won’t.";
+const withholdsLastName = (chat: string) =>
+  /\b(last name|surname|family name|full name)\b/i.test(chat) ||
+  /\bgonzalez\b/i.test(chat);
 const invoke = (routine: string, parameters: Record<string, unknown>) => ({
   version: 1,
   kind: "invoke",
@@ -35,6 +42,9 @@ export function simulateNicoProposal(request: NicoChatRequest): unknown {
     lower = chat.toLowerCase();
   const memory = /^remember\s+(.+)/is.exec(chat);
   if (memory?.[1]) return invoke("remember", { text: memory[1] });
+  if (withholdsLastName(chat)) return say(NIKO_LAST_NAME_REFUSAL);
+  if (/\b(what(?:'|’)?s|what is) your name\b|\bwho are you\b/i.test(chat))
+    return say("I’m Niko.");
   if (isNicoManagementChat(chat)) {
     const exact = request.targets.filter(
       (entry) =>
@@ -127,7 +137,7 @@ export const mockNicoLayer = Layer.succeed(NicoModel)({
   reply: (context, intent) =>
     Effect.succeed(
       intent === "meet"
-        ? "Hey friend, I’m Niko Gonzalez. I’d like to be your sidekick. What are you up to?"
+        ? NIKO_INTRODUCTION
         : intent === "celebrate"
           ? context.playerData.recentReviews.at(-1)?.outcome === "blocked" ||
             context.playerData.recentReviews.at(-1)?.outcome === "set-aside"

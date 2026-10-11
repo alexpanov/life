@@ -6,7 +6,10 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { App } from "./App";
 import * as O from "../../../packages/foundation/src/option";
-import { NICO_WISDOM, SERVICE_TRAIT_ID } from "../../../packages/core/src/index";
+import {
+  NICO_WISDOM,
+  SERVICE_TRAIT_ID,
+} from "../../../packages/core/src/index";
 import {
   createGameController,
   createMemoryPersistence,
@@ -103,4 +106,15 @@ it("wisdom never repeats and the service background has no forget control", asyn
     .closest(".nico-memory")! as HTMLElement;
   expect(within(fixed).queryByRole("button")).not.toBeInTheDocument();
   expect(within(fixed).getByText("Part of who he is")).toBeVisible();
+});
+it("refuses to give his last name", async () => {
+  const { user } = await setup();
+  expect(screen.queryByText(/Gonzalez/)).not.toBeInTheDocument();
+  await user.type(
+    screen.getByLabelText("Talk to Niko"),
+    "What is your last name?",
+  );
+  await user.click(screen.getByRole("button", { name: "Send" }));
+  expect(await screen.findByText(/My last name stays with me/)).toBeVisible();
+  expect(screen.queryByText(/Gonzalez/)).not.toBeInTheDocument();
 });

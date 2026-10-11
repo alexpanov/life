@@ -10,6 +10,7 @@ const SERVER_SECRET_NAMES = [
   "SUPABASE_DEV_DB_PASSWORD",
   "SUPABASE_LIVE_DB_PASSWORD",
   "SUPABASE_SERVICE_ROLE_KEY",
+  "LIFE_LLM_API_KEY",
 ] as const;
 const CLIENT_PREFIXES = ["VITE_", "EXPO_PUBLIC_"] as const;
 const FORBIDDEN_CLIENT_NAME = [
@@ -17,6 +18,8 @@ const FORBIDDEN_CLIENT_NAME = [
   "DB_PASSWORD",
   "DATABASE_URL",
   "SECRET_KEY",
+  "LIFE_LLM",
+  "API_KEY",
 ] as const;
 
 export interface PublicSupabaseConfig {

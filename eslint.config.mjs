@@ -166,6 +166,7 @@ export default [
       "apps/**/*.tsx",
       "scripts/**/*.ts",
       "vite.config.ts",
+      "supabase/functions/**/*.ts",
     ],
     languageOptions: {
       parser,

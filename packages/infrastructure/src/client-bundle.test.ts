@@ -6,6 +6,7 @@ import { build } from "vite";
 
 const password = "db-password-sentinel-7c1e4b8a";
 const serviceRole = "service-role-sentinel-9f3c2a6d";
+const modelKey = "llm-key-sentinel-8d2a4c6e";
 const anonKey = "sb_publishable_bundle_test_key";
 
 function jwt(payload: unknown): string {
@@ -70,6 +71,7 @@ describe("browser bundle secrets", () => {
             SUPABASE_DEV_DB_PASSWORD: password,
             SUPABASE_LIVE_DB_PASSWORD: password,
             SUPABASE_SERVICE_ROLE_KEY: serviceRole,
+            LIFE_LLM_API_KEY: modelKey,
             DATABASE_URL: databaseUrl,
           },
           async () => {
@@ -84,6 +86,7 @@ describe("browser bundle secrets", () => {
         expect(built).toContain(anonKey);
         expect(built).not.toContain(password);
         expect(built).not.toContain(serviceRole);
+        expect(built).not.toContain(modelKey);
         expect(built).not.toContain("db.example.supabase.co");
         expect(built).not.toContain("postgresql://");
       } finally {

@@ -372,6 +372,11 @@ authorization_url_path = "/oauth/consent"
 # Allow dynamic client registration
 allow_dynamic_registration = false
 
+# Model HTTP API. The page does not call this. Propose still requires a host-proven caller.
+[functions.nico]
+verify_jwt = false
+entrypoint = "./functions/nico/index.js"
+
 [edge_runtime]
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.

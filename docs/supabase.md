@@ -3,8 +3,13 @@
 The adapter is implemented. Two free projects, development and live, are the
 only hosted databases. They are not provisioned until an account access token
 exists and GitHub Actions secrets are set. Do not use paid preview branches.
-The website stays on static hosting. Supabase provides Auth, the save table,
-the `save_game` function, and Realtime. No Edge Function is used.
+The website stays on GitHub Pages. Supabase provides Auth, the save table,
+the `save_game` function, Realtime, and the `nico` Edge Function. That function
+is the model HTTP API. A push to `main` deploys it to development, then live,
+after the smoke tests. A pull request does not deploy it. The page does not
+call it. Without `LIFE_LLM_API_KEY` in the Supabase project, play stays on the
+stand-in. The database password, the service-role key, and that model key stay
+out of the browser.
 
 ## Boundary
 

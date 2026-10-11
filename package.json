@@ -6,7 +6,7 @@
   "packageManager": "pnpm@12.11.2",
   "description": "Shared TypeScript game core with web and iPhone interfaces.",
   "scripts": {
-    "build": "vite build && node --import tsx scripts/finish-web.ts",
+    "build": "vite build && node --import tsx scripts/finish-web.ts && node scripts/build-edge-function.mjs",
     "build:worker": "pnpm run build && node scripts/build-worker.mjs",
     "typecheck": "prisma generate && tsc --noEmit",
     "postinstall": "prisma generate",
@@ -14,7 +14,7 @@
     "start": "vite --host 127.0.0.1",
     "ios:bundle": "cd apps/iphone && expo export --platform ios --output-dir ../../native-dist",
     "ios:start": "cd apps/iphone && expo start --ios",
-    "lint": "eslint packages apps scripts vite.config.ts",
+    "lint": "eslint packages apps scripts vite.config.ts supabase/functions/nico/source.ts",
     "format": "prettier --write packages apps scripts *.ts *.json",
     "test:unit": "vitest run --project unit",
     "test:integration": "vitest run --project integration",

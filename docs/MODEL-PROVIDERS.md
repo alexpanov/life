@@ -1,6 +1,6 @@
 # Model connection status
 
-The published client uses `mockNicoLayer`. No OpenAI, OpenRouter, Google, or other live model request is configured. There is no server-side API key or live model endpoint in this deployment. The JSON proposal schema and Effect service are adapter boundaries, not proof of a model connection.
+The published client uses `mockNicoLayer` until the server reports a configured model. The server gateway can call OpenRouter chat completions when `LIFE_LLM_PROTOCOL=openrouter`, `LIFE_LLM_MODEL`, and secret `LIFE_LLM_API_KEY` are set in the hosted runtime. No API key, model, or pilot user is stored in this repository, and no live OpenRouter request has been made from here. The JSON proposal schema and Effect service are adapter boundaries, not proof of a model connection.
 
 ## Low-cost candidate checked 2026-10-11 UTC
 
@@ -16,6 +16,6 @@ Sources:
 
 ## Integration boundary
 
-Use a server-only API key and endpoint. Never add a provider secret to Vite environment variables or browser storage. Supply `NicoModel` with a live Layer that sends the existing schema and canonical system context, validates the returned proposal, limits output tokens, maps provider failures to `ModelError`, and keeps usage accounting atomic. Start with inexpensive model evaluation fixtures covering ambiguous deletion, locked traits, malformed JSON, canon consistency and no unsolicited actions. Provider pricing/availability and real response quality must be checked again when enabling it.
+OpenRouter is an added provider on the existing gateway, not a replacement for Anthropic or the other allowlisted hosts. The key is read from server environment only. The gateway posts to `https://openrouter.ai/api/v1/chat/completions` with a bearer token, server-owned instructions, a 1000 token cap, and JSON object mode. It does not accept a caller-chosen URL. Never add a provider secret to Vite environment variables or browser storage. The chosen model remains an operator setting. Provider pricing, availability, and real response quality must be checked again before enabling a live model. Mocked gateway tests do not certify live OpenRouter behavior.
 
 Account credit, model access, backend ownership and the secret are not provisioned by this document. Existing simulated usage limits do not create real provider charges.

@@ -17,3 +17,5 @@ Load the relevant task skill:
 - Parallel work: [.ai/skills/quest-legion/SKILL.md](.ai/skills/quest-legion/SKILL.md)
 
 Inspect current source, package scripts and Git status before acting. Preserve other agents' work. Follow the user's current scope and the host's higher-priority rules. Report executed checks and observed deployment results; never turn a goal into an unverified claim.
+
+When you open a pull request, use a few emojis and one meme you choose. Weave the quest, the problem, and this change into that meme, and put it in the description.

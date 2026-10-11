@@ -60,6 +60,7 @@ export default [
   {
     files: [
       "packages/**/*.ts",
+      "packages/**/*.tsx",
       "apps/**/*.ts",
       "apps/**/*.tsx",
       "scripts/**/*.ts",
@@ -134,7 +135,7 @@ export default [
   },
   // React/native APIs use null to omit rendered elements. Domain rules remain strict.
   {
-    files: ["apps/**/*.tsx"],
+    files: ["apps/**/*.tsx", "packages/**/*.tsx"],
     rules: { "functional/no-absence-return": "off" },
   },
 ];

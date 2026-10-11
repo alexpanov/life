@@ -35,6 +35,7 @@ import * as O from "../../../../packages/foundation/src/option";
 import type { PageActions } from "../ui-types";
 import { Sender } from "../components/presentation";
 import { Button } from "../components/ui/button";
+import { Body, H1, H4 } from "../../../../packages/design/src/type";
 
 function formResolver<T extends FieldValues>(
   definition: FormDefinition<T>,
@@ -111,7 +112,7 @@ export function NicoPage({
   if (O.isSome(feedback))
     return (
       <section className="focus-screen">
-        <h1>Leave this behind.</h1>
+        <H1>Leave this behind.</H1>
         <p>Niko will stop bringing this up.</p>
         <form
           noValidate
@@ -178,7 +179,7 @@ export function NicoPage({
   );
   return (
     <section className="focus-screen nico-conversation">
-      <h1>Niko.</h1>
+      <H1>Niko.</H1>
       <p className="nico-energy">
         {energy.unlimited
           ? "Niko energy · Unlimited"
@@ -201,7 +202,7 @@ export function NicoPage({
       )}
       <div className="nico-reply" aria-live="polite">
         <Sender source="niko" />
-        <p className="nico-copy">{reply}</p>
+        <Body voice="companion">{reply}</Body>
         {O.isSome(target) && (
           <Button
             variant="ghost"
@@ -279,14 +280,14 @@ export function NicoPage({
             )!;
             return (
               <article className="nico-memory" key={story.id}>
-                <h2>{story.title}</h2>
-                <p className="nico-copy">
+                <H4>{story.title}</H4>
+                <Body voice="companion">
                   {
                     story.retellings[
                       (record.tellingCount - 1) % story.retellings.length
                     ]
                   }
-                </p>
+                </Body>
                 <Button
                   variant="ghost"
                   onClick={() =>

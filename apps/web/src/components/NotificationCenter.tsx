@@ -5,6 +5,7 @@ import { Effect } from "effect";
 import type { GameController } from "../../../../packages/application/src/controller";
 import * as O from "../../../../packages/foundation/src/option";
 import { notificationCenter, type Notice } from "../notifications";
+import { H1 } from "../../../../packages/design/src/type";
 import "../notifications.css";
 const promptedPlayers = new Set<string>();
 
@@ -182,7 +183,7 @@ export function NotificationsPage() {
       <p className="eyebrow">
         <Bell size={18} /> life / notifications
       </p>
-      <h1>Stay in touch.</h1>
+      <H1>Stay in touch.</H1>
       <p>
         Let Niko reach you when an update is ready. While you're here, updates
         stay inside the game.

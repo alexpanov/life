@@ -47,6 +47,7 @@ export const palette = {
   border: oklchToHex(0.35, 0.035, shipHue),
   muted: oklchToHex(0.74, 0.028, shipHue),
   text: oklchToHex(0.94, 0.012, shipHue),
+  reading: oklchToHex(0.88, 0.018, shipHue),
   signal: oklchToHex(0.853, 0.102, shipHue),
   action: oklchToHex(0.81, 0.084, orderHue),
   actionSurface: oklchToHex(0.26, 0.03, orderHue),

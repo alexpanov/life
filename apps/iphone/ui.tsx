@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { tokens } from "../../packages/design/src/tokens";
+import { nativeTypeface } from "../../packages/design/src/typography";
 
 export function Action({
   children,
@@ -50,15 +51,15 @@ export const styles = StyleSheet.create({
   },
   brand: {
     color: tokens.color.text,
-    fontSize: 20,
-    fontWeight: "800",
-    letterSpacing: 3,
+    fontFamily: nativeTypeface.display,
+    fontSize: 22,
+    letterSpacing: 0.4,
   },
   coin: { color: tokens.color.action },
   label: {
-    fontFamily: "Menlo",
-    fontSize: 10,
-    letterSpacing: 1.2,
+    fontFamily: nativeTypeface.sansBold,
+    fontSize: 13,
+    letterSpacing: 0.6,
     color: tokens.color.signal,
   },
   tabs: {
@@ -67,16 +68,16 @@ export const styles = StyleSheet.create({
     borderColor: tokens.color.border,
   },
   tab: { flex: 1, paddingVertical: 16, alignItems: "center" },
-  tabText: { color: tokens.color.muted, fontSize: 12 },
-  tabActive: { color: tokens.color.signal, fontWeight: "700" },
-  content: { padding: 20, gap: 16, paddingBottom: 48 },
-  hero: {
-    color: tokens.color.text,
-    fontSize: 37,
-    fontWeight: "700",
-    letterSpacing: -1,
-    lineHeight: 43,
+  tabText: {
+    color: tokens.color.muted,
+    fontFamily: nativeTypeface.sans,
+    fontSize: 13,
   },
+  tabActive: {
+    color: tokens.color.signal,
+    fontFamily: nativeTypeface.sansBold,
+  },
+  content: { padding: 20, gap: 16, paddingBottom: 48 },
   panel: {
     backgroundColor: tokens.color.surface,
     padding: 18,
@@ -89,21 +90,12 @@ export const styles = StyleSheet.create({
     backgroundColor: tokens.color.companionSurface,
     borderColor: tokens.color.companionEdge,
   },
-  nikoLabel: {
-    color: tokens.color.companion,
-    fontFamily: "Menlo",
-    fontSize: 10,
-    letterSpacing: 1,
+  notice: {
+    color: tokens.color.signal,
+    fontFamily: nativeTypeface.text,
+    fontSize: 16,
+    lineHeight: 24,
   },
-  niko: {
-    color: tokens.color.companion,
-    fontFamily: "Georgia",
-    fontSize: 23,
-    lineHeight: 31,
-  },
-  heading: { color: tokens.color.text, fontSize: 21, fontWeight: "600" },
-  body: { color: tokens.color.muted, fontSize: 16, lineHeight: 24 },
-  notice: { color: tokens.color.signal, fontSize: 13, lineHeight: 20 },
   button: {
     backgroundColor: tokens.color.action,
     borderRadius: tokens.radius.control,
@@ -115,8 +107,8 @@ export const styles = StyleSheet.create({
   },
   buttonText: {
     color: tokens.color.background,
-    fontWeight: "700",
-    fontSize: 15,
+    fontFamily: nativeTypeface.sansBold,
+    fontSize: 16,
   },
   subdued: {
     backgroundColor: tokens.color.raised,
@@ -132,6 +124,7 @@ export const styles = StyleSheet.create({
     borderColor: tokens.color.border,
     borderWidth: 1,
     borderRadius: tokens.radius.control,
+    fontFamily: nativeTypeface.text,
     fontSize: 17,
     minHeight: 54,
     backgroundColor: tokens.color.surface,

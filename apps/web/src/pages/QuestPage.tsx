@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import type { GameView, PageActions } from "../ui-types";
 import { Area } from "../components/presentation";
 import { Button } from "../components/ui/button";
+import { H1 } from "../../../../packages/design/src/type";
 export function QuestPage({
   view,
   send,
@@ -15,7 +16,7 @@ export function QuestPage({
   if (!quest)
     return (
       <section className="focus-screen">
-        <h1>Quest not found.</h1>
+        <H1>Quest not found.</H1>
         <Link to="/board">Back to quests</Link>
       </section>
     );
@@ -49,7 +50,7 @@ export function QuestPage({
         Back home
       </Link>
       <small>{quest.status === "done" ? "Completed" : "Your quest"}</small>
-      <h1>{quest.title}</h1>
+      <H1>{quest.title}</H1>
       <p>{quest.nextMove || quest.detail}</p>
       {quest.status === "pending" ? (
         <form onSubmit={progress}>

@@ -10,6 +10,7 @@ Load the relevant task skill:
 - Prisma repositories: [.ai/skills/prisma-repositories/SKILL.md](.ai/skills/prisma-repositories/SKILL.md)
 - Boundary parsing: [.ai/skills/parse-dont-validate/SKILL.md](.ai/skills/parse-dont-validate/SKILL.md)
 - Mobile clarity and progressive disclosure: [.ai/skills/dont-make-me-think/SKILL.md](.ai/skills/dont-make-me-think/SKILL.md)
+- Typography: [.ai/skills/typography/SKILL.md](.ai/skills/typography/SKILL.md)
 - Gameplay, Nico, interface: [.ai/skills/quest-product/SKILL.md](.ai/skills/quest-product/SKILL.md)
 - Tests, CI, deployment: [.ai/skills/quest-release/SKILL.md](.ai/skills/quest-release/SKILL.md)
 - Deployment status report: [.ai/skills/deployment-status-report/SKILL.md](.ai/skills/deployment-status-report/SKILL.md)

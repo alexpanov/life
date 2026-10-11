@@ -26,7 +26,7 @@ export function Dialog({
           aria-describedby={undefined}
         >
           <div className="flex justify-between items-start gap-4">
-            <DialogPrimitive.Title className="text-lg font-semibold mb-5">
+            <DialogPrimitive.Title className="type-h2">
               {title}
             </DialogPrimitive.Title>
             <DialogPrimitive.Close

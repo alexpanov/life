@@ -55,6 +55,7 @@ describe("instrument palette", () => {
 
   it("keeps text readable on its ground", () => {
     expect(contrast(palette.text, palette.background)).toBeGreaterThan(7);
+    expect(contrast(palette.reading, palette.background)).toBeGreaterThan(7);
     expect(contrast(palette.muted, palette.background)).toBeGreaterThan(4.5);
     expect(contrast(palette.signal, palette.background)).toBeGreaterThan(4.5);
     expect(contrast(palette.action, palette.background)).toBeGreaterThan(4.5);

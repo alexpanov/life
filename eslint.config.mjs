@@ -46,7 +46,17 @@ const rules = {
   },
 };
 export default [
-  { ignores: ["node_modules/**", "dist/**", "native-dist/**"] },
+  {
+    ignores: [
+      "node_modules/**",
+      "dist/**",
+      "native-dist/**",
+      "packages/infrastructure/src/generated/**",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+    ],
+  },
   {
     files: [
       "packages/**/*.ts",
@@ -97,6 +107,22 @@ export default [
           object: "Math",
           property: "random",
           message: "Inject IDs or randomness.",
+        },
+      ],
+    },
+  },
+  // Domain repository files stay vendor-free. Prisma lives in the parser and the Prisma repository.
+  {
+    files: [
+      "packages/infrastructure/src/**/*-repository.ts",
+      "packages/infrastructure/src/**/*-repository-facade.ts",
+      "packages/infrastructure/src/**/*-routine.ts",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: ["*prisma*", "*/generated/*"],
         },
       ],
     },

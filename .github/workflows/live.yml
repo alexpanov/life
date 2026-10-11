@@ -1,11 +1,10 @@
 name: Test and deploy life
 # About 60 seconds from workflow creation to verified live content.
+# After the smoke test passes, publish the site and apply the database together.
 # The website publish does not wait on the database.
 on:
   push:
     branches: [main]
-  pull_request:
-  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
@@ -17,18 +16,18 @@ jobs:
     timeout-minutes: 5
     env:
       SITE_BASE: /life/
+      # Public project URL and anon key only. The database password and the
+      # service-role key are not build inputs and must not be added here.
+      VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: actions/cache@v4
-        id: dependencies
-        with:
-          path: node_modules
-          key: life-${{ runner.os }}-node22-${{ hashFiles('package-lock.json') }}
-      - if: steps.dependencies.outputs.cache-hit != 'true'
-        run: npm ci --no-audit --no-fund
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Typecheck, lint, tests and build
         run: node scripts/check-release.mjs
       - uses: actions/upload-artifact@v4
@@ -40,27 +39,25 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      SITE_BASE: /life/
     steps:
       - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: actions/cache@v4
-        id: dependencies
-        with:
-          path: node_modules
-          key: life-${{ runner.os }}-node22-${{ hashFiles('package-lock.json') }}
-      - if: steps.dependencies.outputs.cache-hit != 'true'
-        run: npm ci --no-audit --no-fund
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: rm -rf dist
       - uses: actions/download-artifact@v4
         with:
           name: site
           path: dist
       - name: Smoke tests
-        run: npm run test:browser
+        run: pnpm run test:browser
   site:
-    needs: check
+    needs: smoke
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -91,7 +88,7 @@ jobs:
           LIVE_URL: ${{ steps.deployment.outputs.page_url }}
         run: node scripts/verify-deployment.mjs
   database:
-    needs: check
+    needs: smoke
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5

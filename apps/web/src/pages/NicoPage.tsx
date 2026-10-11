@@ -25,6 +25,7 @@ import {
 import type {
   Player,
   NicoContentTarget,
+  DeepReadonly,
 } from "../../../../packages/core/src/types";
 import {
   NICO_STORIES,
@@ -61,7 +62,7 @@ export function NicoPage({
 }: {
   modelLayer?: Layer.Layer<NicoModel>;
   controller: GameController;
-  player: Player;
+  player: DeepReadonly<Player>;
   now: number;
   send: PageActions["send"];
 }) {
@@ -177,7 +178,7 @@ export function NicoPage({
   );
   return (
     <section className="focus-screen nico-conversation">
-      <h1>Niko Gonzalez.</h1>
+      <h1>Niko.</h1>
       <p className="nico-energy">
         {energy.unlimited
           ? "Niko energy · Unlimited"
@@ -375,8 +376,8 @@ export function NicoPage({
       <details className="quiet-details">
         <summary>About Niko</summary>
         <p>
-          Niko Gonzalez is a fictional veteran and your guide in life. His
-          stories belong to the character. You’re the hero.
+          Niko is a fictional veteran and your guide in life. His stories belong
+          to the character. You’re the hero.
         </p>
         <p>
           Replies use a simulator until a model is configured. Memories and

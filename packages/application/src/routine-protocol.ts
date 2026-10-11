@@ -164,6 +164,12 @@ export function runNicoChatRoutine(
           ? cause
           : new RoutineProtocolError("Unable to read the active hero."),
     });
+    controller.send({
+      type: "record-line",
+      questId: before.focusQuestId,
+      speaker: "hero",
+      text: chat.trim(),
+    });
     const targets = chatTargets(before);
     if (
       O.isSome(target) &&
@@ -256,6 +262,12 @@ export function runNicoChatRoutine(
                 O.none(),
                 powerupId,
               );
+            controller.send({
+              type: "record-line",
+              questId: before.focusQuestId,
+              speaker: "nico",
+              text: proposal.text,
+            });
             return { text: proposal.text, invoked: false, target: O.none() };
           }
           const call = proposal.invocation;
@@ -297,6 +309,13 @@ export function runNicoChatRoutine(
               "Niko did not complete that request.",
             );
           const result = completion.value;
+          if (result.message.trim())
+            controller.send({
+              type: "record-line",
+              questId: before.focusQuestId,
+              speaker: "nico",
+              text: result.message,
+            });
           const after = activePlayer(controller);
           let resultTarget =
             call.routine.startsWith("forget-") ||

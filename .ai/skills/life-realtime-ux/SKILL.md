@@ -13,4 +13,4 @@ Design offline use into the app. Keep previously cached screens, quests and loca
 
 Run daily insight work only while the hero is active in the app until a real backend scheduler exists. Use injected clocks, bounded evidence windows and durable per-hero deduplication. Insights remain tentative; they do not auto-change quests, personality or navigation. Failed background work must be retryable without duplicate effects or disruptive UI.
 
-Test user-visible stability in JSDOM: draft survives offline/reconnect, focus remains where possible, duplicate updates do not repeat effects and old-hero responses do not touch the new hero. Keep the browser smoke suite at one or two tests.
+Test user-visible stability in JSDOM: draft survives offline/reconnect, focus remains where possible, duplicate updates do not repeat effects and old-hero responses do not touch the new hero. The test file sits next to the code it tests. Keep the browser smoke suite at one or two tests.

@@ -8,7 +8,7 @@ The downloadable export is generated from the same Git commit pushed and deploye
 
 ## Start locally
 
-Node 22+: `npm ci`, then `npm start`. Development explicitly uses the simulator. `npm run check` runs TypeScript, ESLint, unit/integration/JSDOM tests, production build and encrypted-environment guard. `npm run env:test` tests dotenvx without real credentials. `npm run ios:bundle` checks the native bundle. The single Playwright launch test is configured, but has not run in this managed environment.
+Node 22+: `corepack enable`, `pnpm install`, then `pnpm start`. Development explicitly uses the simulator. `pnpm run check` runs TypeScript, ESLint, unit/integration/JSDOM tests, production build and encrypted-environment guard. `pnpm run env:test` tests dotenvx without real credentials. `pnpm run ios:bundle` checks the native bundle. The single Playwright launch test is configured, but has not run in this managed environment.
 
 ## Implemented
 
@@ -36,6 +36,6 @@ Node 22+: `npm ci`, then `npm start`. Development explicitly uses the simulator.
 
 ## Deployment shape
 
-`npm run build` produces the Vite app, service workers, Telegram entry and `dist/server/index.js`. The latter bundles static assets and routes /api/nico/* to the server gateway. `.openai/hosting.json` preserves Sites identity. Keep provider secrets in runtime settings. `docs/ENVIRONMENT.md` explains dotenvx for local server processes; the Worker does not decrypt dotenvx files itself.
+`pnpm run build` produces the Vite app, service workers, and Telegram entry. `pnpm run build:worker` runs that build, then writes `dist/server/index.js` for the host that executes the worker. That file bundles static assets and routes /api/nico/* to the server gateway. `.openai/hosting.json` preserves Sites identity. Keep provider secrets in runtime settings. `docs/ENVIRONMENT.md` explains dotenvx for local server processes; the Worker does not decrypt dotenvx files itself.
 
 The gateway spends the model key only when the host passes a proven caller id. A request header is not that proof. Never expose the paid model endpoint by trusting client-supplied IDs. Before opening it to multiple players, add durable server quotas and authenticated account/persistence mapping.

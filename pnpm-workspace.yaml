@@ -1,0 +1,10 @@
+allowBuilds:
+  esbuild: true
+  prisma: true
+  "@prisma/engines": true
+# pnpm 12 waits a day before it will install a newly published package.
+# The lockfile already pins the versions, so that wait blocks the release.
+minimumReleaseAge: 0
+# Each git worktree owns its node_modules. The store stays outside the repository.
+nodeLinker: isolated
+packageImportMethod: auto

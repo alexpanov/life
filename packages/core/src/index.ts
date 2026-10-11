@@ -50,6 +50,7 @@ import type {
   QuestStatus,
   Snapshot,
   Sidekick,
+  DeepReadonly,
 } from "./types";
 export type * from "./types";
 export { NIKO_PROMPTS } from "./sidekick";
@@ -88,6 +89,12 @@ export type Command =
   | { type: "name-hero"; name: string }
   | { type: "reflect-quest"; questId: string; text: string }
   | { type: "quest-progress"; questId: string; text: string }
+  | {
+      type: "record-line";
+      questId: string;
+      speaker: "hero" | "nico";
+      text: string;
+    }
   | { type: "set-nico-trait"; text: string }
   | { type: "evolve-nico" }
   | { type: "check-in"; mood: Mood }
@@ -206,6 +213,30 @@ export function transition(
         .flatMap((c) => c.quests)
         .find((q) => q.id === p.focusQuestId && q.status === "pending"),
     );
+  const keepLine = (
+    questId: string,
+    speaker: "hero" | "nico",
+    note: string,
+  ) => {
+    const line = {
+      id: context.eventId,
+      speaker,
+      text: note,
+      at: now,
+    };
+    const targetId = questId || p.focusQuestId;
+    const found = targetId
+      ? p.campaigns
+          .flatMap((campaign) => campaign.quests)
+          .find((item) => item.id === targetId)
+      : undefined;
+    if (found) {
+      if (!found.lines.some((item) => item.id === line.id))
+        found.lines.push(line);
+      return;
+    }
+    if (!p.lines.some((item) => item.id === line.id)) p.lines.push(line);
+  };
   const review = (q: Quest, outcome: "completed" | "blocked" | "set-aside") => {
     learnFromOutcome(p, q, outcome, now);
     const latest = p.sidekick.reviews.at(-1);
@@ -349,8 +380,9 @@ export function transition(
     case "quest-progress": {
       const q = quest(command.questId);
       invariant(q.status === "pending", "This quest is already closed.");
-      const note = command.text.trim().slice(0, 600);
+      const note = command.text.trim().slice(0, 2000);
       invariant(note, "Write one thing you did.");
+      keepLine(q.id, "hero", note);
       if (!p.events.some((e) => e.id === context.eventId))
         p.events.unshift({
           id: context.eventId,
@@ -360,6 +392,12 @@ export function transition(
           questId: q.id,
         });
       p.events = p.events.slice(0, 300);
+      break;
+    }
+    case "record-line": {
+      const note = command.text.trim().slice(0, 2000);
+      invariant(note, "Write a line.");
+      keepLine(command.questId, command.speaker, note);
       break;
     }
     case "set-nico-trait": {
@@ -686,9 +724,8 @@ function assertNever(value: never): never {
   throw Error(`Unsupported command: ${String(value)}`);
 }
 export function selectGame(snapshot: Snapshot, now: number) {
-  const state = copy(snapshot) as GameState,
-    r = runtime({ now, eventId: "query", localDay: "" }),
-    player = r.activePlayer(state),
+  const r = runtime({ now, eventId: "query", localDay: "" }),
+    player = r.activePlayer(snapshot),
     realm = r.activeRealm(player),
     campaign = r.activeCampaign(player),
     all = player.campaigns.flatMap((c) => c.quests),
@@ -735,7 +772,10 @@ export function getSidekickContext(snapshot: Snapshot, now: number) {
   const v = selectGame(snapshot, now);
   return sidekickContext(v.player, v.mission);
 }
-export function sidekickMemory(snapshot: Snapshot, now: number): Sidekick {
+export function sidekickMemory(
+  snapshot: Snapshot,
+  now: number,
+): DeepReadonly<Sidekick> {
   return selectGame(snapshot, now).player.sidekick;
 }
 

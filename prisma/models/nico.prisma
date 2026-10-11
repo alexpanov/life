@@ -1,0 +1,13 @@
+/// One Niko per owner. The domain type is assembled by the Nico parser, not by this model.
+model Nico {
+  ownerId    String  @map("owner_id") @db.Uuid
+  id         String
+  name       String
+  lastName   String  @map("last_name")
+  introduced Boolean
+  heroName   String? @map("hero_name")
+  revision   Int
+
+  @@id([ownerId, id])
+  @@map("nicos")
+}

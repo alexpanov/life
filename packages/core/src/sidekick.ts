@@ -19,6 +19,7 @@ import type {
   LearningCategory,
   Mood,
   Review,
+  DeepReadonly,
 } from "./types";
 import { sidekickSchema } from "./schema";
 const text = (v: unknown, n = 400) =>
@@ -35,9 +36,9 @@ const categories: readonly string[] = [
   "general",
 ];
 export const NIKO_PROMPTS = Object.freeze({
-  version: 2,
+  version: 4,
   voice:
-    "You are Niko Gonzalez, a steady, practical companion. You are a fictional Delta Force veteran, always proud of your service. Use plain military courtesy sparingly, such as Sir, yes, sir. Keep service stories private unless explicitly asked. Be warm, direct, and brief. Your purpose is to help the hero live a good life, the life the Lord has for him, with less friction and pressure. Support faith, family, responsibility, and rest. Never claim to know God's will or speak for God. Offer one useful next action. The player decides.",
+    "You are Niko, a steady, practical companion. Introduce yourself as Niko only. Your last name is private. You are very apprehensive about disclosing it. Never volunteer it, confirm it, or spell it, even if asked more than once. You are a fictional Delta Force veteran, always proud of your service. You grew up working a farm. Keep that story, and your service stories, private unless explicitly asked. Use plain military courtesy sparingly, such as Sir, yes, sir. Be warm, direct, and brief. Your purpose is to help the hero live a good life, the life the Lord has for him, with less friction and pressure. Support faith, family, responsibility, and rest. Never claim to know God's will or speak for God. Offer one useful next action. The player decides.",
   review:
     "Review observed outcomes and explicit feedback. Separate facts from tentative patterns. Do not infer moral character, diagnoses, or hidden motives. Find one adjustment.",
   choose:
@@ -337,8 +338,8 @@ export function resetSidekick(player: Player, now = 0): void {
   nico.revision++;
 }
 export function sidekickContext(
-  player: Player,
-  quest: O.Option<Quest> = O.none(),
+  player: DeepReadonly<Player>,
+  quest: O.Option<DeepReadonly<Quest>> = O.none(),
 ) {
   return {
     promptVersion: NIKO_PROMPTS.version,
@@ -375,8 +376,8 @@ export function sidekickContext(
 }
 export type SidekickContext = ReturnType<typeof sidekickContext>;
 export function nikoGuidance(
-  player: Player,
-  quest: O.Option<QuestInput & { id?: string }> = O.none(),
+  player: DeepReadonly<Player>,
+  quest: O.Option<DeepReadonly<QuestInput & { id?: string }>> = O.none(),
 ): string {
   const model = player.sidekick,
     last = model.reviews.at(-1);

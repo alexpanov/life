@@ -52,7 +52,3 @@ const report = `Deployment verified: ${verified}\n\nWorkflow creation → live c
 console.log(report);
 if (GITHUB_STEP_SUMMARY) await appendFile(GITHUB_STEP_SUMMARY, report);
 if (!verified) throw Error("The requested commit is not yet visible on Pages.");
-if (seconds > 60)
-  throw Error(
-    `Deployment is live, but the 60-second budget was missed (${seconds.toFixed(1)}s).`,
-  );

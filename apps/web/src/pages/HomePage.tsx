@@ -3,6 +3,7 @@ import { Effect } from "effect";
 import {
   nicoReplyRoutine,
   mockNicoLayer,
+  NIKO_INTRODUCTION,
 } from "../../../../packages/application/src/nico-model";
 import {
   getSidekickContext,
@@ -193,10 +194,7 @@ export function HomePage({
       <section className="focus-screen">
         <Sender source="niko" />
         <H1 voice="companion">Meet Niko.</H1>
-        <Body voice="companion">
-          {reply ||
-            "Hey friend, I’m Niko Gonzalez. I’d like to be your sidekick. What are you up to?"}
-        </Body>
+        <Body voice="companion">{reply || NIKO_INTRODUCTION}</Body>
         <form onSubmit={(event) => submit(event, "meet")}>
           <Area name="text" label="What are you up to?" />
           <Button type="submit">Meet Niko</Button>

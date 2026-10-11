@@ -77,9 +77,10 @@ it("keeps fixed story canon, reluctant disclosure and isolated hero history", ()
 it("tells the farm upbringing only when asked and keeps it on an older save", () => {
   let state = initial();
   const farm = NICO_STORIES.find((story) => story.id === "farm")!;
-  expect(getSidekickContext(state, ctx.now).identity.voice).toContain(
-    "grew up working a farm",
-  );
+  const voice = getSidekickContext(state, ctx.now).identity.voice;
+  expect(voice).toContain("grew up working a farm");
+  expect(voice).toContain("very apprehensive");
+  expect(voice).not.toContain("Gonzalez");
   const quiet = send(state, {
     type: "tell-story",
     storyId: "farm",

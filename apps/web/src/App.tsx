@@ -603,7 +603,7 @@ export function App({
           name={modal === "call" ? call?.caller : undefined}
         />
         {error && (
-          <p role="alert" className="text-red-300">
+          <p role="alert" className="text-[var(--paint-danger)]">
             {error}
           </p>
         )}

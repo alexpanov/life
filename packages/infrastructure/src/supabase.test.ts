@@ -48,7 +48,7 @@ function fixture(
     .spyOn(client.auth, "getUser")
     .mockResolvedValue({ data: { user: player }, error: null });
   return {
-    persistence: createSupabasePersistence(client, slot),
+    persistence: createSupabasePersistence(client, slot, player.id),
     requests,
     auth,
   };
@@ -118,6 +118,21 @@ describe("Supabase persistence HTTP contract (not a live database test)", () => 
       p_expected_present: false,
       p_expected_payload: "",
     });
+  });
+
+  it("does not read or write when the session player is not the owner", async () => {
+    const f = fixture(true);
+    f.auth.mockResolvedValue({
+      data: {
+        user: { ...player, id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" },
+      },
+      error: null,
+    });
+    const result = await Effect.runPromise(
+      Effect.result(f.persistence.routines.save("{}", O.none())),
+    );
+    expect(Result.isFailure(result)).toBe(true);
+    expect(f.requests).toHaveLength(0);
   });
 
   it("fails without issuing a database request when there is no authenticated player", async () => {

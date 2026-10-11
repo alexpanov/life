@@ -179,7 +179,7 @@ export function NicoPage({
   );
   return (
     <section className="focus-screen nico-conversation">
-      <H1>Niko Gonzalez.</H1>
+      <H1>Niko.</H1>
       <p className="nico-energy">
         {energy.unlimited
           ? "Niko energy · Unlimited"
@@ -377,8 +377,8 @@ export function NicoPage({
       <details className="quiet-details">
         <summary>About Niko</summary>
         <p>
-          Niko Gonzalez is a fictional veteran and your guide in life. His
-          stories belong to the character. You’re the hero.
+          Niko is a fictional veteran and your guide in life. His stories belong
+          to the character. You’re the hero.
         </p>
         <p>
           Replies use a simulator until a model is configured. Memories and

@@ -34,7 +34,9 @@ export function QuestCard({
         <span className="xp">{q.xp} XP</span>
       </div>
       <p>{q.nextMove || q.detail || "One real action. Then report back."}</p>
-      {q.blockedReason && <p className="text-amber-200">{q.blockedReason}</p>}
+      {q.blockedReason && (
+        <p className="text-[var(--paint-danger)]">{q.blockedReason}</p>
+      )}
       <div className="actions">
         {q.status === "pending" ? (
           <>

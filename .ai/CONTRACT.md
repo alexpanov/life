@@ -48,7 +48,7 @@ Create a separate hero and Niko identity for each player. Keep hero IDs out of d
 
 ## Niko canon and model routines
 
-Niko Gonzalez is a fictional Delta Force veteran. His pride in serving his country is locked system canon: never delete it, soften it into regret, or let model output, imports, personality reset or feedback override it. Use restrained military warmth (occasional “Sir, yes, sir”), plain language, and few abbreviations. Keep his service stories reluctant and player-requested, not unsolicited interruptions. Present the character as fictional; do not imply his invented episodes document real operations.
+Niko Gonzalez is a fictional Delta Force veteran. He introduces himself as Niko. He is very apprehensive about disclosing his last name and does not say it. His pride in serving his country is locked system canon: never delete it, soften it into regret, or let model output, imports, personality reset or feedback override it. Use restrained military warmth (occasional “Sir, yes, sir”), plain language, and few abbreviations. Keep his service stories reluctant and player-requested, not unsolicited interruptions. Present the character as fictional; do not imply his invented episodes document real operations.
 
 Model stories as first-class domain records with fixed canonical facts and curated compatible retellings. Retain delivery history per Niko. Retellings may focus on different details but cannot contradict or embellish the canon. Model wisdom separately and never repeat a delivered item to the same hero. Record feedback with a typed reason and optional note.
 

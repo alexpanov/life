@@ -9,7 +9,7 @@
   align-items: center;
   gap: 3px;
   padding: 10px 12px calc(8px + env(safe-area-inset-bottom));
-  background: linear-gradient(transparent, #071018 30%);
+  background: linear-gradient(transparent, var(--paint-background) 30%);
   pointer-events: none;
 }
 .port-home {
@@ -19,20 +19,24 @@
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  border: 2px solid #87959c;
-  background: radial-gradient(circle at 40% 30%, #28353c, #090f14 75%);
+  border: 2px solid var(--paint-muted);
+  background: radial-gradient(
+    circle at 40% 30%,
+    var(--paint-border),
+    var(--paint-background) 75%
+  );
   box-shadow:
-    0 0 0 4px #121c23,
-    0 4px 16px #0008;
-  color: #e6edf0;
+    0 0 0 4px var(--paint-background),
+    0 4px 16px rgb(0 0 0 / 50%);
+  color: var(--paint-text);
 }
 .port-home:focus-visible {
-  outline: 3px solid #9ddaec;
+  outline: 3px solid var(--paint-signal);
   outline-offset: 5px;
 }
 .port-dock > span {
   font-size: 12px;
-  color: #c8d7df;
+  color: var(--paint-muted);
 }
 body:has(.port-dock) {
   padding-bottom: calc(105px + env(safe-area-inset-bottom));
@@ -45,17 +49,17 @@ body:has(.port-dock) {
   right: max(16px, calc((100vw - 520px) / 2));
   display: flex;
   align-items: start;
-  background: #132b33;
-  border: 1px solid #698794;
+  background: var(--paint-raised);
+  border: 1px solid var(--paint-border);
   border-radius: 16px;
-  box-shadow: 0 8px 28px #0008;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 50%);
 }
 .port-notice-open {
   flex: 1;
   padding: 15px;
   text-align: left;
   background: none;
-  color: #edf4f7;
+  color: var(--paint-text);
   border: 0;
   font: inherit;
   min-height: 48px;
@@ -75,7 +79,7 @@ body:has(.port-dock) {
   min-height: 44px;
   border: 0;
   background: none;
-  color: #dae6ed;
+  color: var(--paint-muted);
   display: grid;
   place-items: center;
 }
@@ -95,7 +99,7 @@ body:has(.port-dock) {
   margin: 8px 0;
 }
 .notification-help {
-  color: #aebec7;
+  color: var(--paint-muted);
   font-size: 16px;
 }
 
@@ -109,6 +113,6 @@ body:has(.port-dock) {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  color: #c7dbe3;
-  background: #11232d;
+  color: var(--paint-muted);
+  background: var(--paint-surface);
 }

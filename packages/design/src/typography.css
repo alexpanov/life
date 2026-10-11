@@ -5,9 +5,9 @@
   --type-text: "Libre Baskerville", Palatino, "Times New Roman", serif;
   --type-sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --type-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --type-ink: #e6edf1;
-  --type-reading: #d3e0e6;
-  --type-companion: #f1dcc0;
+  --type-ink: var(--paint-text);
+  --type-reading: var(--paint-reading);
+  --type-companion: var(--paint-companion);
 }
 
 h1,
@@ -99,7 +99,7 @@ small,
   font-weight: 600;
   line-height: 1.4;
   letter-spacing: 0.06em;
-  color: #91a5af;
+  color: var(--paint-muted);
 }
 
 h1[data-b="true"],

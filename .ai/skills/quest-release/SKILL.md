@@ -16,6 +16,8 @@ Read `../../CONTRACT.md` relative to this file's directory. Inspect current pack
 | JSDOM | Render React, interact with controls and observe meaningful state or text changes; do not replace the component with a hand-written fake. |
 | Playwright | Run one or two smoke tests. The required test opens the share website, clicks “play live”, and confirms the game is usable. Do not add a third. |
 
+The test file sits next to the code it tests. `model-gateway.test.ts` sits beside `model-gateway.ts`. Do not put a test under a distant `tests/` tree.
+
 Read scripts before running them. Run lint, typecheck, affected tests and production build; run the full required release gates before publishing. When native code changes, verify the iOS bundle. Report unavailable checks without inventing pass counts. Never substitute a mocked backend result for a real integration pass.
 
 ## Fast deployment

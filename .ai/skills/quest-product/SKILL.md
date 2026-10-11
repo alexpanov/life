@@ -18,7 +18,7 @@ Read `../../CONTRACT.md` relative to this file's directory. Trace the current pl
 - Maintain a clear website entrance labeled “play live” with the original coin mark. Keep fresh-player defaults free of the creator's personal history. Preserve existing players' local saves.
 - Keep native support iPhone-only. Treat App Store distribution, web distribution and opening a URL from ChatGPT as distinct capabilities. Never imply native ChatGPT integration merely because a link opens.
 
-Validate the affected journey in JSDOM and the relevant pure transition tests. Use the single existing Playwright launch test for the website entrance; do not add browser cases for every UI change.
+Validate the affected journey in JSDOM and the relevant pure transition tests. The test file sits next to the code it tests. Use the single existing Playwright launch test for the website entrance; do not add browser cases for every UI change.
 
 Keep Niko's locked Delta Force pride, reluctant story canon, and delivery history consistent. Retire unwanted content through soft deletion, preserving nonrepetition records. Use the model routine schema as an adapter contract, never as permission for arbitrary commands. Keep fiction identifiable in Niko's profile/about context. Do not turn war stories into combat instruction or spontaneous hero task assignments.
 

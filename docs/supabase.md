@@ -42,7 +42,7 @@ supports owner-and-slot queries without another index. Saves are limited to 1 Mi
 6. Enable the cloud adapter in the application only once authenticated onboarding,
    conflict handling, migration checks, and those real-project tests pass.
 
-`tests/infrastructure/supabase.test.ts` exercises the real JavaScript client's
+`packages/infrastructure/src/supabase.test.ts` exercises the real JavaScript client's
 HTTP contract against a controlled transport. These tests verify request scoping,
 Option decoding, optimistic-save parameters, and errors. They do **not** establish
 that Postgres policies or SQL execute correctly. Live SQL verification and advisors

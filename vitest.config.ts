@@ -8,7 +8,10 @@ export default defineConfig({
         extends: true,
         test: {
           name: "unit",
-          include: ["tests/core/**/*.test.ts"],
+          include: [
+            "packages/core/src/**/*.test.ts",
+            "packages/foundation/src/**/*.test.ts",
+          ],
           environment: "node",
         },
       },
@@ -17,8 +20,8 @@ export default defineConfig({
         test: {
           name: "integration",
           include: [
-            "tests/integration/**/*.test.ts",
-            "tests/infrastructure/**/*.test.ts",
+            "packages/application/src/**/*.test.ts",
+            "packages/infrastructure/src/**/*.test.ts",
           ],
           environment: "node",
         },
@@ -27,9 +30,9 @@ export default defineConfig({
         extends: true,
         test: {
           name: "dom",
-          include: ["tests/web/**/*.test.tsx"],
+          include: ["apps/web/src/**/*.test.tsx"],
           environment: "jsdom",
-          setupFiles: ["tests/web/setup.ts"],
+          setupFiles: ["apps/web/src/setup.ts"],
         },
       },
     ],

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deployment status report"
+  short_description: "Report whether a Life deploy is complete, in progress, failed, or not started"
+  default_prompt: "Use $deployment-status-report to report the current Life deployment."

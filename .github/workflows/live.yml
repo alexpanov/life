@@ -40,6 +40,8 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      SITE_BASE: /life/
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v4

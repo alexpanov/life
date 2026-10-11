@@ -1,6 +1,9 @@
-import { Package } from "lucide-react";
 import { Panel } from "../components/presentation";
-import { Button } from "../components/ui/button";
+import {
+  Button,
+  gridSm,
+  Package,
+} from "../../../../packages/design/src/index";
 import { H1, H4 } from "../../../../packages/design/src/type";
 import type { PageActions, GameView } from "../ui-types";
 export function InventoryPage({
@@ -15,10 +18,10 @@ export function InventoryPage({
         <p>{view.inventory.length} items acquired.</p>
         <Button onClick={() => open("loot")}>Add existing item</Button>
       </div>
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className={gridSm}>
         {view.inventory.map((item, index) => (
           <Panel key={`${item.name}-${index}`}>
-            <Package className="text-[var(--paint-signal)] mb-4" />
+            <Package />
             <H4>{item.name}</H4>
             <small>{item.source}</small>
           </Panel>

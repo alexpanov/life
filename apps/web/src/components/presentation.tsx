@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { UserRound, Radio, Cpu } from "lucide-react";
+import { Cpu, Radio, UserRound } from "../../../../packages/design/src/index";
 import {
   senderLabels,
   type MessageSource,

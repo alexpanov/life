@@ -1,6 +1,11 @@
-import { ArrowRight, Check } from "lucide-react";
 import type { Quest, Command } from "../../../../packages/core/src/index";
-import { Button } from "./ui/button";
+import {
+  ArrowRight,
+  Button,
+  Check,
+  dangerText,
+  questSpread,
+} from "../../../../packages/design/src/index";
 import { H4 } from "../../../../packages/design/src/type";
 export function QuestCard({
   quest: q,
@@ -17,7 +22,7 @@ export function QuestCard({
 }) {
   return (
     <article key={q.id} className="quest-card">
-      <div className="flex justify-between gap-4">
+      <div className={questSpread}>
         <div>
           <small>
             {q.category.toUpperCase()} /{" "}
@@ -35,7 +40,7 @@ export function QuestCard({
       </div>
       <p>{q.nextMove || q.detail || "One real action. Then report back."}</p>
       {q.blockedReason && (
-        <p className="text-[var(--paint-danger)]">{q.blockedReason}</p>
+        <p className={dangerText}>{q.blockedReason}</p>
       )}
       <div className="actions">
         {q.status === "pending" ? (

@@ -1,5 +1,8 @@
-import { Activity } from "lucide-react";
-import { Button } from "../components/ui/button";
+import {
+  Activity,
+  Button,
+  gridMd,
+} from "../../../../packages/design/src/index";
 import { H1 } from "../../../../packages/design/src/type";
 import type { PageActions, GameView } from "../ui-types";
 export function SkillsPage({
@@ -15,7 +18,7 @@ export function SkillsPage({
         <p>Potential records practice. Readiness changes with time.</p>
         <Button onClick={() => open("skill")}>New skill</Button>
       </div>
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className={gridMd}>
         {view.skills.map((s) => (
           <details key={s.id} className="quiet-details">
             <summary>{s.name}</summary>

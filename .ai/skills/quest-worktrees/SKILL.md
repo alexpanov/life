@@ -86,7 +86,7 @@ When only generated files block the remove:
 git worktree remove --force "../worktrees/<prefix>-<slug>"
 ```
 
-3. Delete the local branch. `git branch -d <branch>` is enough when the commits are in `main`. A squash merge will refuse `-d`. If the pull request is merged and `-d` refuses, delete it with `git branch -D <branch>`. Do not delete the remote branch.
+3. Delete the local branch. `git branch -d <branch>` is enough when the commits are in `main`. A squash merge will refuse `-d`. If the pull request is merged and `-d` refuses, delete it with `git branch -D <branch>`. The squash merge deletes the remote branch. Do not delete it a second time.
 
 4. Rearm the primary checkout:
 

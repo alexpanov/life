@@ -162,6 +162,7 @@ export function createRules(env: RuleEnvironment) {
       modules: [],
       events: [],
       lines: [],
+      draftQuest: O.none(),
       settings: {
         sound: false,
         autoCalls: false,
@@ -273,6 +274,58 @@ export function createRules(env: RuleEnvironment) {
       realm.memory.places = [
         ...new Set([...realm.memory.places, quest.destination]),
       ].slice(-100);
+  }
+  function describeQuest(
+    player: Player,
+    text: string,
+    lineId: string,
+    now = env.now(),
+  ) {
+    const title = clean(text, 160);
+    must(title, "Tell Niko what you're up to.");
+    const id = O.isSome(player.draftQuest)
+      ? player.draftQuest.value.id
+      : uid("quest");
+    player.draftQuest = O.some({ id, title, realmId: O.none() });
+    if (!player.lines.some((line) => line.id === lineId))
+      player.lines.push({ id: lineId, speaker: "hero", text: title, at: now });
+  }
+  function chooseDraftRealm(player: Player, realmId: string) {
+    must(O.isSome(player.draftQuest), "Tell Niko what you're up to.");
+    must(
+      player.realms.some((realm) => realm.id === realmId),
+      "Realm not found.",
+    );
+    player.draftQuest = O.some({
+      ...player.draftQuest.value,
+      realmId: O.some(realmId),
+    });
+  }
+  function startDraftQuest(player: Player, now = env.now()): Quest {
+    must(O.isSome(player.draftQuest), "Tell Niko what you're up to.");
+    const draft = player.draftQuest.value;
+    must(O.isSome(draft.realmId), "Pick a realm before this quest can start.");
+    enterRealm(player, draft.realmId.value, now);
+    const campaign = activeCampaign(player);
+    must(campaign.quests.length < 200, "This dungeon is full.");
+    const existing = player.campaigns
+      .flatMap((item) => item.quests)
+      .find((quest) => quest.id === draft.id);
+    if (existing) {
+      player.draftQuest = O.none();
+      focusQuest(player, existing.id, now);
+      return existing;
+    }
+    const quest = makeQuest(
+      { title: draft.title, nextMove: draft.title },
+      now,
+    );
+    quest.id = draft.id;
+    quest.lines = player.lines.splice(0, player.lines.length);
+    campaign.quests.push(quest);
+    player.draftQuest = O.none();
+    focusQuest(player, quest.id, now);
+    return quest;
   }
   function focusQuest(player: Player, questId: string, now = env.now()) {
     const campaign = player.campaigns.find((c) =>
@@ -993,6 +1046,19 @@ export function createRules(env: RuleEnvironment) {
         modules,
         events,
         lines: keptLines,
+        draftQuest: (() => {
+          const title = clean(p.draftQuest?.title, 160);
+          if (!p.draftQuest || !title) return O.none();
+          const realmId = p.draftQuest.realmId;
+          return O.some({
+            id: validId(p.draftQuest.id),
+            title,
+            realmId:
+              realmId && realms.some((realm) => realm.id === realmId)
+                ? O.some(realmId)
+                : O.none(),
+          });
+        })(),
         settings: {
           sound: Boolean(p.settings?.sound),
           autoCalls: Boolean(p.settings?.autoCalls),
@@ -1246,6 +1312,9 @@ export function createRules(env: RuleEnvironment) {
     addRealm,
     rememberQuest,
     focusQuest,
+    describeQuest,
+    chooseDraftRealm,
+    startDraftQuest,
     MOODS,
     checkIn,
     acceptSuggestion,

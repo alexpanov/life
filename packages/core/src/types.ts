@@ -30,6 +30,12 @@ export interface QuestLine {
   text: string;
   at: number;
 }
+/** Heard from the hero, not in a realm, and not started. */
+export interface QuestDraft {
+  id: string;
+  title: string;
+  realmId: Option<string>;
+}
 export interface Quest {
   id: string;
   title: string;
@@ -227,6 +233,7 @@ export interface Player {
   events: GameEvent[];
   /** Hero and Nico lines spoken before a quest existed. Still part of this player's save. */
   lines: QuestLine[];
+  draftQuest: Option<QuestDraft>;
   settings: {
     sound: boolean;
     autoCalls: boolean;

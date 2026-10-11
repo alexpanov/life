@@ -17,7 +17,7 @@ export function QuestPage({
     return (
       <section className="focus-screen">
         <H1>Quest not found.</H1>
-        <Link to="/board">Back to quests</Link>
+        <Link to="/">Back home</Link>
       </section>
     );
   const lines =

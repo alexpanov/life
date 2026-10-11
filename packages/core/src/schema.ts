@@ -181,6 +181,14 @@ const player = z.object({
   bonusLoot: z.array(text).optional(),
   modules: z.array(z.unknown()).optional(),
   lines: z.array(questLineSchema).max(5000).default([]),
+  draftQuest: z
+    .object({
+      id: text,
+      title: text,
+      realmId: text.nullable().optional(),
+    })
+    .nullable()
+    .optional(),
   events: z
     .array(
       z.object({

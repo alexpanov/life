@@ -54,11 +54,11 @@ Model stories as first-class domain records with fixed canonical facts and curat
 
 Forgetting memories, unlocked traits, stories and wisdom is a soft-delete routine with an Option timestamp. Exclude retired items from selection and model context, while keeping records for consistency and nonrepetition. Reset personalization must preserve locked traits and nonrepetition history. A model can propose only allowlisted JSON routine invocations with validated parameters. Bind identity and authority outside model output; reject unknown fields, unknown routines, foreign targets and attempts to remove locked canon. Ambiguous chat must ask which item, not guess and retire arbitrary content.
 
-## Port and notifications
+## Home
 
-Call the home destination Port and keep its stable root route. Provide a circular, thumb-reachable home control inspired by the old iPhone home button. Keep primary task screens focused. Route incidental events into concise, actionable notices instead of adding persistent dashboard panels.
+Call the home destination Home and keep its stable root route. Home lists the hero's open quests. When none are open, Niko asks what they are up to. That answer becomes a quest, and the quest cannot start until the hero picks a realm. Put Home in the bottom navigation. Do not label Home as Port, and do not use a circular home button. Do not route to an Explore menu, a Niko lore page, inventory, settings and saves, notifications, invite, power-ups, or driving mode.
 
-When the game is visible, use in-game notifications only. When hidden, use browser-native notifications only if supported and explicitly permitted. Request OS permission from a deliberate user action, show a clear enable prompt, respect denial, and offer an actual test. Never claim push after the app closes without a working Web Push backend. Explain iPhone installation requirements where relevant. Tapping a notice returns to its relevant game screen; preserve starter/base-path scope.
+Keep primary task screens focused. Do not add a stay-in-touch block or an enable-notifications prompt.
 
 ## Niko energy and access
 
@@ -84,4 +84,4 @@ Use dotenvx for encrypted development/live environment files. Commit only cipher
 
 ## Surfaces and distribution
 
-Use InteractionSurface for the window through which Niko sees the hero (iPhone, web, Telegram, Instagram, WhatsApp). Keep it distinct from Port (game home) and transaction channel (commercial access). Primary native surface is iPhone; secondary planned distribution is Telegram. Android users can play through web/Telegram. Surface-specific guidance should reduce cognitive load and unnecessary social use. It is a context hint, never proof of identity, permission or access to private social data. Bot registration, authenticated cross-device persistence and social messaging require their own verified adapters.
+Use InteractionSurface for the window through which Niko sees the hero (iPhone, web, Telegram, Instagram, WhatsApp). Keep it distinct from Home (game home) and transaction channel (commercial access). Primary native surface is iPhone; secondary planned distribution is Telegram. Android users can play through web/Telegram. Surface-specific guidance should reduce cognitive load and unnecessary social use. It is a context hint, never proof of identity, permission or access to private social data. Bot registration, authenticated cross-device persistence and social messaging require their own verified adapters.

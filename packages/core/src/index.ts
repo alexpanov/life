@@ -111,6 +111,9 @@ export type Command =
       status: QuestStatus;
       reason?: string;
     }
+  | { type: "describe-quest"; text: string }
+  | { type: "choose-realm"; realmId: string }
+  | { type: "start-quest" }
   | { type: "add-quest"; quest: QuestInput }
   | { type: "edit-quest"; questId: string; quest: QuestInput }
   | { type: "enter-realm"; realmId: string }
@@ -260,8 +263,6 @@ export function transition(
       p.operation.candidateQuestId = id;
     else choose(id);
   };
-  if (p.settings.driving && command.type !== "settings")
-    throw Error("Park before using game controls.");
   switch (command.type) {
     case "create-powerup":
       createPowerup(
@@ -480,6 +481,22 @@ export function transition(
               ? "Closed. No penalty."
               : "Quest reopened. Reward reversed.";
       }
+      break;
+    }
+    case "describe-quest":
+      r.describeQuest(p, command.text, context.eventId, now);
+      break;
+    case "choose-realm":
+      r.chooseDraftRealm(p, command.realmId);
+      break;
+    case "start-quest": {
+      const before = current();
+      const started = r.startDraftQuest(p, now);
+      p.operation = { phase: "execute", candidateQuestId: "", lastQuestId: "" };
+      if (O.isNone(before) || before.value.id !== started.id)
+        learnFromOutcome(p, started, "accepted", now);
+      result.destination = O.some("home");
+      result.message = "Quest started.";
       break;
     }
     case "add-quest": {

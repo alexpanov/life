@@ -26,7 +26,9 @@ The `.openai/hosting.json` manifest retains the current hosted project. Sites us
 
 ## Environments
 
-Only development and live database environments are intended. A local browser-only save is a persistence adapter, not another hosted environment. See `supabase.md` for backend provisioning, auth and migration steps.
+Only development and live database environments are intended. A local browser-only save is a persistence adapter, not another hosted environment. See `supabase.md` for auth and migration steps.
+
+On a push to `main`, after the smoke tests, the workflow applies `supabase/migrations` to the development project and then the live project. Pull requests do not touch either database. The migration creates `game_saves`, `save_game`, owner policies, and the Realtime publication. Required Actions secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DEV_PROJECT_REF`, `SUPABASE_DEV_DB_PASSWORD`, `SUPABASE_LIVE_PROJECT_REF`, `SUPABASE_LIVE_DB_PASSWORD`.
 
 ## Source of deployment truth
 

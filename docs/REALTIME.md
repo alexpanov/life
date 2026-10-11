@@ -10,14 +10,12 @@ The observer's `onSave` hook is an optional controller integration point. The fu
 
 ## Provisioning gate
 
-Apply the existing `game_saves` migration to development first, retain its owner RLS and authenticated SELECT grants, then enable that table in the `supabase_realtime` publication through Dashboard Publications. Equivalent SQL, after checking membership:
+The `game_saves` migration adds that table to the `supabase_realtime` publication. Apply it to development first, then live. Do not add the table by hand when the migration has run. Confirm membership:
 
 ```sql
 select * from pg_publication_tables
 where pubname = 'supabase_realtime'
   and schemaname = 'public' and tablename = 'game_saves';
--- Only when absent:
-alter publication supabase_realtime add table public.game_saves;
 ```
 
 Do not modify the protected `realtime` schema. Use only a public publishable client key plus the player's session; never a service-role key in a client. The server RLS policy is the authorization boundary; event filters are only a routing optimization.

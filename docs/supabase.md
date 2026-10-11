@@ -1,13 +1,10 @@
 # Supabase persistence
 
-The adapter is implemented but no hosted project is provisioned. The connected
-Supabase account returned no projects and project cost lookup was unavailable.
-The user authorized proceeding without the broken cost lookup, but the exposed creation API still requires a confirmation ID. Provisioning can continue once projects are created in the dashboard or the API is repaired.
-
-Use two independent free projects: development and live. Do not use paid preview
-branches. The website belongs on static hosting (GitHub Pages); Supabase provides
-Auth and Postgres save storage. No Edge Function or privileged browser key is
-needed for this adapter.
+The adapter is implemented. Two free projects, development and live, are the
+only hosted databases. They are not provisioned until an account access token
+exists and GitHub Actions secrets are set. Do not use paid preview branches.
+The website stays on static hosting. Supabase provides Auth, the save table,
+the `save_game` function, and Realtime. No Edge Function is used.
 
 ## Boundary
 
@@ -33,9 +30,8 @@ supports owner-and-slot queries without another index. Saves are limited to 1 Mi
 
 ## Provisioning and verification
 
-1. Create development and live in the explicitly selected owner organization. Prefer the free plan. The user authorized skipping the broken cost check, but an actual API confirmation ID must never be invented.
-2. Discover the installed Supabase CLI commands with `--help`, link development,
-   and apply the checked-in migration. Use the same migration for live after tests.
+1. Create development and live on the free plan in the selected organization. Do not invent a confirmation identifier.
+2. Store `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DEV_PROJECT_REF`, `SUPABASE_DEV_DB_PASSWORD`, `SUPABASE_LIVE_PROJECT_REF`, and `SUPABASE_LIVE_DB_PASSWORD` as GitHub Actions secrets. The main-branch workflow applies the checked-in migration to development, then live, after the smoke tests.
 3. Generate database types from the actual development schema and compare with
    `SupabaseDatabase`. Configure project URL and publishable key separately for
    development and production; keep administrative credentials in CI secrets only.

@@ -62,3 +62,6 @@ $$;
 
 revoke all on function public.save_game(text, text, boolean, text) from public, anon;
 grant execute on function public.save_game(text, text, boolean, text) to authenticated;
+
+-- Realtime delivers invalidations only. The client re-reads through the policies above.
+alter publication supabase_realtime add table public.game_saves;

@@ -32,11 +32,11 @@ Use replaceable adapters for memory/local storage, Supabase and future models. K
 
 Retain versioned prompt snippets and bounded learning context behind a model boundary when implementing generation. Self-improvement means learning useful player preferences and adapting support, not autonomous source mutation or deployment.
 
-Provide a shareable website with a prominent “play live” button, including lowercase “live”, and a small original Greek-inspired coin mark. Use GitHub source and Actions when available. Target at most 60 seconds from deployment trigger to verified live content. Measure the complete elapsed time, including queue and propagation; never promise a hosted runner guarantee or weaken checks to manufacture success.
+Provide a shareable website with a prominent “play live” button, including lowercase “live”, and a small original Greek-inspired coin mark. Use GitHub source and Actions when available. Target about 60 seconds from deployment trigger to verified live content, including checks, one or two smoke tests, and the development then live database deploy. Measure the complete elapsed time, including queue and propagation; never promise a hosted runner guarantee or weaken checks to manufacture success.
 
 ## Verification and collaboration
 
-Use pure unit tests, repository/routine integration tests, interactive React JSDOM tests, and exactly one Playwright test: website → “play live” → playable game. Test outcomes and important failures. Keep deterministic tests fast. Test real backend isolation when backend integration changes. Distinguish checks that ran from checks only configured.
+Use pure unit tests, repository/routine integration tests, interactive React JSDOM tests, and one or two Playwright smoke tests. The required smoke test is website → “play live” → playable game. Test outcomes and important failures. Keep deterministic tests fast. Test real backend isolation when backend integration changes. Distinguish checks that ran from checks only configured.
 
 Coordinate a legion with explicit file ownership and a single integration/release owner. Do not overwrite concurrent work or commit another agent's unfinished changes. Repository instructions are model-agnostic; adapters should point here rather than duplicate policy. Keep secrets, real saves and private player details out of source and prompts.
 

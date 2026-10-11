@@ -1,7 +1,9 @@
 import * as O from "../../foundation/src/option";
-import type { Sidekick, NicoJob, Player } from "./types";
+import type { Sidekick, NicoJob, Player, DeepReadonly } from "./types";
 /** Jobs belong to one Niko. Every routine returns a new value; input is unchanged. */
-export const nextNicoJob = (nico: Sidekick): O.Option<NicoJob> =>
+export const nextNicoJob = (
+  nico: DeepReadonly<Sidekick>,
+): O.Option<DeepReadonly<NicoJob>> =>
   O.fromNullable(
     [...nico.jobs]
       .filter((j) => j.status === "pending")

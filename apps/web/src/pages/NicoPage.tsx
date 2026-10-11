@@ -25,6 +25,7 @@ import {
 import type {
   Player,
   NicoContentTarget,
+  DeepReadonly,
 } from "../../../../packages/core/src/types";
 import {
   NICO_STORIES,
@@ -61,7 +62,7 @@ export function NicoPage({
 }: {
   modelLayer?: Layer.Layer<NicoModel>;
   controller: GameController;
-  player: Player;
+  player: DeepReadonly<Player>;
   now: number;
   send: PageActions["send"];
 }) {

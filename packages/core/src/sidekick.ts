@@ -19,6 +19,7 @@ import type {
   LearningCategory,
   Mood,
   Review,
+  DeepReadonly,
 } from "./types";
 import { sidekickSchema } from "./schema";
 const text = (v: unknown, n = 400) =>
@@ -337,8 +338,8 @@ export function resetSidekick(player: Player, now = 0): void {
   nico.revision++;
 }
 export function sidekickContext(
-  player: Player,
-  quest: O.Option<Quest> = O.none(),
+  player: DeepReadonly<Player>,
+  quest: O.Option<DeepReadonly<Quest>> = O.none(),
 ) {
   return {
     promptVersion: NIKO_PROMPTS.version,
@@ -375,8 +376,8 @@ export function sidekickContext(
 }
 export type SidekickContext = ReturnType<typeof sidekickContext>;
 export function nikoGuidance(
-  player: Player,
-  quest: O.Option<QuestInput & { id?: string }> = O.none(),
+  player: DeepReadonly<Player>,
+  quest: O.Option<DeepReadonly<QuestInput & { id?: string }>> = O.none(),
 ): string {
   const model = player.sidekick,
     last = model.reviews.at(-1);

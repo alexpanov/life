@@ -50,6 +50,7 @@ import type {
   QuestStatus,
   Snapshot,
   Sidekick,
+  DeepReadonly,
 } from "./types";
 export type * from "./types";
 export { NIKO_PROMPTS } from "./sidekick";
@@ -686,9 +687,8 @@ function assertNever(value: never): never {
   throw Error(`Unsupported command: ${String(value)}`);
 }
 export function selectGame(snapshot: Snapshot, now: number) {
-  const state = copy(snapshot) as GameState,
-    r = runtime({ now, eventId: "query", localDay: "" }),
-    player = r.activePlayer(state),
+  const r = runtime({ now, eventId: "query", localDay: "" }),
+    player = r.activePlayer(snapshot),
     realm = r.activeRealm(player),
     campaign = r.activeCampaign(player),
     all = player.campaigns.flatMap((c) => c.quests),
@@ -735,7 +735,10 @@ export function getSidekickContext(snapshot: Snapshot, now: number) {
   const v = selectGame(snapshot, now);
   return sidekickContext(v.player, v.mission);
 }
-export function sidekickMemory(snapshot: Snapshot, now: number): Sidekick {
+export function sidekickMemory(
+  snapshot: Snapshot,
+  now: number,
+): DeepReadonly<Sidekick> {
   return selectGame(snapshot, now).player.sidekick;
 }
 

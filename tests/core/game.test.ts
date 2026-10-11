@@ -191,6 +191,59 @@ describe("stable game transitions", () => {
     );
   });
 });
+describe("game selection", () => {
+  const freeze = (value: unknown) => {
+    if (!value || typeof value !== "object" || Object.isFrozen(value)) return;
+    Object.freeze(value);
+    for (const child of Object.values(value)) freeze(child);
+  };
+  it("draws each picture from the save and leaves that save unchanged", () => {
+    let state = add(newGame(context()));
+    const skillId = view(state).skills[0]!.id;
+    state = send(state, { type: "practice", skillId, note: "Forms" });
+    const saved = structuredClone(state);
+    const hero = state.players[0]!;
+    const quest = hero.campaigns[0]!.quests.at(-1)!;
+    freeze(state);
+    const opened = selectGame(state, context().now);
+    const redrawn = selectGame(state, context().now);
+    const refreshed = selectGame(state, context().now + 60_000);
+    expect(opened.player).toBe(hero);
+    expect(opened.realm).toBe(hero.realms[0]);
+    expect(opened.campaign).toBe(hero.campaigns[0]);
+    expect(opened.quests.at(-1)).toBe(quest);
+    expect(opened.quests.at(-1)?.title).toBe("Call family");
+    expect(redrawn).toEqual(opened);
+    expect(refreshed.player).toBe(hero);
+    expect(refreshed.skills[0]?.readiness).toBe(opened.skills[0]?.readiness);
+    expect(state).toEqual(saved);
+    const later = selectGame(state, context().now + 90 * 86_400_000);
+    expect(later.skills[0]?.readiness).toBeLessThan(opened.skills[0]!.readiness);
+    expect(hero.skills[0]?.readiness).toBe(saved.players[0]!.skills[0]!.readiness);
+    expect(state).toEqual(saved);
+  });
+  it("shows a newly chosen quest from the updated save", () => {
+    const state = add(newGame(context()));
+    const before = structuredClone(state);
+    const quest = state.players[0]!.campaigns[0]!.quests.at(-1)!;
+    const chosen = transition(
+      state,
+      { type: "choose-mission", questId: quest.id },
+      context("choose"),
+    ).state;
+    const picture = selectGame(chosen, context().now);
+    expect(picture.mission).toMatchObject({
+      _tag: "Some",
+      value: { id: quest.id, title: "Call family" },
+    });
+    expect(picture.player).toBe(chosen.players[0]);
+    expect(picture.mission).toMatchObject({
+      _tag: "Some",
+      value: picture.player.campaigns[0]?.quests.at(-1),
+    });
+    expect(state).toEqual(before);
+  });
+});
 describe("skill progression", () => {
   it("enforces the supplied local calendar day, including across UTC midnight", () => {
     let state = newGame(context());

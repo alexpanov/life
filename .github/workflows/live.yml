@@ -16,6 +16,10 @@ jobs:
     timeout-minutes: 5
     env:
       SITE_BASE: /life/
+      # Public project URL and anon key only. The database password and the
+      # service-role key are not build inputs and must not be added here.
+      VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4

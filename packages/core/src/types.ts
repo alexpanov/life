@@ -24,6 +24,12 @@ export interface QuestInput {
   loot?: string;
   suggestionKey?: string;
 }
+export interface QuestLine {
+  id: string;
+  speaker: "hero" | "nico";
+  text: string;
+  at: number;
+}
 export interface Quest {
   id: string;
   title: string;
@@ -39,6 +45,7 @@ export interface Quest {
   blockedReason: string;
   verified: boolean;
   suggestionKey: string;
+  lines: QuestLine[];
 }
 export interface Campaign {
   id: string;
@@ -218,6 +225,8 @@ export interface Player {
   bonusLoot: string[];
   modules: Extension[];
   events: GameEvent[];
+  /** Hero and Nico lines spoken before a quest existed. Still part of this player's save. */
+  lines: QuestLine[];
   settings: {
     sound: boolean;
     autoCalls: boolean;

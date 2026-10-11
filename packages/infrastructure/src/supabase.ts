@@ -52,16 +52,19 @@ const savedPayload = z.object({
   backup_present: z.boolean(),
 });
 
-/** The caller owns authentication; this adapter never silently creates an account. */
+/** Binds reads and writes to the session id captured when the game opened. */
 export function createSupabasePersistence(
   client: SupabaseClient<SupabaseDatabase>,
   slot: SaveSlot,
+  ownerId: string,
 ): Persistence {
   const authenticatedUser = async (): Promise<string> => {
     const result = await client.auth.getUser();
     if (result.error) throw result.error;
     const user = O.fromNullable(result.data.user);
     if (!O.isSome(user)) throw new Error("Sign in before using cloud saves.");
+    if (user.value.id !== ownerId)
+      throw new Error("Signed-in player changed. Reload before saving.");
     return user.value.id;
   };
 

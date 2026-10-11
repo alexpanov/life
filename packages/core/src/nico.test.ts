@@ -113,6 +113,50 @@ describe("Niko's private job queue", () => {
       player(s).sidekick.snippets.every((n) => O.isSome(n.deletedAt)),
     ).toBe(true);
   });
+  it("keeps every hero line and Nico's line on that quest", () => {
+    let s = newGame(context());
+    s = send(s, { type: "add-quest", quest: { title: "Walk" } }, "add");
+    const id = player(s).campaigns[0]!.quests[0]!.id;
+    s = send(s, { type: "choose-mission", questId: id }, "focus");
+    for (let n = 0; n < 301; n++)
+      s = send(
+        s,
+        { type: "quest-progress", questId: id, text: `Step ${n}` },
+        `step-${n}`,
+        now + n,
+      );
+    s = send(
+      s,
+      {
+        type: "record-line",
+        questId: id,
+        speaker: "nico",
+        text: "Good. Keep walking.",
+      },
+      "nico-line",
+      now + 400,
+    );
+    const lines = player(s).campaigns[0]!.quests[0]!.lines;
+    expect(lines.filter((line) => line.speaker === "hero")).toHaveLength(301);
+    expect(lines[0]).toMatchObject({ speaker: "hero", text: "Step 0" });
+    expect(lines.at(-1)).toMatchObject({
+      speaker: "nico",
+      text: "Good. Keep walking.",
+    });
+    expect(
+      player(s).events.filter((event) => event.questId === id),
+    ).toHaveLength(300);
+    const restored = restoreGame(JSON.parse(serializeGame(s)), context("load"));
+    expect(player(restored).campaigns[0]!.quests[0]!.lines).toEqual(lines);
+    const other = send(s, { type: "add-player", name: "Second" }, "other");
+    const second = other.players.find((hero) => hero.name === "Second");
+    expect(second?.lines).toEqual([]);
+    expect(
+      second?.campaigns.some((campaign) =>
+        campaign.quests.some((quest) => quest.lines.length > 0),
+      ),
+    ).toBe(false);
+  });
   it("logs progress without completing or awarding rewards, replay safe", () => {
     let s = newGame(context());
     s = send(s, { type: "add-quest", quest: { title: "Walk" } });

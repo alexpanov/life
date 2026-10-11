@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Local SVG icon module. No font, network request, or runtime dependency.
 const icons = {
+  companion: '<circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2M6 8V6a6 6 0 0 1 12 0v5h-3"/>',
+  system: '<rect x="5" y="5" width="14" height="14" rx="1"/><path d="M9 9h6v6H9zM9 2v3m6-3v3M9 19v3m6-3v3M2 9h3m-3 6h3m14-6h3m-3 6h3"/>',
+
   compass: '<path d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2Z"/><path d="m9.5 9.5 5 5m0-5-5 5"/>',
   check: '<path d="m5 12 4 4L19 6"/>',
   arrow: '<path d="M4 12h16m-6-6 6 6-6 6"/>',

@@ -58,6 +58,8 @@ describe("calm mobile React journey", () => {
       false,
     );
     expect(screen.getByRole("heading", { name: "Meet Niko." })).toBeVisible();
+    expect(screen.getByText(/Hi, I’m Niko\./)).toBeVisible();
+    expect(screen.queryByText(/Gonzalez/)).not.toBeInTheDocument();
     await user.type(
       screen.getByLabelText("What are you up to?"),
       "Exploring a new city",

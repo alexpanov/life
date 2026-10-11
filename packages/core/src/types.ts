@@ -106,9 +106,31 @@ export interface Snippet {
   source: "player";
   at: number;
 }
+export interface NicoJob {
+  id: string;
+  kind: "meet-hero" | "learn-name" | "reflect-outcome";
+  questId: string;
+  status: "pending" | "done";
+  priority: number;
+  createdAt: number;
+  completedAt: Option<number>;
+}
+export interface NicoTrait {
+  id: string;
+  text: string;
+  source: "system" | "player" | "learned";
+  acquiredAt: number;
+  evidence: string[];
+}
 export interface Sidekick {
   version: 1;
-  name: "Niko";
+  name: "Nico";
+  lastName: "Lopez";
+  id: string;
+  introduced: boolean;
+  heroName: Option<string>;
+  jobs: NicoJob[];
+  traits: NicoTrait[];
   learning: Learning;
   reviews: Review[];
   snippets: Snippet[];

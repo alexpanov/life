@@ -4,7 +4,7 @@ This file records the user's durable requirements. It is portable plain text for
 
 ## Stable core, replaceable interfaces
 
-Build a real-world game around the player, realms, dungeons, quests, progress and a learning sidekick named Niko. Keep the domain independent of pages, React, navigation, storage vendors and model vendors. Use strongly typed TypeScript throughout app code, React interfaces, Effect for application effects, and small pure domain functions. Use the repository's own Option and Either types for explicit absence and recoverable results. Read through repositories; change state through routines. Keep clocks, IDs, randomness and external services injectable. Preserve save compatibility and player progress.
+Build a real-world game around the player, realms, dungeons, quests, progress and a learning sidekick named Nico Lopez. Keep the domain independent of pages, React, navigation, storage vendors and model vendors. Use strongly typed TypeScript throughout app code, React interfaces, Effect for application effects, and small pure domain functions. Use the repository's own Option and Either types for explicit absence and recoverable results. Read through repositories; change state through routines. Keep clocks, IDs, randomness and external services injectable. Preserve save compatibility and player progress.
 
 Use React Router and Tailwind on the web. Share rules and design tokens with the iPhone interface; use native React Native/Expo components. Support iPhone only on native platforms. Do not add Android or claim that web deployment publishes an App Store app. Treat UI compositions and pages as replaceable. Keep a coherent, accessible design system beneath them.
 
@@ -14,7 +14,7 @@ Make beginning obvious: ask how the player feels, help pick one quest, and offer
 
 Guide the player toward choosing one priority and acting. Run the choice loop when a quest arrives or an outcome creates a new decision; avoid forced interruptions for incidental edits. Learn after completed or abandoned quests through small, bounded after-action memories. Let players reset personalization without erasing progress. Keep observations tentative; do not present inferred character traits as fact. Keep OODA, AAR and prioritization machinery out of player-facing jargon.
 
-Distinguish game messages from Niko with explicit sender labels, typography and icons; never rely on color alone. Give Niko a warm, concise personality. Keep spacecraft/military atmosphere fictional and useful. Borrow broad open-world mechanics without copying GTA characters, dialogue, artwork or branding.
+Distinguish game messages from Nico with explicit sender labels, typography and icons; never rely on color alone. Give Nico a warm, concise personality. Keep spacecraft/military atmosphere fictional and useful. Borrow broad open-world mechanics without copying GTA characters, dialogue, artwork or branding.
 
 ## Honest, portable infrastructure
 
@@ -29,3 +29,9 @@ Provide a shareable website with a prominent “play live” button, including l
 Use pure unit tests, repository/routine integration tests, interactive React JSDOM tests, and exactly one Playwright test: website → “play live” → playable game. Test outcomes and important failures. Keep deterministic tests fast. Test real backend isolation when backend integration changes. Distinguish checks that ran from checks only configured.
 
 Coordinate a legion with explicit file ownership and a single integration/release owner. Do not overwrite concurrent work or commit another agent's unfinished changes. Repository instructions are model-agnostic; adapters should point here rather than duplicate policy. Keep secrets, real saves and private player details out of source and prompts.
+
+## Mobile clarity and Nico jobs
+
+Follow `.ai/skills/dont-make-me-think/SKILL.md` for every interface change. Present one decision and at most two primary task actions per screen. Keep stable paths; link to secondary capabilities. Prioritize active-quest completion and progress history over dashboards. Introduce Nico conversationally, celebrate completion, ask the hero’s name when unknown, and collect one reflection before the next priority.
+
+Create a separate hero and Nico identity for each player. Keep hero IDs out of dialogue and model context. Jobs belong to Nico and have explicit priority and completion state. Store system, player-given and learned personality traits separately. Let a pure routine derive bounded tentative traits from recent completed quests and jobs; expose it for a future per-player five-day scheduler without claiming any scheduler is live. Inject a deterministic simulator through an Effect service until a real model is configured. Persist the actual jobs, memories and outcomes even when dialogue is simulated.

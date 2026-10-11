@@ -4,41 +4,99 @@ import { render, screen, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { App } from "../../apps/web/src/App";
+import * as O from "../../packages/foundation/src/option";
 import {
   createGameController,
   createMemoryPersistence,
 } from "../../packages/application/src/controller";
-async function setup(route = "/") {
+async function setup(route = "/", introduced = true) {
   let n = 0;
-  const controller = createGameController(createMemoryPersistence(), () => ({
+  const persistence = createMemoryPersistence();
+  const context = () => ({
     now: Date.now(),
     eventId: `dom-${n++}`,
     localDay: "2026-10-10",
-  }));
+  });
+  const controller = createGameController(persistence, context);
   await controller.load();
+  if (introduced)
+    controller.send({ type: "meet-nico", text: "I want to get outside." });
   await controller.flush();
-  render(
+  const rendered = render(
     <MemoryRouter initialEntries={[route]}>
       <App controller={controller} />
     </MemoryRouter>,
   );
-  return { controller, user: userEvent.setup() };
+  return {
+    controller,
+    user: userEvent.setup(),
+    persistence,
+    context,
+    rendered,
+  };
 }
-describe("interactive React game in JSDOM", () => {
-  it("changing mood updates the visible pressed state", async () => {
-    const { user } = await setup();
-    const ready = screen.getByRole("button", { name: /Ready.*A mission/ }),
-      quiet = screen.getByRole("button", { name: /Quiet.*Room/ });
-    await user.click(ready);
-    expect(ready).toHaveAttribute("aria-pressed", "true");
-    await user.click(quiet);
-    expect(quiet).toHaveAttribute("aria-pressed", "true");
-    expect(ready).toHaveAttribute("aria-pressed", "false");
+async function addMission(controller: ReturnType<typeof createGameController>) {
+  await act(async () => {
+    controller.send({
+      type: "add-quest",
+      quest: { title: "Drink water", nextMove: "Fill a glass", xp: 10 },
+    });
+    const game = controller.getSnapshot().game;
+    if (O.isNone(game)) throw Error("No game");
+    const player = game.value.players[0]!;
+    controller.send({
+      type: "choose-mission",
+      questId: player.campaigns[0]!.quests[0]!.id,
+    });
+    await controller.flush();
   });
-  it("creates a quest through a real form and asks before focusing it", async () => {
+}
+describe("calm mobile React journey", () => {
+  it("introduces Nico once and persists the hero's first memory", async () => {
+    const { user, controller, persistence, context, rendered } = await setup(
+      "/",
+      false,
+    );
+    expect(screen.getByRole("heading", { name: "Meet Nico." })).toBeVisible();
+    await user.type(
+      screen.getByLabelText("What are you up to?"),
+      "Exploring a new city",
+    );
+    await user.click(screen.getByRole("button", { name: "Meet Nico" }));
+    expect(
+      screen.getByRole("heading", { name: "How are you feeling?" }),
+    ).toBeVisible();
+    await controller.flush();
+    rendered.unmount();
+    const restored = createGameController(persistence, context);
+    await restored.load();
+    render(
+      <MemoryRouter>
+        <App controller={restored} />
+      </MemoryRouter>,
+    );
+    expect(
+      screen.queryByRole("heading", { name: "Meet Nico." }),
+    ).not.toBeInTheDocument();
+    const game = restored.getSnapshot().game;
+    expect(
+      O.isSome(game) &&
+        game.value.players[0]!.sidekick.snippets.some((s) =>
+          s.text.includes("Exploring a new city"),
+        ),
+    ).toBe(true);
+  });
+  it("selects mood through one input and a single decision", async () => {
+    const { user } = await setup();
+    await user.selectOptions(screen.getByLabelText("Today I feel"), "quiet");
+    expect(screen.getByLabelText("Today I feel")).toHaveValue("quiet");
+    await user.click(screen.getByRole("button", { name: "Pray for a quest" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+  it("creates a quest and confirms the priority before showing two main actions", async () => {
     const { user } = await setup("/board");
     await user.click(screen.getByRole("button", { name: "Add quest" }));
-    let dialog = screen.getByRole("dialog");
+    const dialog = screen.getByRole("dialog");
     await user.type(
       within(dialog).getByLabelText("Objective"),
       "Walk to the park",
@@ -47,50 +105,86 @@ describe("interactive React game in JSDOM", () => {
       within(dialog).getByLabelText("One next move"),
       "Put shoes on",
     );
-    await user.selectOptions(within(dialog).getByLabelText("Type"), "side");
     await user.click(within(dialog).getByRole("button", { name: "Save" }));
-    dialog = screen.getByRole("dialog", { name: "Choose one next move" });
-    expect(within(dialog).getByText("Walk to the park")).toBeVisible();
-    await user.click(
-      within(dialog).getByRole("button", { name: "Take this quest" }),
-    );
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.getByText("YOUR ONE MISSION")).toBeVisible();
-    expect(screen.getByText("Put shoes on")).toBeVisible();
-  });
-  it("completion shows review then returns to choosing a quest", async () => {
-    const { controller, user } = await setup("/board");
-    await act(async () => {
-      controller.send({
-        type: "add-quest",
-        quest: { title: "Drink water", xp: 10 },
-      });
-      controller.send({ type: "retain-mission" });
-      await controller.flush();
-    });
-    await user.click(screen.getByRole("button", { name: "Complete" }));
+    await user.click(screen.getByRole("button", { name: "Take this quest" }));
     expect(
-      screen.getByRole("heading", { name: "Take a breath." }),
+      screen.getByRole("heading", { name: "Walk to the park" }),
     ).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Complete quest" }),
+    ).toBeVisible();
+    expect(screen.getByRole("link", { name: "Make progress" })).toBeVisible();
+    expect(
+      document.querySelectorAll(".mission-strip,.niko-panel"),
+    ).toHaveLength(0);
+  });
+  it("completes, learns the name and reflection, then returns to choosing", async () => {
+    const { controller, user } = await setup();
+    await addMission(controller);
+    await user.click(screen.getByRole("button", { name: "Complete quest" }));
+    expect(
+      screen.getByRole("heading", { name: "Great job, boss." }),
+    ).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await user.type(screen.getByLabelText("Your name"), "Alex");
+    await user.click(screen.getByRole("button", { name: "Tell Nico" }));
+    await user.type(
+      screen.getByLabelText("Your takeaway"),
+      "Keep a glass nearby",
+    );
+    await user.click(screen.getByRole("button", { name: "Remember this" }));
     await user.click(screen.getByRole("button", { name: "Pick next quest" }));
     expect(
       screen.getByRole("heading", { name: "How are you feeling?" }),
     ).toBeVisible();
-  });
-  it("driving mode gates interaction until the player parks", async () => {
-    const { user } = await setup();
-    await user.click(screen.getByRole("button", { name: "Driving mode" }));
+    const game = controller.getSnapshot().game;
     expect(
-      screen.getByRole("heading", { name: "Eyes on the road." }),
+      O.isSome(game) &&
+        O.getOrElse(game.value.players[0]!.sidekick.heroName, () => "missing"),
+    ).toBe("Alex");
+  });
+  it("known names skip the question and unfinished reflection survives reload", async () => {
+    const { controller, user, persistence, context, rendered } = await setup();
+    await act(async () => {
+      controller.send({ type: "name-hero", name: "Alex" });
+    });
+    await addMission(controller);
+    await user.click(screen.getByRole("button", { name: "Complete quest" }));
+    await controller.flush();
+    rendered.unmount();
+    const restored = createGameController(persistence, context);
+    await restored.load();
+    render(
+      <MemoryRouter>
+        <App controller={restored} />
+      </MemoryRouter>,
+    );
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(
+      screen.getByRole("heading", { name: "What did we learn?" }),
     ).toBeVisible();
+    expect(screen.queryByLabelText("Your name")).not.toBeInTheDocument();
+  });
+  it("opens a dedicated progress screen and records real history", async () => {
+    const { controller, user } = await setup();
+    await addMission(controller);
+    await user.click(screen.getByRole("link", { name: "Make progress" }));
+    await user.type(
+      screen.getByLabelText("What progress did you make?"),
+      "Filled the glass",
+    );
+    await user.click(screen.getByRole("button", { name: "Save progress" }));
+    expect(screen.getByText(/Filled the glass/)).toBeVisible();
+    expect(screen.getByLabelText("What progress did you make?")).toHaveValue(
+      "",
+    );
+  });
+  it("keeps driving mode accessible through Explore", async () => {
+    const { user } = await setup();
+    await user.click(screen.getByRole("link", { name: "Explore" }));
+    await user.click(screen.getByRole("button", { name: "Driving mode" }));
     expect(document.querySelector("[inert]")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "I’m parked" }));
-    expect(screen.queryByText("Eyes on the road.")).not.toBeInTheDocument();
     expect(document.querySelector("[inert]")).not.toBeInTheDocument();
-  });
-  it("distinguishes Niko and system message senders", async () => {
-    await setup();
-    expect(document.querySelector(".sender.niko")).toHaveTextContent("NIKO");
-    expect(document.querySelector(".sender.system")).toBeInTheDocument();
   });
 });

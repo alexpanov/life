@@ -1,3 +1,5 @@
+import { finishNicoJob, queueReflection, evolveNicoTraits } from "./nico-jobs";
+export { nextNicoJob } from "./nico-jobs";
 export { serializeGame } from "./codec";
 import * as O from "../../foundation/src/option";
 /** Stable public domain boundary. Interfaces submit commands; they never calculate rewards or mutate saves. */
@@ -25,6 +27,12 @@ export type * from "./types";
 export { NIKO_PROMPTS } from "./sidekick";
 export type { SidekickContext } from "./sidekick";
 export type Command =
+  | { type: "meet-nico"; text: string }
+  | { type: "name-hero"; name: string }
+  | { type: "reflect-quest"; questId: string; text: string }
+  | { type: "quest-progress"; questId: string; text: string }
+  | { type: "set-nico-trait"; text: string }
+  | { type: "evolve-nico" }
   | { type: "check-in"; mood: Mood }
   | { type: "accept-offer"; offer: QuestOffer }
   | { type: "dismiss-offer"; offer: QuestOffer }
@@ -143,6 +151,8 @@ export function transition(
     );
   const review = (q: Quest, outcome: "completed" | "blocked" | "set-aside") => {
     learnFromOutcome(p, q, outcome, now);
+    const latest = p.sidekick.reviews.at(-1);
+    if (latest) p.sidekick = queueReflection(p.sidekick, q.id, latest.key, now);
     p.operation = { phase: "review", candidateQuestId: "", lastQuestId: q.id };
     result.destination = O.some("home");
   };
@@ -165,6 +175,85 @@ export function transition(
   if (p.settings.driving && command.type !== "settings")
     throw Error("Park before using game controls.");
   switch (command.type) {
+    case "meet-nico":
+      if (!p.sidekick.introduced) {
+        if (command.text.trim()) addSidekickSnippet(p, command.text, now);
+        p.sidekick.introduced = true;
+        p.sidekick = finishNicoJob(p.sidekick, "meet-hero", now);
+      }
+      break;
+    case "name-hero": {
+      const name = command.name.trim().slice(0, 60);
+      invariant(name, "What should Nico call you?");
+      p.name = name;
+      p.sidekick.heroName = O.some(name);
+      p.sidekick = finishNicoJob(p.sidekick, "learn-name", now);
+      break;
+    }
+    case "reflect-quest": {
+      quest(command.questId);
+      const pending = p.sidekick.jobs.some(
+        (j) =>
+          j.kind === "reflect-outcome" &&
+          j.questId === command.questId &&
+          j.status === "pending",
+      );
+      if (!pending) break;
+      const note = command.text.trim().slice(0, 600);
+      invariant(note, "What helped, or what could we change next time?");
+      addSidekickSnippet(p, note, now);
+      const last = [...p.sidekick.reviews]
+        .reverse()
+        .find((r) => r.questId === command.questId);
+      if (last) last.adjustment = note;
+      p.sidekick = finishNicoJob(
+        p.sidekick,
+        "reflect-outcome",
+        now,
+        command.questId,
+      );
+      p.sidekick = evolveNicoTraits(p, now);
+      break;
+    }
+    case "quest-progress": {
+      const q = quest(command.questId);
+      invariant(q.status === "pending", "This quest is already closed.");
+      const note = command.text.trim().slice(0, 600);
+      invariant(note, "Write one thing you did.");
+      if (!p.events.some((e) => e.id === context.eventId))
+        p.events.unshift({
+          id: context.eventId,
+          type: "quest-progress",
+          text: note,
+          at: now,
+          questId: q.id,
+        });
+      p.events = p.events.slice(0, 300);
+      break;
+    }
+    case "set-nico-trait": {
+      const text = command.text.trim().slice(0, 200);
+      invariant(text, "Describe how you want Nico to help.");
+      if (
+        p.sidekick.traits.some((t) => t.source === "player" && t.text === text)
+      )
+        break;
+      invariant(
+        p.sidekick.traits.length < 30,
+        "Nico has enough traits for now.",
+      );
+      p.sidekick.traits.push({
+        id: `trait_${context.eventId}`,
+        text,
+        source: "player",
+        acquiredAt: now,
+        evidence: [],
+      });
+      break;
+    }
+    case "evolve-nico":
+      p.sidekick = evolveNicoTraits(p, now);
+      break;
     case "check-in":
       result.offer = r.checkIn(p, command.mood, now, (q, m) =>
         learnedFit(p, q, m),
@@ -345,11 +434,11 @@ export function transition(
       break;
     case "remember":
       addSidekickSnippet(p, command.text, now);
-      result.message = "Niko will remember.";
+      result.message = "Nico will remember.";
       break;
     case "reset-memory":
       resetSidekick(p);
-      result.message = "Niko’s memory reset. Your progress is safe.";
+      result.message = "Nico’s memory reset. Your progress is safe.";
       break;
     case "settings":
       p.settings = {

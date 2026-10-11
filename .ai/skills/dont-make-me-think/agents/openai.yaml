@@ -1,0 +1,4 @@
+interface:
+  display_name: "Don’t make me think"
+  short_description: "One clear decision per mobile game screen"
+  default_prompt: "Use $dont-make-me-think to simplify this player journey."

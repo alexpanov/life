@@ -27,16 +27,49 @@ const categories: readonly string[] = [
 export const NIKO_PROMPTS = Object.freeze({
   version: 1,
   voice:
-    "You are Niko, a steady, practical companion. Be warm, direct, and brief. Offer one useful next action. The player decides.",
+    "You are Nico Lopez, a steady, practical companion. Be warm, direct, and brief. Offer one useful next action. The player decides.",
   review:
     "Review observed outcomes and explicit feedback. Separate facts from tentative patterns. Do not infer moral character, diagnoses, or hidden motives. Find one adjustment.",
   choose:
     "Observe mood, realm, active quest and outcomes. Offer one feasible action. Ask before replacing the active mission. Never award completion without the player’s report.",
 });
-export function createSidekick(): Sidekick {
+export function createSidekick(id = "nico", now = 0): Sidekick {
   return {
     version: 1,
-    name: "Niko",
+    name: "Nico",
+    lastName: "Lopez",
+    id,
+    introduced: false,
+    heroName: O.none(),
+    jobs: [
+      {
+        id: `${id}:meet`,
+        kind: "meet-hero",
+        questId: "",
+        status: "pending",
+        priority: 100,
+        createdAt: now,
+        completedAt: O.none(),
+      },
+      {
+        id: `${id}:name`,
+        kind: "learn-name",
+        questId: "",
+        status: "pending",
+        priority: 95,
+        createdAt: now,
+        completedAt: O.none(),
+      },
+    ],
+    traits: [
+      {
+        id: "steady",
+        text: "Warm, practical, and brief. The hero decides.",
+        source: "system",
+        acquiredAt: now,
+        evidence: [],
+      },
+    ],
     learning: { preferences: {}, feedback: [] },
     reviews: [],
     snippets: [],
@@ -47,8 +80,9 @@ export function normalizeSidekick(
   input: unknown,
   legacy: unknown = {},
   now = Number.MAX_SAFE_INTEGER,
+  id = "nico",
 ): Sidekick {
-  const result = createSidekick();
+  const result = createSidekick(id, now);
   let parsed = sidekickSchema.safeParse(input);
   if (!parsed.success) parsed = sidekickSchema.safeParse({ learning: legacy });
   if (!parsed.success) return result;
@@ -71,27 +105,41 @@ export function normalizeSidekick(
   result.learning.feedback = (source.learning?.feedback || [])
     .slice(-200)
     .map((f) => ({ ...f, questId: text(f.questId, 100), at: safeAt(f.at) }));
-  result.reviews = source.reviews
-    .slice(-100)
-    .map((r) => ({
-      ...r,
-      key: text(r.key, 200),
-      questId: text(r.questId, 100),
-      title: text(r.title, 160),
-      realmId: text(r.realmId, 100),
-      reason: text(r.reason),
-      adjustment: text(r.adjustment),
-      at: safeAt(r.at),
-      source: "player-action",
+  result.reviews = source.reviews.slice(-100).map((r) => ({
+    ...r,
+    key: text(r.key, 200),
+    questId: text(r.questId, 100),
+    title: text(r.title, 160),
+    realmId: text(r.realmId, 100),
+    reason: text(r.reason),
+    adjustment: text(r.adjustment),
+    at: safeAt(r.at),
+    source: "player-action",
+  }));
+  result.snippets = source.snippets.slice(-30).map((n) => ({
+    ...n,
+    id: text(n.id, 100),
+    text: text(n.text, 600),
+    at: safeAt(n.at),
+    source: "player",
+  }));
+  result.id = id;
+  result.introduced = source.introduced;
+  result.heroName = source.heroName;
+  if (source.jobs)
+    result.jobs = source.jobs.map((j) => ({
+      ...j,
+      id: j.id.startsWith(`${source.id}:`)
+        ? `${id}:${j.id.slice(source.id.length + 1)}`
+        : `${id}:${j.id}`,
+      priority: j.kind === "learn-name" ? 95 : j.priority,
+      createdAt: safeAt(j.createdAt),
+      completedAt: O.map(j.completedAt, safeAt),
     }));
-  result.snippets = source.snippets
-    .slice(-30)
-    .map((n) => ({
-      ...n,
-      id: text(n.id, 100),
-      text: text(n.text, 600),
-      at: safeAt(n.at),
-      source: "player",
+  if (source.traits)
+    result.traits = source.traits.map((t) => ({
+      ...t,
+      acquiredAt: safeAt(t.acquiredAt),
     }));
   result.revision = source.revision;
   return result;
@@ -192,7 +240,7 @@ export function addSidekickSnippet(
   now: number,
 ): void {
   const value = text(note, 600);
-  if (!value) throw Error("Write one thing Niko should remember.");
+  if (!value) throw Error("Write one thing Nico should remember.");
   player.sidekick.snippets.push({
     id: `note_${now}_${player.sidekick.revision}`,
     text: value,
@@ -203,7 +251,7 @@ export function addSidekickSnippet(
   player.sidekick.revision++;
 }
 export function resetSidekick(player: Player): void {
-  player.sidekick = createSidekick();
+  player.sidekick = createSidekick(player.sidekick.id);
 }
 export function sidekickContext(
   player: Player,
@@ -211,11 +259,16 @@ export function sidekickContext(
 ) {
   return {
     promptVersion: NIKO_PROMPTS.version,
-    identity: { name: "Niko", voice: NIKO_PROMPTS.voice },
+    identity: { name: "Nico", voice: NIKO_PROMPTS.voice },
     instructions: { review: NIKO_PROMPTS.review, choose: NIKO_PROMPTS.choose },
     playerData: {
       mood: O.map(player.checkin, (c) => c.mood),
       realmId: player.activeRealmId,
+      heroName: player.sidekick.heroName,
+      traits: player.sidekick.traits.map((t) => ({
+        text: t.text,
+        source: t.source,
+      })),
       activeQuestId: player.focusQuestId,
       quest: O.map(quest, (q) => ({
         id: q.id,
@@ -257,5 +310,5 @@ export function nikoGuidance(
   }
   return model.reviews.length
     ? "Ready when you are. Let’s choose one useful move."
-    : "I’m Niko. Let’s find your next useful move.";
+    : "I’m Nico. Let’s find your next useful move.";
 }

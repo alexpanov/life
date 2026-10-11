@@ -705,3 +705,141 @@ footer {
     font-size: 8px;
   }
 }
+
+/* Calm mobile flow: the current task owns the screen. */
+:root {
+  font-family: var(--font-sans);
+  font-size: 16px;
+}
+.app-shell {
+  max-width: 760px;
+}
+.topbar {
+  padding: 16px 22px;
+}
+.brand {
+  font-size: 26px;
+  letter-spacing: -1px;
+  text-decoration: none;
+  min-height: 44px;
+}
+.explore-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  color: #a6b6bf;
+  text-decoration: none;
+}
+.layout {
+  max-width: 680px;
+  padding: 24px 22px 64px;
+}
+.focus-screen {
+  padding: 28px 0;
+}
+.focus-screen h1 {
+  font-size: clamp(30px, 6vw, 44px);
+  font-weight: 600;
+  letter-spacing: -1px;
+  line-height: 1.18;
+  margin: 20px 0;
+  overflow-wrap: anywhere;
+}
+.focus-screen .nico-heading {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  color: #f1dcc0;
+}
+.nico-copy {
+  font-family: Georgia, serif;
+  font-size: 21px;
+  color: #f1dcc0;
+}
+.focus-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+.focus-actions > * {
+  width: 100%;
+}
+.app-shell button,
+.app-shell [role="button"],
+.app-shell select {
+  font-size: 16px;
+  min-height: 44px;
+}
+.app-shell small,
+.app-shell .sender {
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+.app-shell .field,
+.app-shell .checkline,
+.app-shell h3,
+.app-shell .panel-head h2,
+.app-shell .page-heading p {
+  font-size: 16px;
+}
+.sender.niko {
+  margin-bottom: 22px;
+}
+.menu-links {
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0 28px;
+}
+.menu-links > a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 0;
+  color: #e6edf1;
+  font-size: 18px;
+  text-decoration: none;
+  border-bottom: 1px solid #263b48;
+  min-height: 64px;
+}
+.menu-links small {
+  margin-top: 8px;
+}
+.quiet-details {
+  border-top: 1px solid #263b48;
+  margin-top: 30px;
+  padding: 14px 0;
+}
+.quiet-details summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: #a6b6bf;
+}
+.quiet-details summary::after {
+  content: "+";
+  margin-left: auto;
+}
+.quiet-details[open] summary::after {
+  content: "−";
+}
+.history-entry {
+  border-left: 2px solid #39596b;
+  padding: 0 0 14px 16px;
+}
+.history-entry p {
+  margin-bottom: 4px;
+}
+.history-entry time {
+  color: #91a5af;
+  font-size: 13px;
+}
+.back-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: #a6b6bf;
+  margin-bottom: 20px;
+}

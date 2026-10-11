@@ -53,7 +53,7 @@ export function Website({
         </h1>
         <p>
           Places to discover. Quests to finish.
-          <br />A sidekick named Niko to help you find your next move.
+          <br />A sidekick named Nico to help you find your next move.
         </p>
         <button
           className="play-live"

@@ -133,8 +133,9 @@ export function createRules(env: RuleEnvironment) {
     const home = makeRealm("Home", "", true, now);
     campaign.realmId = home.id;
     home.lastCampaignId = campaign.id;
+    const heroId = uid("player");
     const player: Player = {
-      id: uid("player"),
+      id: heroId,
       name: clean(name, 60) || "Player 1",
       createdAt: now,
       campaigns: [campaign],
@@ -147,7 +148,7 @@ export function createRules(env: RuleEnvironment) {
       checkin: O.none(),
       suggestions: { lastOfferedAt: 0, dismissed: [] },
       operation: { phase: "choose", candidateQuestId: "", lastQuestId: "" },
-      sidekick: createSidekick(),
+      sidekick: createSidekick(`nico_${heroId}`, now),
       skills: [
         newSkill("Taekwondo", 30, now),
         newSkill("Strength", 21, now),
@@ -877,17 +878,15 @@ export function createRules(env: RuleEnvironment) {
         ? p.modules.slice(0, 50).map((m) => validateExtension(m))
         : [];
       const events = Array.isArray(p.events)
-        ? p.events
-            .slice(0, 300)
-            .map((e) => ({
-              id: clean(e.id, 100) || uid("event"),
-              type: clean(e.type, 60),
-              text: clean(e.text, 500),
-              at: timestamp(e.at),
-              ...(e.questId ? { questId: clean(e.questId, 100) } : {}),
-              ...(e.skillId ? { skillId: clean(e.skillId, 100) } : {}),
-              ...(e.sessionId ? { sessionId: clean(e.sessionId, 100) } : {}),
-            }))
+        ? p.events.slice(0, 300).map((e) => ({
+            id: clean(e.id, 100) || uid("event"),
+            type: clean(e.type, 60),
+            text: clean(e.text, 600),
+            at: timestamp(e.at),
+            ...(e.questId ? { questId: clean(e.questId, 100) } : {}),
+            ...(e.skillId ? { skillId: clean(e.skillId, 100) } : {}),
+            ...(e.sessionId ? { sessionId: clean(e.sessionId, 100) } : {}),
+          }))
         : [];
       return {
         id,
@@ -928,7 +927,12 @@ export function createRules(env: RuleEnvironment) {
           candidateQuestId: reference(p.operation?.candidateQuestId),
           lastQuestId: reference(p.operation?.lastQuestId),
         },
-        sidekick: normalizeSidekick(p.sidekick, p.learning, now),
+        sidekick: normalizeSidekick(
+          p.sidekick,
+          p.learning,
+          now,
+          `nico_${id}`,
+        ),
         skills,
         bonusLoot: Array.isArray(p.bonusLoot)
           ? p.bonusLoot.slice(0, 200).map((x) => clean(x, 160))

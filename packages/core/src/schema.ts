@@ -187,6 +187,43 @@ export const saveSchema = z.object({
   players: z.array(player).min(1).max(25),
 });
 export const sidekickSchema = z.object({
+  id: z.string().max(200).default(""),
+  introduced: z.boolean().default(false),
+  heroName: z
+    .discriminatedUnion("_tag", [
+      z.object({ _tag: z.literal("None") }),
+      z.object({ _tag: z.literal("Some"), value: z.string().max(60) }),
+    ])
+    .default({ _tag: "None" }),
+  jobs: z
+    .array(
+      z.object({
+        id: z.string().max(250),
+        kind: z.enum(["meet-hero", "learn-name", "reflect-outcome"]),
+        questId: z.string().max(100),
+        status: z.enum(["pending", "done"]),
+        priority: z.number().finite(),
+        createdAt: timestamp,
+        completedAt: z.discriminatedUnion("_tag", [
+          z.object({ _tag: z.literal("None") }),
+          z.object({ _tag: z.literal("Some"), value: timestamp }),
+        ]),
+      }),
+    )
+    .max(100)
+    .optional(),
+  traits: z
+    .array(
+      z.object({
+        id: z.string().max(100),
+        text: z.string().max(200),
+        source: z.enum(["system", "player", "learned"]),
+        acquiredAt: timestamp,
+        evidence: z.array(z.string().max(250)).max(100),
+      }),
+    )
+    .max(30)
+    .optional(),
   learning: z
     .object({
       preferences: z.record(z.string(), z.number()).default({}),

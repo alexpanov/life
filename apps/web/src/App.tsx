@@ -5,18 +5,8 @@ import {
   useSyncExternalStore,
   type FormEvent,
 } from "react";
-import { NavLink, Route, Routes, useNavigate } from "react-router";
-import {
-  Compass,
-  UserRound,
-  Radio,
-  ArrowRight,
-  Plus,
-  MapPin,
-  Shield,
-  Download,
-  Pause,
-} from "lucide-react";
+import { Link, Route, Routes, useNavigate } from "react-router";
+import { Compass, Radio, ArrowRight, Shield, Download } from "lucide-react";
 import {
   serializeGame,
   selectGame,
@@ -28,10 +18,12 @@ import {
   type QuestCategory,
 } from "../../../packages/core/src/index";
 import type { GameController } from "../../../packages/application/src/controller";
-import { Sender, Panel, Field, Area } from "./components/presentation";
+import { Sender, Field, Area } from "./components/presentation";
 import { download } from "./download";
 import type { Modal } from "./ui-types";
 import { RealmsPage } from "./pages/RealmsPage";
+import { HomePage } from "./pages/HomePage";
+import { QuestPage } from "./pages/QuestPage";
 import { BoardPage } from "./pages/BoardPage";
 import { SkillsPage } from "./pages/SkillsPage";
 import { InventoryPage } from "./pages/InventoryPage";
@@ -95,7 +87,7 @@ export function App({ controller }: { controller: GameController }) {
         <p>Opening your world…</p>
       </main>
     );
-  const { player, realm, campaign } = view,
+  const { player } = view,
     game = store.game.value;
   const mission = O.match(
       view.mission,
@@ -106,17 +98,7 @@ export function App({ controller }: { controller: GameController }) {
       view.candidate,
       () => null,
       (q) => q,
-    ),
-    lastQuest = O.match(
-      view.lastQuest,
-      () => null,
-      (q) => q,
     );
-  const checkin = O.match(
-    player.checkin,
-    () => null,
-    (c) => c,
-  );
   const selectedQuest = player.campaigns
       .flatMap((c) => c.quests)
       .find((q) => q.id === selectedId),
@@ -133,7 +115,14 @@ export function App({ controller }: { controller: GameController }) {
           (offer) => offer,
         ),
       );
-      if (O.isSome(result.destination))
+      const started =
+        ["choose-mission", "propose-mission", "accept-offer"].includes(
+          command.type,
+        ) &&
+        result.state.players.find((p) => p.id === result.state.activePlayerId)
+          ?.operation.phase === "execute";
+      if (started) navigate("/");
+      else if (O.isSome(result.destination))
         navigate(
           result.destination.value === "home"
             ? "/"
@@ -250,133 +239,81 @@ export function App({ controller }: { controller: GameController }) {
           .find((q) => q.id === offer.questId)
       : offer?.quest;
   const home = (
+    <HomePage
+      view={view}
+      game={game}
+      now={tick}
+      offer={offer}
+      offeredQuest={offeredQuest}
+      send={send}
+      open={open}
+    />
+  );
+  const menu = (
     <>
       <div className="page-heading">
-        <Sender />
-        <small>
-          {realm.name} / {realm.home ? "HOME REALM" : "FIELD OPERATIONS"}
-        </small>
-        <h1>
-          {player.operation.phase === "review"
-            ? "Take a breath."
-            : "How are you feeling?"}
-        </h1>
-        <p>
-          {player.operation.phase === "review"
-            ? "What matters most now?"
-            : "Let’s pick one quest for you."}
-        </p>
+        <h1>Explore.</h1>
       </div>
-      {player.operation.phase === "review" ? (
-        <Panel>
-          <small>
-            {lastQuest?.status === "done"
-              ? "MISSION COMPLETE"
-              : lastQuest?.status === "impossible"
-                ? "DEAD END CLOSED"
-                : "QUEST SET ASIDE"}
-          </small>
-          <h2 className="text-2xl my-3">
-            {lastQuest?.title || "Report received."}
-          </h2>
-          <div className="actions">
-            {mission && (
-              <Button
-                onClick={() =>
-                  send({ type: "choose-mission", questId: mission.id })
-                }
-              >
-                Resume current mission
-              </Button>
-            )}
-            <Button onClick={() => send({ type: "finish-review" })}>
-              Pick next quest
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                send({ type: "finish-review" });
-                navigate("/realms");
-              }}
-            >
-              Stand down
-            </Button>
-          </div>
-        </Panel>
-      ) : (
-        <>
-          <div className="mood-grid">
-            {(
-              [
-                ["ready", "Ready", "A mission to get done."],
-                ["curious", "Curious", "Something worth noticing."],
-                ["quiet", "Quiet", "Room to breathe."],
-                ["tired", "Low energy", "Keep it small."],
-              ] as const
-            ).map(([mood, label, copy]) => (
-              <button
-                key={mood}
-                className={`mood ${checkin?.mood === mood ? "chosen" : ""}`}
-                aria-pressed={checkin?.mood === mood}
-                onClick={() => send({ type: "check-in", mood })}
-              >
-                <Compass size={20} />
-                <strong>{label}</strong>
-                <span>{copy}</span>
-              </button>
-            ))}
-          </div>
-          <Panel>
-            {offer && offeredQuest ? (
-              <>
-                <small>
-                  {offer.kind === "proposal"
-                    ? "OPTIONAL LEAD"
-                    : "ONE NEXT MOVE"}
-                </small>
-                <h2 className="text-2xl my-3">{offeredQuest.title}</h2>
-                <p>{offeredQuest.nextMove}</p>
-                <div className="actions">
-                  <Button onClick={() => send({ type: "accept-offer", offer })}>
-                    Take quest
-                    <ArrowRight size={16} />
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => send({ type: "dismiss-offer", offer })}
-                  >
-                    Not now
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="text-2xl">
-                  {view.quests.some((q) => q.status === "pending") && !checkin
-                    ? "One move at a time."
-                    : "Pray for a quest."}
-                </h2>
-                <p>
-                  Choose how you feel, revisit a realm, or add a quest of your
-                  own.
-                </p>
-                <div className="actions">
-                  <Button
-                    variant="secondary"
-                    onClick={() => navigate("/realms")}
-                  >
-                    Open realms
-                  </Button>
-                  <Button variant="ghost" onClick={() => open("quest")}>
-                    <Plus size={14} />
-                    Add quest
-                  </Button>
-                </div>
-              </>
-            )}
-          </Panel>
-        </>
-      )}
+      <nav className="menu-links" aria-label="Your world">
+        {[
+          ["/board", "Quests"],
+          ["/realms", "Realms"],
+          ["/skills", "Skills"],
+          ["/inventory", "Inventory"],
+          ["/nico", "Nico"],
+          ["/workshop", "Settings & saves"],
+        ].map(([path, label]) => (
+          <Link key={path} to={path!}>
+            {label}
+            <ArrowRight size={18} />
+          </Link>
+        ))}
+      </nav>
+      <Button
+        variant="ghost"
+        onClick={() => send({ type: "settings", settings: { driving: true } })}
+      >
+        <Shield size={18} />
+        Driving mode
+      </Button>
+    </>
+  );
+  const nico = (
+    <>
+      <div className="page-heading">
+        <h1>Nico Lopez.</h1>
+      </div>
+      <div className="niko-quote">
+        <Sender source="niko" />
+        <p>{view.guidance}</p>
+      </div>
+      <Button onClick={() => open("memory")}>Tell Nico something</Button>
+      <details className="quiet-details">
+        <summary>What Nico remembers</summary>
+        {player.sidekick.snippets.map((note) => (
+          <p key={note.id}>{note.text}</p>
+        ))}
+        <p>{player.sidekick.reviews.length} recent quest outcomes.</p>
+      </details>
+      <details className="quiet-details">
+        <summary>Nico’s personality</summary>
+        {player.sidekick.traits.map((trait) => (
+          <p key={trait.id}>{trait.text}</p>
+        ))}
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            const text = String(
+              new FormData(event.currentTarget).get("trait") || "",
+            ).trim();
+            if (text && send({ type: "set-nico-trait", text }))
+              event.currentTarget.reset();
+          }}
+        >
+          <Field name="trait" label="How should Nico support you?" required />
+          <Button type="submit">Tell Nico</Button>
+        </form>
+      </details>
     </>
   );
   const realms = <RealmsPage view={view} send={send} open={open} />;
@@ -396,14 +333,16 @@ export function App({ controller }: { controller: GameController }) {
         <small>YOUR WORLD / YOUR RULES</small>
         <h1>Workshop.</h1>
       </div>
-      <div className="grid md:grid-cols-2 gap-4">
-        <Panel title="Niko">
+      <div className="settings-list">
+        <details className="quiet-details">
+          <summary>Nico</summary>
           <p>Resettable memory. Your quests and rewards stay intact.</p>
           <Button variant="secondary" onClick={() => open("memory")}>
             Open memory
           </Button>
-        </Panel>
-        <Panel title="Save and restore">
+        </details>
+        <details className="quiet-details">
+          <summary>Save and restore</summary>
           <p>
             Progress stays in this browser. Export before switching devices.
           </p>
@@ -418,17 +357,19 @@ export function App({ controller }: { controller: GameController }) {
               Import JSON
             </Button>
           </div>
-        </Panel>
-        <Panel title="ChatGPT bridge">
+        </details>
+        <details className="quiet-details">
+          <summary>ChatGPT bridge</summary>
           <p>
-            Copy your current state and Niko’s context. No live model is
+            Copy your current state and Nico’s context. No live model is
             connected.
           </p>
           <Button variant="secondary" onClick={() => open("handoff")}>
             Open handoff
           </Button>
-        </Panel>
-        <Panel title="Share a quest">
+        </details>
+        <details className="quiet-details">
+          <summary>Share a quest</summary>
           <p>
             Templates have fresh progress. Share the clean starter for a new
             game.
@@ -455,8 +396,9 @@ export function App({ controller }: { controller: GameController }) {
               </a>
             </Button>
           </div>
-        </Panel>
-        <Panel title="Dispatch">
+        </details>
+        <details className="quiet-details">
+          <summary>Dispatch</summary>
           <p>Optional fictional transmissions. You decide when to answer.</p>
           <Button
             variant="secondary"
@@ -491,13 +433,14 @@ export function App({ controller }: { controller: GameController }) {
             />
             Read answered transmissions aloud
           </label>
-        </Panel>
-        <Panel title="Players">
+        </details>
+        <details className="quiet-details">
+          <summary>Players</summary>
           <p>Independent profiles on this device.</p>
           <Button variant="secondary" onClick={() => open("profiles")}>
             Manage players
           </Button>
-        </Panel>
+        </details>
       </div>
     </>
   );
@@ -505,48 +448,16 @@ export function App({ controller }: { controller: GameController }) {
     <div className="app-shell">
       <div inert={player.settings.driving}>
         <header className="topbar">
-          <button className="brand" onClick={() => navigate("/")}>
-            <Compass size={30} />
-            <span>
-              QUEST<span className="text-cyan-200">/</span>OS
-              <small>ORBITAL COMMAND / FIELD OPERATIONS</small>
-            </span>
-          </button>
-          <Button variant="ghost" onClick={() => open("profiles")}>
-            <UserRound size={15} />
-            {player.name}
-          </Button>
+          <Link className="brand" to="/">
+            life
+          </Link>
+          <nav aria-label="Main navigation">
+            <Link className="explore-link" to="/explore">
+              Explore <Compass size={18} />
+            </Link>
+          </nav>
         </header>
-        <nav className="navigation" aria-label="Main navigation">
-          {[
-            ["/", "Home"],
-            ["/realms", "Realms"],
-            ["/board", "Quests"],
-            ["/skills", "Skills"],
-            ["/inventory", "Inventory"],
-            ["/workshop", "Workshop"],
-          ].map(([path, label]) => (
-            <NavLink key={path} to={path!} end={path === "/"}>
-              {label}
-            </NavLink>
-          ))}
-        </nav>
         <main className="layout">
-          <div className="utility">
-            <span>
-              <MapPin size={13} />
-              {realm.name} / {campaign.name}
-            </span>
-            <Button
-              variant="ghost"
-              onClick={() =>
-                send({ type: "settings", settings: { driving: true } })
-              }
-            >
-              <Shield size={14} />
-              Driving mode
-            </Button>
-          </div>
           {store.storage !== "saved" && (
             <div className="storage-warning" role="status">
               <Sender />
@@ -581,51 +492,19 @@ export function App({ controller }: { controller: GameController }) {
               )}
             </div>
           )}
-          <aside className="niko-panel">
-            <UserRound className="niko-avatar" size={30} />
-            <div>
-              <Sender source="niko" />
-              <p>{view.guidance}</p>
-            </div>
-            <Button variant="ghost" onClick={() => open("memory")}>
-              Memory
-            </Button>
-          </aside>
-          {mission && (
-            <section className="mission-strip">
-              <div>
-                <small>YOUR ONE MISSION</small>
-                <h3>{mission.title}</h3>
-              </div>
-              <div className="actions">
-                <Button
-                  onClick={() =>
-                    send({ type: "choose-mission", questId: mission.id })
-                  }
-                >
-                  Resume
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => send({ type: "set-aside" })}
-                >
-                  <Pause size={13} />
-                  Set aside
-                </Button>
-              </div>
-            </section>
-          )}
-          {(error || store.notice) && (
-            <div
-              className={`notice ${error ? "error" : ""}`}
-              role={error ? "alert" : "status"}
-            >
-              <Sender />
-              <p>{error || store.notice}</p>
+          {error && (
+            <div className="notice error" role="alert">
+              <p>{error}</p>
             </div>
           )}
           <Routes>
             <Route path="/" element={home} />
+            <Route path="/explore" element={menu} />
+            <Route path="/nico" element={nico} />
+            <Route
+              path="/quest/:questId"
+              element={<QuestPage view={view} send={send} open={open} />}
+            />
             <Route path="/realms" element={realms} />
             <Route path="/board" element={board} />
             <Route path="/skills" element={skills} />
@@ -633,15 +512,6 @@ export function App({ controller }: { controller: GameController }) {
             <Route path="/workshop" element={workshop} />
             <Route path="*" element={home} />
           </Routes>
-          <footer>
-            <span>
-              QUESTOS v0.4 /{" "}
-              {store.storage === "saved" ? "LOCAL SAVE" : "SESSION"}
-            </span>
-            <Button variant="ghost" onClick={() => open("about")}>
-              Field manual
-            </Button>
-          </footer>
         </main>
       </div>
       {player.settings.driving && (
@@ -692,11 +562,11 @@ export function App({ controller }: { controller: GameController }) {
         }}
         title={
           modal === "memory"
-            ? "Niko / memory"
+            ? "Nico / memory"
             : modal === "quest"
               ? "Quest details"
               : modal === "reset"
-                ? "Reset Niko’s memory?"
+                ? "Reset Nico’s memory?"
                 : modal === "call"
                   ? "Transmission"
                   : modal === "handoff"
@@ -1009,7 +879,7 @@ export function App({ controller }: { controller: GameController }) {
                 later. Impossible quests close without penalty.
               </p>
               <p>
-                Niko learns locally from your choices. You can reset his memory.
+                Nico learns locally from your choices. You can reset his memory.
                 There is no connected LLM, background location tracking, or
                 shared cloud save.
               </p>

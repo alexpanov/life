@@ -5,7 +5,8 @@ Read [.ai/CONTRACT.md](.ai/CONTRACT.md) before changing this repository. It is t
 Load the relevant task skill:
 
 - Domain, effects, persistence: [.ai/skills/quest-functional-core/SKILL.md](.ai/skills/quest-functional-core/SKILL.md)
-- Gameplay, Niko, interface: [.ai/skills/quest-product/SKILL.md](.ai/skills/quest-product/SKILL.md)
+- Mobile clarity and progressive disclosure: [.ai/skills/dont-make-me-think/SKILL.md](.ai/skills/dont-make-me-think/SKILL.md)
+- Gameplay, Nico, interface: [.ai/skills/quest-product/SKILL.md](.ai/skills/quest-product/SKILL.md)
 - Tests, CI, deployment: [.ai/skills/quest-release/SKILL.md](.ai/skills/quest-release/SKILL.md)
 - Parallel work: [.ai/skills/quest-legion/SKILL.md](.ai/skills/quest-legion/SKILL.md)
 

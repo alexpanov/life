@@ -1,5 +1,5 @@
-const CACHE='life-8dc642c6dc74-'+self.registration.scope;
-const ASSETS=["/","/starter/","/assets/index-DsJ4EHLm.css","/assets/index-UCxL5K-h.js"];
+const CACHE='life-8da89bb1442f-'+self.registration.scope;
+const ASSETS=["/","/starter/","/assets/index-BgVPCr9e.css","/assets/index-CfH8-ney.js"];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if((key.startsWith('questos')||(key.startsWith('life-')&&key.endsWith(self.registration.scope)))&&key!==CACHE)await caches.delete(key);await self.clients.claim();})()));
 self.addEventListener('fetch',event=>{const request=event.request,url=new URL(request.url);if(request.method!=='GET'||url.origin!==self.location.origin||url.pathname.endsWith('build-info.json'))return;

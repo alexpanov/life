@@ -1,0 +1,122 @@
+import { Link, useParams } from "react-router";
+import type { FormEvent } from "react";
+import type { GameView, PageActions } from "../ui-types";
+import { Area } from "../components/presentation";
+import { Button } from "../components/ui/button";
+export function QuestPage({
+  view,
+  send,
+  open,
+}: PageActions & { view: GameView }) {
+  const { questId } = useParams();
+  const quest = view.player.campaigns
+    .flatMap((c) => c.quests)
+    .find((q) => q.id === questId);
+  if (!quest)
+    return (
+      <section className="focus-screen">
+        <h1>Quest not found.</h1>
+        <Link to="/board">Back to quests</Link>
+      </section>
+    );
+  const events = view.player.events
+    .filter((event) => event.questId === quest.id)
+    .sort((a, b) => b.at - a.at);
+  function progress(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const text = String(
+      new FormData(event.currentTarget).get("note") || "",
+    ).trim();
+    if (
+      text &&
+      quest &&
+      send({ type: "quest-progress", questId: quest.id, text })
+    )
+      event.currentTarget.reset();
+  }
+  return (
+    <section className="focus-screen">
+      <Link className="back-link" to="/">
+        Back home
+      </Link>
+      <small>{quest.status === "done" ? "Completed" : "Your quest"}</small>
+      <h1>{quest.title}</h1>
+      <p>{quest.nextMove || quest.detail}</p>
+      {quest.status === "pending" ? (
+        <form onSubmit={progress}>
+          <Area name="note" label="What progress did you make?" />
+          <div className="focus-actions">
+            <Button type="submit">Save progress</Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() =>
+                send({ type: "set-status", questId: quest.id, status: "done" })
+              }
+            >
+              Complete quest
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <p>{quest.status === "done" ? "You did it." : quest.blockedReason}</p>
+      )}
+      <details className="quiet-details" open={events.length > 0}>
+        <summary>Quest history</summary>
+        {events.length ? (
+          events.map((event) => (
+            <article className="history-entry" key={event.id}>
+              <p>{event.text}</p>
+              <time>{new Date(event.at).toLocaleDateString()}</time>
+            </article>
+          ))
+        ) : (
+          <p>Your progress will appear here.</p>
+        )}
+      </details>
+      <details className="quiet-details">
+        <summary>Quest options</summary>
+        <div className="actions">
+          {quest.status === "pending" ? (
+            <>
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  send({ type: "propose-mission", questId: quest.id })
+                }
+              >
+                Make this my priority
+              </Button>
+              <Button variant="ghost" onClick={() => open("blocked", quest.id)}>
+                Cannot complete
+              </Button>
+              {view.player.focusQuestId === quest.id && (
+                <Button
+                  variant="ghost"
+                  onClick={() => send({ type: "set-aside" })}
+                >
+                  Set aside
+                </Button>
+              )}
+            </>
+          ) : (
+            <Button
+              onClick={() =>
+                send({
+                  type: "set-status",
+                  questId: quest.id,
+                  status: "pending",
+                })
+              }
+            >
+              Reopen quest
+            </Button>
+          )}
+          <Button variant="ghost" onClick={() => open("quest", quest.id)}>
+            Edit details
+          </Button>
+        </div>
+      </details>
+    </section>
+  );
+}

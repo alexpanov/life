@@ -21,7 +21,8 @@ export function RealmsPage({
       </div>
       <div className="grid md:grid-cols-2 gap-4">
         {player.realms.map((r) => (
-          <Panel key={r.id}>
+          <details key={r.id} className="quiet-details">
+            <summary>{r.name}</summary>
             <small>
               {r.id === realm.id ? "CURRENT" : r.home ? "HOME" : "REALM"}
             </small>
@@ -38,7 +39,7 @@ export function RealmsPage({
                 Edit
               </Button>
             </div>
-          </Panel>
+          </details>
         ))}
       </div>
       <Panel

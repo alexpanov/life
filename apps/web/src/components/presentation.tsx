@@ -16,7 +16,11 @@ export function Sender({
   return (
     <span className={`sender ${source}`}>
       <Icon size={14} />
-      {name ? `${name} / GAME DISPATCH` : senderLabels[source]}
+      {name
+        ? `${name} / GAME DISPATCH`
+        : source === "niko"
+          ? "Nico Lopez · Your sidekick"
+          : senderLabels[source]}
     </span>
   );
 }

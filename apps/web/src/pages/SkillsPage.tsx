@@ -1,5 +1,4 @@
 import { Activity } from "lucide-react";
-import { Panel } from "../components/presentation";
 import { Button } from "../components/ui/button";
 import type { PageActions, GameView } from "../ui-types";
 export function SkillsPage({
@@ -17,7 +16,8 @@ export function SkillsPage({
       </div>
       <div className="grid md:grid-cols-2 gap-4">
         {view.skills.map((s) => (
-          <Panel key={s.id} title={s.name}>
+          <details key={s.id} className="quiet-details">
+            <summary>{s.name}</summary>
             <div className="skill-level">
               <Activity />
               <strong>{s.currentLevel}</strong>
@@ -59,7 +59,7 @@ export function SkillsPage({
                 </Button>
               )}
             </div>
-          </Panel>
+          </details>
         ))}
       </div>
     </>

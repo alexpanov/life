@@ -11,6 +11,19 @@ export function serializeGame(game: Snapshot): string {
         () => null,
         (c) => c,
       ),
+      draftQuest: O.match(
+        p.draftQuest,
+        () => null,
+        (draft) => ({
+          id: draft.id,
+          title: draft.title,
+          realmId: O.match(
+            draft.realmId,
+            () => null,
+            (id) => id,
+          ),
+        }),
+      ),
       campaigns: p.campaigns.map((c) => ({
         ...c,
         quests: c.quests.map((q) => ({

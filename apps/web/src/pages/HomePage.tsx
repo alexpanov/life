@@ -1,261 +1,103 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { Effect } from "effect";
-import {
-  nicoReplyRoutine,
-  mockNicoLayer,
-  NIKO_INTRODUCTION,
-} from "../../../../packages/application/src/nico-model";
-import {
-  getSidekickContext,
-  nextNicoJob,
-  type Snapshot,
-} from "../../../../packages/core/src/index";
+import type { FormEvent } from "react";
 import { Link } from "react-router";
 import * as O from "../../../../packages/foundation/src/option";
-import type {
-  QuestInput,
-  QuestOffer,
-} from "../../../../packages/core/src/index";
+import { Body, H1, H4, Label } from "../../../../packages/design/src/type";
 import type { GameView, PageActions } from "../ui-types";
-import { Sender, Area, Field } from "../components/presentation";
+import { Sender } from "../components/presentation";
 import { Button } from "../../../../packages/design/src/index";
-import { Body, H1 } from "../../../../packages/design/src/type";
 
 export function HomePage({
   view,
-  game,
-  now,
-  offer,
-  offeredQuest,
   send,
-  open,
-}: PageActions & {
+}: {
   view: GameView;
-  game: Snapshot;
-  now: number;
-  offer: QuestOffer | null;
-  offeredQuest: QuestInput | undefined;
+  send: PageActions["send"];
 }) {
   const { player } = view;
-  const [celebrated, setCelebrated] = useState("");
-  const mission = O.isSome(view.mission) ? view.mission.value : null;
-  const lastQuest = O.isSome(view.lastQuest) ? view.lastQuest.value : null;
-  const nextJob = nextNicoJob(
-    player.operation.phase === "review"
-      ? {
-          ...player.sidekick,
-          jobs: player.sidekick.jobs.filter(
-            (job) =>
-              job.kind === "learn-name" ||
-              (job.kind === "reflect-outcome" && job.questId === lastQuest?.id),
-          ),
-        }
-      : player.sidekick,
+  const openQuests = player.campaigns.flatMap((campaign) =>
+    campaign.quests
+      .filter((quest) => quest.status === "pending")
+      .map((quest) => ({
+        quest,
+        realm:
+          player.realms.find((realm) => realm.id === campaign.realmId)?.name ||
+          "Realm",
+      })),
   );
-  const pendingReflection = player.sidekick.jobs.find(
-    (job) =>
-      job.kind === "reflect-outcome" &&
-      job.status === "pending" &&
-      job.questId === lastQuest?.id,
-  );
-  const outcomeKey =
-    [...player.sidekick.jobs]
-      .reverse()
-      .find(
-        (job) =>
-          job.kind === "reflect-outcome" && job.questId === lastQuest?.id,
-      )?.id ||
-    lastQuest?.id ||
-    "";
-  const [reply, setReply] = useState("");
-  const intent =
-    player.operation.phase === "review"
-      ? celebrated === outcomeKey
-        ? "reflect"
-        : "celebrate"
-      : O.isSome(nextJob) && nextJob.value.kind === "meet-hero"
-        ? "meet"
-        : !player.sidekick.introduced
-          ? "meet"
-          : "choose";
-  useEffect(() => {
-    let active = true;
-    void Effect.runPromise(
-      nicoReplyRoutine(getSidekickContext(game, now), intent).pipe(
-        Effect.provide(mockNicoLayer),
-      ),
-    )
-      .then((text) => {
-        if (active) setReply(text);
-      })
-      .catch(() => {
-        if (active) setReply("");
-      });
-    return () => {
-      active = false;
-    };
-  }, [game, now, intent]);
-  function submit(
-    event: FormEvent<HTMLFormElement>,
-    action: "meet" | "name" | "reflect",
-  ) {
+  if (openQuests.length > 0)
+    return (
+      <section className="focus-screen">
+        <H1>Home</H1>
+        <nav className="menu-links" aria-label="Quests">
+          {openQuests.map(({ quest, realm }) => (
+            <Link key={quest.id} to={`/quest/${quest.id}`}>
+              <span>
+                <H4>{quest.title}</H4>
+                <Body>{realm}</Body>
+              </span>
+              <span aria-hidden="true">→</span>
+            </Link>
+          ))}
+        </nav>
+      </section>
+    );
+  const draft = player.draftQuest;
+  function describe(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const text = String(
-      new FormData(event.currentTarget).get("text") || "",
-    ).trim();
-    if (!text) return;
-    if (action === "meet") send({ type: "meet-nico", text });
-    if (action === "name") send({ type: "name-hero", name: text });
-    if (action === "reflect" && pendingReflection)
-      send({ type: "reflect-quest", questId: pendingReflection.questId, text });
+    const text = String(new FormData(event.currentTarget).get("text") || "");
+    if (text.trim()) send({ type: "describe-quest", text });
   }
-  // An existing mission stays one tap away even before the first introduction.
-  if (player.operation.phase === "review" && lastQuest) {
-    if (celebrated !== outcomeKey)
-      return (
-        <section className="focus-screen">
-          <Sender source="niko" />
-          <H1 voice="companion">
-            {lastQuest.status === "done"
-              ? `Great job, ${O.getOrElse(player.sidekick.heroName, () => "boss")}.`
-              : "Let’s learn from this."}
-          </H1>
-          <p>{lastQuest.title}</p>
-          {reply && <Body voice="companion">{reply}</Body>}
-          <Button onClick={() => setCelebrated(outcomeKey)}>Continue</Button>
-        </section>
-      );
-    if (
-      O.isSome(nextJob) &&
-      nextJob.value.kind === "learn-name" &&
-      O.isNone(player.sidekick.heroName)
-    )
-      return (
-        <section className="focus-screen">
-          <Sender source="niko" />
-          <H1 voice="companion">By the way, what’s your name?</H1>
-          <form onSubmit={(event) => submit(event, "name")}>
-            <Field name="text" label="Your name" required />
-            <Button type="submit">Tell Niko</Button>
-          </form>
-        </section>
-      );
-    if (pendingReflection)
-      return (
-        <section className="focus-screen">
-          <Sender source="niko" />
-          <H1 voice="companion">What did we learn?</H1>
-          <Body voice="companion">
-            {reply || "A small lesson for your next quest."}
-          </Body>
-          <form onSubmit={(event) => submit(event, "reflect")}>
-            <Area name="text" label="Your takeaway" />
-            <Button type="submit">Remember this</Button>
-          </form>
-        </section>
-      );
-    return (
-      <section className="focus-screen">
-        <Sender source="niko" />
-        <H1 voice="companion">One good next move.</H1>
-        <p>Ready when you are.</p>
-        <Button onClick={() => send({ type: "finish-review" })}>
-          Pick next quest
-        </Button>
-      </section>
-    );
-  }
-  if (mission)
-    return (
-      <section className="focus-screen">
-        <small>Your current quest</small>
-        <H1>{mission.title}</H1>
-        <p>
-          {mission.nextMove ||
-            mission.detail ||
-            "One real action. Your own pace."}
-        </p>
-        <div className="focus-actions">
-          <Button
-            onClick={() =>
-              send({ type: "set-status", questId: mission.id, status: "done" })
-            }
-          >
-            Complete quest
-          </Button>
-          <Button asChild variant="secondary">
-            <Link to={`/quest/${mission.id}`}>Make progress</Link>
-          </Button>
-        </div>
-      </section>
-    );
-  if (!player.sidekick.introduced)
-    return (
-      <section className="focus-screen">
-        <Sender source="niko" />
-        <H1 voice="companion">Meet Niko.</H1>
-        <Body voice="companion">{reply || NIKO_INTRODUCTION}</Body>
-        <form onSubmit={(event) => submit(event, "meet")}>
-          <Area name="text" label="What are you up to?" />
-          <Button type="submit">Meet Niko</Button>
-        </form>
-      </section>
-    );
-  if (offer && offeredQuest)
-    return (
-      <section className="focus-screen">
-        <Sender source="niko" />
-        <H1>{offeredQuest.title}</H1>
-        <p>{offeredQuest.nextMove}</p>
-        <div className="focus-actions">
-          <Button onClick={() => send({ type: "accept-offer", offer })}>
-            Take quest
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => send({ type: "dismiss-offer", offer })}
-          >
-            Not now
-          </Button>
-        </div>
-      </section>
-    );
   return (
     <section className="focus-screen">
+      <H1>Home</H1>
       <Sender source="niko" />
-      <H1 voice="companion">How are you feeling?</H1>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          const mood = String(new FormData(event.currentTarget).get("mood")) as
-            "ready" | "curious" | "quiet" | "tired";
-          send({ type: "check-in", mood });
-        }}
-      >
-        <label className="field">
-          Today I feel
-          <select name="mood">
-            <option value="ready">Ready</option>
-            <option value="curious">Curious</option>
-            <option value="quiet">Quiet</option>
-            <option value="tired">Low energy</option>
-          </select>
-        </label>
-        <div className="focus-actions">
-          <Button type="submit">
-            {view.quests.some((q) => q.status === "pending")
-              ? "Find my next quest"
-              : "Pray for a quest"}
-          </Button>
+      <Body i voice="companion">
+        What's up, boss? What are we up to?
+      </Body>
+      {O.isNone(draft) ? (
+        <form onSubmit={describe}>
+          <label className="field" htmlFor="what-are-we-up-to">
+            <Label>What are we up to?</Label>
+            <textarea
+              id="what-are-we-up-to"
+              name="text"
+              required
+              rows={4}
+              maxLength={160}
+            />
+          </label>
+          <Button type="submit">Continue</Button>
+        </form>
+      ) : (
+        <>
+          <H4>{draft.value.title}</H4>
+          <label className="field" htmlFor="quest-realm">
+            <Label>Which realm?</Label>
+            <select
+              id="quest-realm"
+              value={O.isSome(draft.value.realmId) ? draft.value.realmId.value : ""}
+              onChange={(event) => {
+                if (event.target.value)
+                  send({ type: "choose-realm", realmId: event.target.value });
+              }}
+            >
+              <option value="">Pick a realm</option>
+              {player.realms.map((realm) => (
+                <option key={realm.id} value={realm.id}>
+                  {realm.name}
+                </option>
+              ))}
+            </select>
+          </label>
           <Button
             type="button"
-            variant="secondary"
-            onClick={() => open("quest")}
+            disabled={O.isNone(draft.value.realmId)}
+            onClick={() => send({ type: "start-quest" })}
           >
-            Add my own quest
+            Start
           </Button>
-        </div>
-      </form>
+        </>
+      )}
     </section>
   );
 }

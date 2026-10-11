@@ -6,7 +6,8 @@
   "packageManager": "pnpm@12.11.2",
   "description": "Shared TypeScript game core with web and iPhone interfaces.",
   "scripts": {
-    "build": "vite build && node --import tsx scripts/finish-web.ts && node scripts/build-worker.mjs",
+    "build": "vite build && node --import tsx scripts/finish-web.ts",
+    "build:worker": "pnpm run build && node scripts/build-worker.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "start": "vite --host 127.0.0.1",

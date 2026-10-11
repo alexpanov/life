@@ -16,6 +16,10 @@ export interface ModelGatewayEnv {
   LIFE_LLM_API_KEY?: string;
   LIFE_LLM_ALLOWED_USER_ID?: string;
 }
+/** Caller the host already proved. Request headers, query, and body are not this proof. */
+export interface HostCallerProof {
+  readonly userId: string;
+}
 export type ModelFetch = (
   input: string | URL | Request,
   init?: RequestInit,
@@ -278,20 +282,23 @@ export async function handleNicoGateway(
   request: Request,
   env: ModelGatewayEnv,
   fetcher: ModelFetch = fetch,
+  caller: O.Option<HostCallerProof> = O.none(),
 ): Promise<Response> {
   const path = new URL(request.url).pathname;
   if (path !== "/api/nico/status" && path !== "/api/nico/propose")
     return json({ error: "Not found." }, 404);
   const configured = Boolean(env.LIFE_LLM_API_KEY);
   const config = resolveModelGatewayConfig(env);
-  const authenticated = Boolean(
-    request.headers.get("oai-authenticated-user-id"),
+  const provenUserId = O.match(
+    caller,
+    () => "",
+    (proof) => proof.userId,
   );
+  const authenticated = provenUserId.length > 0;
   const authorized =
     authenticated &&
     Boolean(env.LIFE_LLM_ALLOWED_USER_ID) &&
-    request.headers.get("oai-authenticated-user-id") ===
-      env.LIFE_LLM_ALLOWED_USER_ID;
+    provenUserId === env.LIFE_LLM_ALLOWED_USER_ID;
   if (path === "/api/nico/status")
     return request.method === "GET"
       ? json({

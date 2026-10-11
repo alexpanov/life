@@ -80,6 +80,9 @@ export function simulateNicoProposal(request: NicoChatRequest): unknown {
     return say(
       "I served in Delta Force. I’m proud of serving my country. I keep most of those days to myself.",
     );
+  const farm = request.storyChoices.find((story) => story.id === "farm");
+  if (farm && /\b(farm|farmer|farming)\b/i.test(chat))
+    return say("I grew up working a farm. Ask if you want that story.");
   if (O.isSome(request.powerup)) {
     const boost = request.powerup.value;
     if (boost.id === "mutual-offer")

@@ -74,6 +74,44 @@ it("keeps fixed story canon, reluctant disclosure and isolated hero history", ()
   expect(nico(state).stories[0]!.tellingCount).toBe(0);
   expect(state.players[0]!.sidekick.stories[0]!.tellingCount).toBe(3);
 });
+it("tells the farm upbringing only when asked and keeps it on an older save", () => {
+  let state = initial();
+  const farm = NICO_STORIES.find((story) => story.id === "farm")!;
+  expect(getSidekickContext(state, ctx.now).identity.voice).toContain(
+    "grew up working a farm",
+  );
+  const quiet = send(state, {
+    type: "tell-story",
+    storyId: "farm",
+    explicitRequest: false,
+  });
+  expect(quiet.state).toEqual(state);
+  const told = send(state, {
+    type: "tell-story",
+    storyId: "farm",
+    explicitRequest: true,
+  });
+  expect(farm.retellings).toContain(told.message);
+  state = send(told.state, {
+    type: "tell-story",
+    storyId: "dmz",
+    explicitRequest: true,
+  }).state;
+  expect(
+    nico(state).stories.find((story) => story.id === "farm")?.tellingCount,
+  ).toBe(1);
+  const wire = JSON.parse(serializeGame(state));
+  wire.players[0].sidekick.stories = wire.players[0].sidekick.stories.filter(
+    (story: { id: string }) => story.id !== "farm",
+  );
+  const restored = restoreGame(wire, ctx);
+  expect(
+    nico(restored).stories.find((story) => story.id === "farm")?.tellingCount,
+  ).toBe(0);
+  expect(
+    nico(restored).stories.find((story) => story.id === "dmz")?.tellingCount,
+  ).toBe(1);
+});
 it("does not repeat wisdom across reload, reset or importing an older save", () => {
   let state = initial();
   const old = JSON.parse(serializeGame(state));

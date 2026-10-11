@@ -243,6 +243,31 @@ describe("Niko JSON routine boundary", () => {
         ?.tellingCount,
     ).toBe(1);
   });
+  it("keeps the farm upbringing private until the hero asks for that story", async () => {
+    const controller = await setup();
+    const asked = await Effect.runPromise(
+      runNicoChatRoutine(controller, "Were you a farmer?").pipe(
+        Effect.provide(mockNicoLayer),
+      ),
+    );
+    expect(asked.invoked).toBe(false);
+    expect(asked.text).toContain("grew up working a farm");
+    expect(
+      player(controller).sidekick.stories.find((s) => s.id === "farm")
+        ?.tellingCount,
+    ).toBe(0);
+    const told = await Effect.runPromise(
+      runNicoChatRoutine(controller, "Please tell me Growing up").pipe(
+        Effect.provide(mockNicoLayer),
+      ),
+    );
+    expect(told.target).toEqual(O.some({ kind: "story", id: "farm" }));
+    expect(told.text).toContain("farm");
+    expect(
+      player(controller).sidekick.stories.find((s) => s.id === "farm")
+        ?.tellingCount,
+    ).toBe(1);
+  });
   it("rotates wisdom once and records categorical feedback as a soft deletion", async () => {
     const controller = await setup();
     const wisdom = await Effect.runPromise(

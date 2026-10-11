@@ -52,6 +52,15 @@ export const NICO_STORIES = [
       "You asked about the doors. Yes, there were encounters involving squatters. I will leave the private details there.",
     ],
   },
+  {
+    id: "farm",
+    title: "Growing up",
+    core: "Niko grew up working a farm. That work taught him to finish what he started.",
+    retellings: [
+      "I grew up on a farm. The work did not care how I felt about it. You finish the row, then you start the next one.",
+      "Before any of the later years, I was a farm kid. Early mornings, animals, and a job that was done only when it was done.",
+    ],
+  },
 ] as const;
 export const NICO_WISDOM = [
   {

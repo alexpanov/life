@@ -88,6 +88,7 @@ export function createRules(env: RuleEnvironment) {
       blockedReason: "",
       verified: false,
       suggestionKey: clean(input.suggestionKey, 100),
+      lines: [],
     };
   }
   function makeCampaign(
@@ -160,6 +161,7 @@ export function createRules(env: RuleEnvironment) {
       bonusLoot: [],
       modules: [],
       events: [],
+      lines: [],
       settings: {
         sound: false,
         autoCalls: false,
@@ -288,12 +290,12 @@ export function createRules(env: RuleEnvironment) {
     player: Player,
     mood: Mood,
     now = env.now(),
-    adjustScore: (quest: Quest, mood: Mood) => number = () => 0,
+    adjustScore: (quest: DeepReadonly<Quest>, mood: Mood) => number = () => 0,
   ): O.Option<QuestOffer> {
     must(MOODS.includes(mood), "Choose how you feel.");
     player.checkin = O.some({ mood, at: now });
     const realm = activeRealm(player);
-    const score = (q: Quest) => {
+    const score = (q: DeepReadonly<Quest>) => {
       const title = q.title.toLowerCase(),
         text = q.detail.toLowerCase();
       if (mood === "tired")
@@ -744,6 +746,18 @@ export function createRules(env: RuleEnvironment) {
                 : O.none(),
             blockedReason: clean(q.blockedReason, 500),
             verified: false,
+            lines: (q.lines ?? []).flatMap((line) => {
+              const text = clean(line.text, 2000);
+              if (!text) return [];
+              return [
+                {
+                  id: clean(line.id, 100) || uid("line"),
+                  speaker: line.speaker,
+                  text,
+                  at: timestamp(line.at),
+                },
+              ];
+            }),
           };
         });
         return {
@@ -905,6 +919,32 @@ export function createRules(env: RuleEnvironment) {
             ...(e.sessionId ? { sessionId: clean(e.sessionId, 100) } : {}),
           }))
         : [];
+      for (const event of [...events].reverse()) {
+        if (event.type !== "quest-progress" || !event.questId) continue;
+        const found = campaigns
+          .flatMap((campaign) => campaign.quests)
+          .find((item) => item.id === event.questId);
+        if (!found || found.lines.some((line) => line.id === event.id))
+          continue;
+        found.lines.push({
+          id: event.id,
+          speaker: "hero",
+          text: event.text,
+          at: event.at,
+        });
+      }
+      const keptLines = (p.lines ?? []).flatMap((line) => {
+        const text = clean(line.text, 2000);
+        if (!text) return [];
+        return [
+          {
+            id: clean(line.id, 100) || uid("line"),
+            speaker: line.speaker,
+            text,
+            at: timestamp(line.at),
+          },
+        ];
+      });
       return {
         id,
         name: clean(p.name, 60) || "Player",
@@ -952,6 +992,7 @@ export function createRules(env: RuleEnvironment) {
           : [],
         modules,
         events,
+        lines: keptLines,
         settings: {
           sound: Boolean(p.settings?.sound),
           autoCalls: Boolean(p.settings?.autoCalls),

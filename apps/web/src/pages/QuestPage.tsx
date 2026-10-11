@@ -19,9 +19,18 @@ export function QuestPage({
         <Link to="/board">Back to quests</Link>
       </section>
     );
-  const events = view.player.events
-    .filter((event) => event.questId === quest.id)
-    .sort((a, b) => b.at - a.at);
+  const lines =
+    quest.lines.length > 0
+      ? quest.lines
+      : view.player.events
+          .filter((event) => event.questId === quest.id)
+          .sort((a, b) => a.at - b.at)
+          .map((event) => ({
+            id: event.id,
+            speaker: "hero" as const,
+            text: event.text,
+            at: event.at,
+          }));
   function progress(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = String(
@@ -61,13 +70,14 @@ export function QuestPage({
       ) : (
         <p>{quest.status === "done" ? "You did it." : quest.blockedReason}</p>
       )}
-      <details className="quiet-details" open={events.length > 0}>
+      <details className="quiet-details" open={lines.length > 0}>
         <summary>Quest history</summary>
-        {events.length ? (
-          events.map((event) => (
-            <article className="history-entry" key={event.id}>
-              <p>{event.text}</p>
-              <time>{new Date(event.at).toLocaleDateString()}</time>
+        {lines.length ? (
+          lines.map((line) => (
+            <article className="history-entry" key={line.id}>
+              <small>{line.speaker === "hero" ? "You" : "Niko"}</small>
+              <p>{line.text}</p>
+              <time>{new Date(line.at).toLocaleDateString()}</time>
             </article>
           ))
         ) : (

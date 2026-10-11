@@ -99,6 +99,15 @@ describe("Niko conversation archive", () => {
         ),
       ),
     ).rejects.toMatchObject({ _tag: "SnippetArchiveError" });
-    expect(controller.getSnapshot().game).toEqual(before);
+    const after = controller.getSnapshot().game;
+    if (O.isNone(before) || O.isNone(after))
+      throw new Error("Save missing.");
+    const previous = before.value.players[0];
+    const current = after.value.players[0];
+    if (!previous || !current) throw new Error("Hero missing.");
+    expect({ ...current, lines: previous.lines }).toEqual(previous);
+    expect(current.lines.map((line) => line.text)).toEqual([
+      "Remember morning walks",
+    ]);
   });
 });

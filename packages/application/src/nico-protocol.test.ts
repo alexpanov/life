@@ -141,7 +141,7 @@ describe("Niko JSON routine boundary", () => {
     const controller = await setup();
     controller.send({ type: "remember", text: "First" });
     controller.send({ type: "remember", text: "Second" });
-    const before = controller.getSnapshot().game;
+    const before = player(controller).sidekick.snippets;
     const result = await Effect.runPromise(
       runNicoChatRoutine(controller, "Let it go").pipe(
         Effect.provide(mockNicoLayer),
@@ -149,7 +149,11 @@ describe("Niko JSON routine boundary", () => {
     );
     expect(result.invoked).toBe(false);
     expect(result.text).toContain("Which");
-    expect(controller.getSnapshot().game).toBe(before);
+    expect(player(controller).sidekick.snippets).toEqual(before);
+    expect(player(controller).lines.map((line) => line.text)).toEqual([
+      "Let it go",
+      result.text,
+    ]);
   });
   it("keeps locked service identity protected even from a model invocation", async () => {
     const controller = await setup();
@@ -188,9 +192,8 @@ describe("Niko JSON routine boundary", () => {
     expect(observed).not.toContain(hero.sidekick.id);
     expect(observed).toContain('"routineSchema"');
   });
-  it("rejects nonexistent scoped targets without changing state", async () => {
+  it("keeps the hero line when the request is refused", async () => {
     const controller = await setup();
-    const before = controller.getSnapshot().game;
     await expect(
       Effect.runPromise(
         runNicoChatRoutine(controller, "Hello").pipe(
@@ -202,7 +205,36 @@ describe("Niko JSON routine boundary", () => {
         ),
       ),
     ).rejects.toThrow("does not belong");
-    expect(controller.getSnapshot().game).toBe(before);
+    expect(player(controller).lines.map((line) => line.text)).toEqual([
+      "Hello",
+    ]);
+    expect(player(controller).sidekick.snippets).toHaveLength(0);
+  });
+  it("stores the hero line and Nico's line on the focus quest", async () => {
+    const controller = await setup();
+    controller.send({ type: "add-quest", quest: { title: "Walk" } });
+    const questId = player(controller).campaigns[0]!.quests[0]!.id;
+    controller.send({ type: "choose-mission", questId });
+    await Effect.runPromise(
+      runNicoChatRoutine(controller, "I walked the block").pipe(
+        Effect.provide(
+          proposalLayer({
+            version: 1,
+            kind: "say",
+            text: "Good. One block.",
+          }),
+        ),
+      ),
+    );
+    expect(
+      player(controller)
+        .campaigns.flatMap((campaign) => campaign.quests)
+        .find((quest) => quest.id === questId)
+        ?.lines.map((line) => ({ speaker: line.speaker, text: line.text })),
+    ).toEqual([
+      { speaker: "hero", text: "I walked the block" },
+      { speaker: "nico", text: "Good. One block." },
+    ]);
   });
   it("rejects delayed proposals after switching heroes", async () => {
     const controller = await setup();

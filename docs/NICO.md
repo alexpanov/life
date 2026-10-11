@@ -14,7 +14,7 @@ Supabase's connected account reports no projects as of this update. The existing
 
 ## Stories and wisdom
 
-Nico's Delta Force service and pride are locked fictional character canon. His profile identifies him as a fictional companion. The game does not present the authored episodes as historical operations. Stories have stable IDs and canonical facts; only curated, compatible retellings can be delivered. Asking explicitly makes a story eligible. A telling is recorded before its text is returned.
+Nico's Delta Force service and pride are locked fictional character canon. He grew up working a farm. That story is told only when the player asks, and the player can let it go. His profile identifies him as a fictional companion. The game does not present the authored episodes as historical operations. Stories have stable IDs and canonical facts; only curated, compatible retellings can be delivered. Asking explicitly makes a story eligible. A telling is recorded before its text is returned.
 
 Wisdom has its own delivery record. Once delivered, an item is excluded from future rotation for that hero, including after a personality reset. Feedback uses a typed reason (`not-interesting`, `repetitive`, `not-for-me`, or `other`) and an optional explanation. Forgetting retains a timestamped tombstone and delivery history. Locked service canon cannot be retired.
 

@@ -1,6 +1,6 @@
 ---
 name: quest-worktrees
-description: Put every extra git worktree in a sibling worktrees folder, named after the primary checkout. Use when adding a worktree, when checkouts sit beside the main line, or when cleaning a repository folder. Applies to every repository, not only this one.
+description: Put every extra git worktree in a sibling worktrees folder, and remove it after its pull request merges. Use when adding a worktree, when checkouts sit beside the main line, when cleaning a repository folder, or when a worktree's pull request has merged. Applies to every repository, not only this one.
 ---
 
 # Worktree layout
@@ -61,3 +61,38 @@ git worktree move <current-path> "../worktrees/<prefix>-<slug>"
 When the primary checkout is on a branch other than `main` and its working tree is clean, check out `main`, fast-forward it from `origin/main`, then add a worktree for the branch you left. When the working tree is dirty, leave it and report. Do not stash another agent's work.
 
 `worktrees` is not part of the repository. Do not commit it.
+
+## After the pull request merges
+
+When the pull request for a worktree's branch has merged, retire that worktree and rearm the primary checkout. Do this from the primary checkout. If you are inside the worktree, leave it first.
+
+1. Confirm the pull request is merged. Match it by the worktree's branch:
+
+```sh
+gh pr list --state merged --head <branch> --json number,state,title
+```
+
+If that list is empty, stop. Do not remove a worktree whose pull request is still open, closed without merging, or missing.
+
+2. Look at the worktree. If a tracked file is modified, or an untracked file is source, stop and report. Do not force it. If the only leftovers are generated files (`node_modules`, `dist`, and other ignored build output), force is allowed.
+
+```sh
+git worktree remove "../worktrees/<prefix>-<slug>"
+```
+
+When only generated files block the remove:
+
+```sh
+git worktree remove --force "../worktrees/<prefix>-<slug>"
+```
+
+3. Delete the local branch. `git branch -d <branch>` is enough when the commits are in `main`. A squash merge will refuse `-d`. If the pull request is merged and `-d` refuses, delete it with `git branch -D <branch>`. Do not delete the remote branch.
+
+4. Rearm the primary checkout:
+
+```sh
+git checkout main
+git pull --ff-only origin main
+```
+
+The primary checkout is then on the latest `main`, and the finished worktree is gone. Start the next branch as a new worktree. Do not start it in the primary checkout.

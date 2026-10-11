@@ -22,7 +22,7 @@ export function Dialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 bg-black/80 z-40" />
         <DialogPrimitive.Content
-          className="dialog-surface fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-24px)] max-w-xl max-h-[88dvh] overflow-y-auto border border-slate-600 bg-slate-950 rounded-xl p-6 shadow-2xl"
+          className="dialog-surface fixed z-50 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-24px)] max-w-xl max-h-[88dvh] overflow-y-auto border border-[var(--paint-border)] bg-[var(--paint-surface)] text-[var(--paint-text)] rounded-xl p-6 shadow-2xl"
           aria-describedby={undefined}
         >
           <div className="flex justify-between items-start gap-4">

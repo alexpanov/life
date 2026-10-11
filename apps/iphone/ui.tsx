@@ -87,7 +87,7 @@ export const styles = StyleSheet.create({
   },
   companion: {
     backgroundColor: tokens.color.companionSurface,
-    borderColor: "#494034",
+    borderColor: tokens.color.companionEdge,
   },
   nikoLabel: {
     color: tokens.color.companion,
@@ -138,7 +138,7 @@ export const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "#000c",
+    backgroundColor: tokens.color.scrim,
     justifyContent: "center",
     padding: 24,
   },

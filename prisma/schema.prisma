@@ -1,0 +1,13 @@
+// Main Prisma file. Generator and datasource only.
+// One model per file under prisma/models. Prisma combines them at generate time.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../packages/infrastructure/src/generated/prisma"
+  runtime      = "nodejs"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}

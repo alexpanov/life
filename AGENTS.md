@@ -7,6 +7,7 @@ Read [.ai/CONTRACT.md](.ai/CONTRACT.md) before changing this repository. It is t
 Load the relevant task skill:
 
 - Domain, effects, persistence: [.ai/skills/quest-functional-core/SKILL.md](.ai/skills/quest-functional-core/SKILL.md)
+- Prisma repositories: [.ai/skills/prisma-repositories/SKILL.md](.ai/skills/prisma-repositories/SKILL.md)
 - Boundary parsing: [.ai/skills/parse-dont-validate/SKILL.md](.ai/skills/parse-dont-validate/SKILL.md)
 - Mobile clarity and progressive disclosure: [.ai/skills/dont-make-me-think/SKILL.md](.ai/skills/dont-make-me-think/SKILL.md)
 - Gameplay, Nico, interface: [.ai/skills/quest-product/SKILL.md](.ai/skills/quest-product/SKILL.md)

@@ -15,6 +15,9 @@ Load the relevant task skill:
 - Monetization, entitlements and transaction paths: [.ai/skills/life-monetization/SKILL.md](.ai/skills/life-monetization/SKILL.md)
 - Background updates and offline UX: [.ai/skills/life-realtime-ux/SKILL.md](.ai/skills/life-realtime-ux/SKILL.md)
 - Parallel work: [.ai/skills/quest-legion/SKILL.md](.ai/skills/quest-legion/SKILL.md)
+- Worktree placement: [.ai/skills/quest-worktrees/SKILL.md](.ai/skills/quest-worktrees/SKILL.md)
+
+Keep the primary checkout on `main`. Extra worktrees belong in the sibling `worktrees` folder. Load the worktree skill and move any that sit beside the main line.
 
 Inspect current source, package scripts and Git status before acting. Preserve other agents' work. Follow the user's current scope and the host's higher-priority rules. Report executed checks and observed deployment results; never turn a goal into an unverified claim.
 

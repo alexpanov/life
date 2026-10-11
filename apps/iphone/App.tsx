@@ -1,3 +1,4 @@
+import { createMemorySnippetArchive } from "../../packages/application/src/snippet-archive";
 import { Action, Panel, styles } from "./ui";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import {
@@ -35,10 +36,12 @@ const controller = createGameController(
       localDay: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`,
     };
   },
+  createMemorySnippetArchive(),
+  "iphone",
 );
-type Screen = "Home" | "Realms" | "Quests" | "Skills" | "Nico";
+type Screen = "Home" | "Realms" | "Quests" | "Skills" | "Niko";
 type Form = "quest" | "realm" | "dungeon" | "skill" | "memory";
-const screens: Screen[] = ["Home", "Realms", "Quests", "Skills", "Nico"];
+const screens: Screen[] = ["Home", "Realms", "Quests", "Skills", "Niko"];
 const moods: Mood[] = ["ready", "curious", "quiet", "tired"];
 
 function Game() {
@@ -398,7 +401,7 @@ function Game() {
                           onPress={() =>
                             Alert.alert(
                               "Close this quest?",
-                              "Nico will learn from this. There is no penalty.",
+                              "Niko will learn from this. There is no penalty.",
                               [
                                 { text: "Keep open", style: "cancel" },
                                 {
@@ -484,7 +487,7 @@ function Game() {
               ))}
             </>
           )}
-          {screen === "Nico" && (
+          {screen === "Niko" && (
             <>
               <Panel companion>
                 <Text style={styles.nikoLabel}>◈ NIKO / YOUR SIDEKICK</Text>
@@ -504,13 +507,13 @@ function Game() {
                   </Panel>
                 ))}
               <Action onPress={() => open("memory")}>
-                Tell Nico something
+                Tell Niko something
               </Action>
               <Action
                 subdued
                 onPress={() =>
                   Alert.alert(
-                    "Reset Nico’s memory?",
+                    "Reset Niko’s memory?",
                     "Your quests, XP, and skills remain.",
                     [
                       { text: "Cancel", style: "cancel" },
@@ -595,7 +598,7 @@ function Game() {
             </Text>
             <Text style={styles.heading}>
               {formName === "memory"
-                ? "What should Nico remember?"
+                ? "What should Niko remember?"
                 : `Name your ${formName}`}
             </Text>
             <TextInput

@@ -1,3 +1,14 @@
+import type { Layer } from "effect";
+import type { NicoModel } from "../../../packages/application/src/nico-model";
+import { httpNicoLayer } from "../../../packages/infrastructure/src/http-nico-model";
+const liveNicoLayer = httpNicoLayer();
+import { attachBrowserInsights } from "./background-insights";
+import { PowerupsPage } from "./pages/PowerupsPage";
+import { Effect } from "effect";
+import {
+  executeFrontendRoutine,
+  frontendRoutineRequest,
+} from "../../../packages/application/src/frontend-routines";
 import * as O from "../../../packages/foundation/src/option";
 import {
   useEffect,
@@ -37,7 +48,8 @@ export { Sender } from "./components/presentation";
 import { Button } from "./components/ui/button";
 import { Dialog } from "./components/ui/dialog";
 import { browserContext } from "./repository";
-export function App({ controller }: { controller: GameController }) {
+export function App({ controller, modelLayer = liveNicoLayer }: { controller: GameController; modelLayer?: Layer.Layer<NicoModel> }) {
+  useEffect(() => attachBrowserInsights(controller), [controller]);
   const store = useSyncExternalStore(
       controller.subscribe,
       controller.getSnapshot,
@@ -112,7 +124,15 @@ export function App({ controller }: { controller: GameController }) {
     selectedSkill = player.skills.find((s) => s.id === selectedId);
   function send(command: Command) {
     try {
-      const result = controller.send(command);
+      const result =
+        command.type === "import" || command.type === "transmission"
+          ? controller.send(command)
+          : Effect.runSync(
+              executeFrontendRoutine(
+                controller,
+                frontendRoutineRequest(crypto.randomUUID(), command),
+              ),
+            ).outcome;
       setError("");
       setOffer(
         O.match(
@@ -266,10 +286,11 @@ export function App({ controller }: { controller: GameController }) {
           ["/realms", "Realms"],
           ["/skills", "Skills"],
           ["/inventory", "Inventory"],
-          ["/nico", "Nico"],
+          ["/nico", "Niko"],
           ["/workshop", "Settings & saves"],
           ["/notifications", "Notifications"],
           ["/invite", "Invite a friend"],
+          ["/powerups", "Power-ups"],
         ].map(([path, label]) => (
           <Link key={path} to={path!}>
             {label}
@@ -288,6 +309,7 @@ export function App({ controller }: { controller: GameController }) {
   );
   const nico = (
     <NicoPage
+      modelLayer={modelLayer}
       key={player.id}
       controller={controller}
       player={player}
@@ -314,7 +336,7 @@ export function App({ controller }: { controller: GameController }) {
       </div>
       <div className="settings-list">
         <details className="quiet-details">
-          <summary>Nico</summary>
+          <summary>Niko</summary>
           <p>Resettable memory. Your quests and rewards stay intact.</p>
           <Button variant="secondary" onClick={() => open("memory")}>
             Open memory
@@ -340,7 +362,7 @@ export function App({ controller }: { controller: GameController }) {
         <details className="quiet-details">
           <summary>ChatGPT bridge</summary>
           <p>
-            Copy your current state and Nico’s context. No live model is
+            Copy your current state and Niko’s context. No live model is
             connected.
           </p>
           <Button variant="secondary" onClick={() => open("handoff")}>
@@ -481,6 +503,10 @@ export function App({ controller }: { controller: GameController }) {
             <Route path="/explore" element={menu} />
             <Route path="/nico" element={nico} />
             <Route
+              path="/powerups"
+              element={<PowerupsPage player={player} now={tick} send={send} />}
+            />
+            <Route
               path="/invite"
               element={<InvitePage code={player.energy.referralCode} />}
             />
@@ -547,11 +573,11 @@ export function App({ controller }: { controller: GameController }) {
         }}
         title={
           modal === "memory"
-            ? "Nico / memory"
+            ? "Niko / memory"
             : modal === "quest"
               ? "Quest details"
               : modal === "reset"
-                ? "Reset Nico’s memory?"
+                ? "Reset Niko’s memory?"
                 : modal === "call"
                   ? "Transmission"
                   : modal === "handoff"
@@ -866,7 +892,7 @@ export function App({ controller }: { controller: GameController }) {
                 later. Impossible quests close without penalty.
               </p>
               <p>
-                Nico learns locally from your choices. You can reset his memory.
+                Niko learns locally from your choices. You can reset his memory.
                 There is no connected LLM, background location tracking, or
                 shared cloud save.
               </p>

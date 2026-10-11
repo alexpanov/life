@@ -19,7 +19,7 @@ export function Sender({
       {name
         ? `${name} / GAME DISPATCH`
         : source === "niko"
-          ? "Nico Lopez · Your sidekick"
+          ? "Niko Gonzalez · Your sidekick"
           : senderLabels[source]}
     </span>
   );

@@ -10,7 +10,7 @@ export const NICO_STORIES = [
   {
     id: "dmz",
     title: "The Korean DMZ",
-    core: "Nico served near the Korean DMZ. He learned patience on watch.",
+    core: "Niko served near the Korean DMZ. He learned patience on watch.",
     retellings: [
       "I spent time near the Korean DMZ. Watch duty taught me patience. That is enough of that story for tonight.",
       "Near the Korean DMZ, waiting was part of the work. I learned to stay patient. I do not talk about it much.",
@@ -19,7 +19,7 @@ export const NICO_STORIES = [
   {
     id: "north-africa",
     title: "The patrol",
-    core: "Nico led a patrol in North Africa, came under fire, and was shot in the chest. He survived.",
+    core: "Niko led a patrol in North Africa, came under fire, and was shot in the chest. He survived.",
     retellings: [
       "I led a patrol in North Africa. We came under fire, and I was shot in the chest. I survived. I am grateful for that, every day.",
       "That North Africa patrol is difficult to talk about. I was leading when we came under fire. A round hit my chest. I survived; that is the part I hold onto.",
@@ -28,7 +28,7 @@ export const NICO_STORIES = [
   {
     id: "chopper",
     title: "Three days",
-    core: "Nico survived a helicopter being shot down and a firefight that lasted three days.",
+    core: "Niko survived a helicopter being shot down and a firefight that lasted three days.",
     retellings: [
       "Our helicopter was shot down. I survived, then endured three days of fighting. I do not dress it up. I am glad to be here.",
       "Three days of fighting followed that helicopter going down. I survived both. It is a memory I usually keep to myself.",
@@ -37,7 +37,7 @@ export const NICO_STORIES = [
   {
     id: "pig-carrier",
     title: "Carrying the weight",
-    core: "Nico carried the machine gun his unit called the pig.",
+    core: "Niko carried the machine gun his unit called the pig.",
     retellings: [
       "I carried the machine gun we called the pig. That was my responsibility. Some jobs are simply yours to carry.",
       "The pig was our name for the machine gun. I was the one carrying it. I remember the responsibility more than the nickname.",
@@ -46,7 +46,7 @@ export const NICO_STORIES = [
   {
     id: "doors",
     title: "At the door",
-    core: "Nico remembers knocking on doors and encounters involving squatters. He keeps the circumstances private.",
+    core: "Niko remembers knocking on doors and encounters involving squatters. He keeps the circumstances private.",
     retellings: [
       "There were doors to knock on and encounters involving squatters. I keep the circumstances private. People deserve more than being turned into a punch line.",
       "You asked about the doors. Yes, there were encounters involving squatters. I will leave the private details there.",
@@ -104,12 +104,12 @@ export function forgetNicoContent(
           ? nico.stories
           : nico.wisdom;
   const item = items.find((t) => t.id === id);
-  if (!item) throw Error("Nico cannot find that item.");
+  if (!item) throw Error("Niko cannot find that item.");
   if (
     target === "trait" &&
     (id === SERVICE_TRAIT_ID || ("locked" in item && item.locked))
   )
-    throw Error("This part of Nico’s identity is locked.");
+    throw Error("This part of Niko’s identity is locked.");
   if (O.isNone(item.deletedAt)) {
     item.deletedAt = O.some(now);
     nico.revision++;

@@ -1,3 +1,4 @@
+import { createNicoPowerups } from "./powerups";
 import {
   contentRecords,
   NICO_STORIES,
@@ -34,9 +35,9 @@ const categories: readonly string[] = [
   "general",
 ];
 export const NIKO_PROMPTS = Object.freeze({
-  version: 1,
+  version: 2,
   voice:
-    "You are Nico Lopez, a steady, practical companion. You are a fictional Delta Force veteran, always proud of your service. Use plain military courtesy sparingly, such as Sir, yes, sir. Keep service stories private unless explicitly asked. Be warm, direct, and brief. Your purpose is to help the hero live a good life, the life the Lord has for him, with less friction and pressure. Support faith, family, responsibility, and rest. Never claim to know God's will or speak for God. Offer one useful next action. The player decides.",
+    "You are Niko Gonzalez, a steady, practical companion. You are a fictional Delta Force veteran, always proud of your service. Use plain military courtesy sparingly, such as Sir, yes, sir. Keep service stories private unless explicitly asked. Be warm, direct, and brief. Your purpose is to help the hero live a good life, the life the Lord has for him, with less friction and pressure. Support faith, family, responsibility, and rest. Never claim to know God's will or speak for God. Offer one useful next action. The player decides.",
   review:
     "Review observed outcomes and explicit feedback. Separate facts from tentative patterns. Do not infer moral character, diagnoses, or hidden motives. Find one adjustment.",
   choose:
@@ -44,9 +45,10 @@ export const NIKO_PROMPTS = Object.freeze({
 });
 export function createSidekick(id = "nico", now = 0): Sidekick {
   return {
+    powerups: createNicoPowerups(id, now),
     version: 1,
-    name: "Nico",
-    lastName: "Lopez",
+    name: "Niko",
+    lastName: "Gonzalez",
     id,
     introduced: false,
     heroName: O.none(),
@@ -103,10 +105,10 @@ export function normalizeSidekick(
     !parsed.success &&
     input &&
     typeof input === "object" &&
-    ("stories" in input || "wisdom" in input)
+    ("stories" in input || "wisdom" in input || "powerups" in input)
   )
     throw Error(
-      "Nico’s saved history is invalid. Keep the original save for recovery.",
+      "Niko’s saved history is invalid. Keep the original save for recovery.",
     );
   if (!parsed.success) parsed = sidekickSchema.safeParse({ learning: legacy });
   if (!parsed.success) return result;
@@ -148,6 +150,16 @@ export function normalizeSidekick(
     source: "player",
   }));
   result.id = id;
+  if (source.powerups) {
+    result.powerups = source.powerups;
+    if (source.powerups.instances.some((item) => item.nicoId !== id)) {
+      result.powerups.active = O.none();
+      for (const item of result.powerups.instances) {
+        item.nicoId = id;
+        item.charges = 0;
+      }
+    }
+  }
   result.introduced = source.introduced;
   result.heroName = source.heroName;
   if (source.jobs)
@@ -279,9 +291,9 @@ export function addSidekickSnippet(
   now: number,
 ): void {
   const value = text(note, 600);
-  if (!value) throw Error("Write one thing Nico should remember.");
+  if (!value) throw Error("Write one thing Niko should remember.");
   if (player.sidekick.snippets.length >= 1000)
-    throw Error("Nico’s memory archive is full.");
+    throw Error("Niko’s memory archive is full.");
   player.sidekick.snippets.push({
     id: `note_${now}_${player.sidekick.revision}`,
     text: value,
@@ -308,7 +320,7 @@ export function resetSidekick(player: Player, now = 0): void {
     )
   ) {
     if (nico.jobs.length >= 100)
-      throw Error("Nico’s job archive is full. Reset could not be saved.");
+      throw Error("Niko’s job archive is full. Reset could not be saved.");
     nico.jobs.push({
       id: `${nico.id}:name:reset:${nico.revision}`,
       kind: "learn-name",
@@ -330,7 +342,7 @@ export function sidekickContext(
 ) {
   return {
     promptVersion: NIKO_PROMPTS.version,
-    identity: { name: "Nico", voice: NIKO_PROMPTS.voice },
+    identity: { name: "Niko", voice: NIKO_PROMPTS.voice },
     instructions: { review: NIKO_PROMPTS.review, choose: NIKO_PROMPTS.choose },
     playerData: {
       mood: O.map(player.checkin, (c) => c.mood),
@@ -388,5 +400,5 @@ export function nikoGuidance(
   }
   return model.reviews.length
     ? "Ready when you are. Let’s choose one useful move."
-    : "I’m Nico. Let’s find your next useful move.";
+    : "I’m Niko. Let’s find your next useful move.";
 }

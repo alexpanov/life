@@ -6,7 +6,7 @@ import {
 import { selectGame } from "../../packages/core/src/index";
 import * as O from "../../packages/foundation/src/option";
 
-it("restores the hero, Nico, completed jobs and quest history after closing the game", async () => {
+it("restores the hero, Niko, completed jobs and quest history after closing the game", async () => {
   const persistence = createMemoryPersistence();
   let sequence = 0;
   const context = () => ({

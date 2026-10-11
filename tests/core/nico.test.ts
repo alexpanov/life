@@ -40,8 +40,8 @@ function complete(s: GameState, id: string, at = now) {
   );
   return { s, id: q.id };
 }
-describe("Nico's private job queue", () => {
-  it("creates separate Nico identities and onboarding jobs per hero", () => {
+describe("Niko's private job queue", () => {
+  it("creates separate Niko identities and onboarding jobs per hero", () => {
     let s = newGame(context());
     s = send(s, { type: "add-player", name: "Other" });
     expect(new Set(s.players.map((p) => p.sidekick.id)).size).toBe(2);
@@ -73,7 +73,7 @@ describe("Nico's private job queue", () => {
       revision: 1,
     };
     const restored = restoreGame(wire, context());
-    expect(player(restored).sidekick.name).toBe("Nico");
+    expect(player(restored).sidekick.name).toBe("Niko");
     expect(player(restored).sidekick.snippets[0]!.text).toBe("Keep it small");
     expect(player(restored).sidekick.jobs).toHaveLength(2);
     expect(restoreGame(JSON.parse(serializeGame(restored)), context())).toEqual(

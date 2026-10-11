@@ -10,6 +10,8 @@ Load the relevant task skill:
 - Mobile clarity and progressive disclosure: [.ai/skills/dont-make-me-think/SKILL.md](.ai/skills/dont-make-me-think/SKILL.md)
 - Gameplay, Nico, interface: [.ai/skills/quest-product/SKILL.md](.ai/skills/quest-product/SKILL.md)
 - Tests, CI, deployment: [.ai/skills/quest-release/SKILL.md](.ai/skills/quest-release/SKILL.md)
+- Monetization, entitlements and transaction paths: [.ai/skills/life-monetization/SKILL.md](.ai/skills/life-monetization/SKILL.md)
+- Background updates and offline UX: [.ai/skills/life-realtime-ux/SKILL.md](.ai/skills/life-realtime-ux/SKILL.md)
 - Parallel work: [.ai/skills/quest-legion/SKILL.md](.ai/skills/quest-legion/SKILL.md)
 
 Inspect current source, package scripts and Git status before acting. Preserve other agents' work. Follow the user's current scope and the host's higher-priority rules. Report executed checks and observed deployment results; never turn a goal into an unverified claim.

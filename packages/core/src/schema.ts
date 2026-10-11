@@ -1,3 +1,4 @@
+import { nicoPowerupsSchema } from "./powerups";
 import { z } from "zod";
 export const moodSchema = z.enum(["ready", "curious", "quiet", "tired"]);
 export const categorySchema = z.enum(["main", "side", "bonus"]);
@@ -214,6 +215,7 @@ const contentRecord = z.object({
   lastToldAt: optionalTime,
 });
 export const sidekickSchema = z.object({
+  powerups: nicoPowerupsSchema.optional(),
   id: z.string().max(200).default(""),
   introduced: z.boolean().default(false),
   stories: z.array(contentRecord).max(100).default([]),

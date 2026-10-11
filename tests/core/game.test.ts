@@ -41,7 +41,7 @@ describe("stable game transitions", () => {
     expect(view(state).quests).toEqual([]);
     expect(view(state).mission).toEqual(O.none());
     expect(view(state).player.name).toBe("Player 1");
-    expect(view(state).player.sidekick.name).toBe("Nico");
+    expect(view(state).player.sidekick.name).toBe("Niko");
   });
   it("is deterministic and does not mutate the input", () => {
     const state = newGame(context()),

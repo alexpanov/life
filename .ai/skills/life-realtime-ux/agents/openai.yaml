@@ -1,0 +1,4 @@
+interface:
+  display_name: "Life Realtime UX"
+  short_description: "Keep background updates calm and offline use clear"
+  default_prompt: "Use $life-realtime-ux to review a background update flow."

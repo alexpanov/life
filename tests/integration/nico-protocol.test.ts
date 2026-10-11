@@ -46,7 +46,7 @@ const proposalLayer = (proposal: unknown) =>
     propose: () => Effect.succeed(proposal),
   });
 
-describe("Nico JSON routine boundary", () => {
+describe("Niko JSON routine boundary", () => {
   it("prefers explicitly named content over the previous reply and never guesses multiple targets", async () => {
     const controller = await setup();
     controller.send({ type: "remember", text: "Mornings work best" });
@@ -170,7 +170,7 @@ describe("Nico JSON routine boundary", () => {
       )?.deletedAt,
     ).toEqual(O.none());
   });
-  it("never gives the model a hero or Nico identity", async () => {
+  it("never gives the model a hero or Niko identity", async () => {
     const controller = await setup();
     const hero = player(controller);
     let observed = "";

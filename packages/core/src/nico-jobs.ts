@@ -1,6 +1,6 @@
 import * as O from "../../foundation/src/option";
 import type { Sidekick, NicoJob, Player } from "./types";
-/** Jobs belong to one Nico. Every routine returns a new value; input is unchanged. */
+/** Jobs belong to one Niko. Every routine returns a new value; input is unchanged. */
 export const nextNicoJob = (nico: Sidekick): O.Option<NicoJob> =>
   O.fromNullable(
     [...nico.jobs]
@@ -46,7 +46,7 @@ export function queueReflection(
     if (done >= 0) nico.jobs.splice(done, 1);
     else
       throw Error(
-        "Finish a conversation with Nico before adding more reviews.",
+        "Finish a conversation with Niko before adding more reviews.",
       );
   }
   nico.jobs.push({

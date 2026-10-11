@@ -50,7 +50,7 @@ it("retains invitation context across play and copies an honest invitation", asy
     screen.getByText("A friend invited you. Welcome to life."),
   ).toBeVisible();
   await user.click(screen.getByRole("button", { name: "play live" }));
-  expect(screen.getByRole("heading", { name: "Meet Nico." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Meet Niko." })).toBeVisible();
   window.history.replaceState({}, "", "/");
   expect(O.getOrElse(incomingInvitationRepository(), () => "missing")).toBe(
     "inv_opaque_123456",
@@ -77,13 +77,13 @@ it("shows exhausted energy while keeping memory removal available", async () => 
     </MemoryRouter>,
   );
   const user = userEvent.setup();
-  expect(screen.getByText("Nico energy 0/100")).toBeVisible();
-  expect(screen.getByText(/Nico is resting until/)).toBeVisible();
+  expect(screen.getByText("Niko energy 0/100")).toBeVisible();
+  expect(screen.getByText(/Niko is resting until/)).toBeVisible();
   await user.click(screen.getByText("Stories & a little wisdom"));
   expect(
     screen.getByRole("button", { name: "A little wisdom" }),
   ).toBeDisabled();
-  await user.click(screen.getByText("What Nico remembers"));
+  await user.click(screen.getByText("What Niko remembers"));
   await user.click(
     screen.getByRole("button", { name: "Forget memory: I prefer evenings" }),
   );

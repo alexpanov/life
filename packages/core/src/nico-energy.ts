@@ -61,7 +61,7 @@ export function consumeNicoEnergy(
   if (energy.requestIds.includes(requestId)) return energy;
   const status = nicoEnergyStatus(energy, now);
   if (status.sleeping)
-    throw Error("Nico is resting. Energy returns at the next daily reset.");
+    throw Error("Niko is resting. Energy returns at the next daily reset.");
   if (!status.unlimited) energy.requestIds.push(requestId);
   return energy;
 }

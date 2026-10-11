@@ -1,3 +1,14 @@
+import type { InteractionSurface } from "../../core/src/surface";
+import { activeNicoPowerup } from "../../core/src/powerups";
+import {
+  createMemorySnippetArchive,
+  type createSnippetArchive,
+} from "./snippet-archive";
+import {
+  prepareLLMGeneratedSnippetForStorage,
+  mockLLMSnippetPreparerLayer,
+} from "./prepare-llm-snippet";
+import type { LLMSnippetInput } from "../../core/src/llm-snippet";
 import { Effect, Result as EffectResult } from "effect";
 import {
   serializeGame,
@@ -43,6 +54,10 @@ function canonicalWireJson(raw: string): string {
 export function createGameController(
   persistence: Persistence,
   context: () => TransitionContext,
+  snippetArchive: ReturnType<
+    typeof createSnippetArchive
+  > = createMemorySnippetArchive(),
+  surface: InteractionSurface = "web",
 ) {
   let snapshot: StoreSnapshot = {
       game: O.none(),
@@ -94,6 +109,29 @@ export function createGameController(
       };
     },
     getSnapshot: () => snapshot,
+    getSurface: () => surface,
+    readActiveNicoPowerup: () =>
+      activeNicoPowerup(currentHero().sidekick, context().now),
+    /** Internal only: raw model evidence is archived before any proposed mutation. */
+    archiveNicoGeneration(input: LLMSnippetInput) {
+      return Effect.gen(function* () {
+        const stamp = context();
+        const prepared = yield* prepareLLMGeneratedSnippetForStorage(input, {
+          id: `generation:${stamp.eventId}`,
+          now: stamp.now,
+        }).pipe(Effect.provide(mockLLMSnippetPreparerLayer));
+        return yield* snippetArchive.routines.append(input.heroId, prepared);
+      });
+    },
+    listNicoGenerations() {
+      return Effect.flatMap(
+        Effect.try({
+          try: () => currentHero().id,
+          catch: () => new NicoEnergyError("Game is loading."),
+        }),
+        (heroId) => snippetArchive.repository.list(heroId),
+      );
+    },
     async load() {
       const read = await Effect.runPromise(
         Effect.result(persistence.repository.load()),
@@ -185,7 +223,7 @@ export function createGameController(
       ).length;
       if (!status.unlimited && status.remaining <= reserved)
         throw new NicoEnergyError(
-          "Nico is resting. Energy returns at the next daily reset.",
+          "Niko is resting. Energy returns at the next daily reset.",
         );
       const reservation = Object.freeze({
         heroId: hero.id,
@@ -206,6 +244,10 @@ export function createGameController(
     completeNicoInteraction(
       reservation: NicoEnergyReservation,
       command: O.Option<Command>,
+      powerupId: O.Option<{
+        instanceId: string;
+        expectedActivatedAt: number;
+      }> = O.none(),
     ): O.Option<TransitionResult> {
       const hero = currentHero();
       if (reservations.get(reservation.requestId) !== reservation)
@@ -225,12 +267,26 @@ export function createGameController(
           at,
         ),
       );
+      const powered = O.isSome(powerupId)
+        ? Effect.runSync(
+            executeRoutine(
+              consume.state,
+              {
+                type: "consume-powerup",
+                requestId: reservation.requestId,
+                instanceId: powerupId.value.instanceId,
+                expectedActivatedAt: powerupId.value.expectedActivatedAt,
+              },
+              at,
+            ),
+          )
+        : consume;
       const result = O.isSome(command)
         ? O.some(
-            Effect.runSync(executeRoutine(consume.state, command.value, at)),
+            Effect.runSync(executeRoutine(powered.state, command.value, at)),
           )
         : O.none<TransitionResult>();
-      const state = O.isSome(result) ? result.value.state : consume.state;
+      const state = O.isSome(result) ? result.value.state : powered.state;
       update({
         game: O.some(state),
         ...(O.isSome(result) ? { notice: result.value.message } : {}),

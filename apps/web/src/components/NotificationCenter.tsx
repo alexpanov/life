@@ -42,7 +42,7 @@ export function NotificationCenter({
           .filter((e) => e.type === "quest:done")
           .map((e) => ({
             id: `quest-${player.id}-${e.id}`,
-            title: "Nico",
+            title: "Niko",
             body: "Great job, boss. Let's take a moment to reflect.",
             route: "/",
           })),
@@ -50,7 +50,7 @@ export function NotificationCenter({
           .filter((j) => j.status === "done")
           .map((j) => ({
             id: `job-${player.id}-${j.id}`,
-            title: "Nico",
+            title: "Niko",
             body: "Got it, boss. I've remembered that.",
             route: "/nico",
           })),
@@ -79,7 +79,7 @@ export function NotificationCenter({
           notificationCenter.publish({
             id: `alerts-${player.id}`,
             title: "life",
-            body: "Enable notifications to hear from Nico when you’re away.",
+            body: "Enable notifications to hear from Niko when you’re away.",
             route: "/notifications",
           }),
         );
@@ -154,7 +154,7 @@ export function NotificationsPage() {
     void Effect.runPromise(
       notificationCenter.publish({
         id: `test-now-${id}`,
-        title: "Nico",
+        title: "Niko",
         body: "Comms check. You're hearing me inside life.",
         route: "/nico",
       }),
@@ -167,7 +167,7 @@ export function NotificationsPage() {
       void Effect.runPromise(
         notificationCenter.publish({
           id: `test-later-${id}`,
-          title: "Nico",
+          title: "Niko",
           body: "Second comms check, boss. Your update is ready.",
           route: "/nico",
         }),
@@ -184,7 +184,7 @@ export function NotificationsPage() {
       </p>
       <h1>Stay in touch.</h1>
       <p>
-        Let Nico reach you when an update is ready. While you're here, updates
+        Let Niko reach you when an update is ready. While you're here, updates
         stay inside the game.
       </p>
       {state.access === "default" && (

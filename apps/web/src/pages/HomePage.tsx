@@ -134,7 +134,7 @@ export function HomePage({
           <h1 className="nico-heading">By the way, what’s your name?</h1>
           <form onSubmit={(event) => submit(event, "name")}>
             <Field name="text" label="Your name" required />
-            <Button type="submit">Tell Nico</Button>
+            <Button type="submit">Tell Niko</Button>
           </form>
         </section>
       );
@@ -191,14 +191,14 @@ export function HomePage({
     return (
       <section className="focus-screen">
         <Sender source="niko" />
-        <h1 className="nico-heading">Meet Nico.</h1>
+        <h1 className="nico-heading">Meet Niko.</h1>
         <p className="nico-copy">
           {reply ||
-            "Hey friend, I’m Nico Lopez. I’d like to be your sidekick. What are you up to?"}
+            "Hey friend, I’m Niko Gonzalez. I’d like to be your sidekick. What are you up to?"}
         </p>
         <form onSubmit={(event) => submit(event, "meet")}>
           <Area name="text" label="What are you up to?" />
-          <Button type="submit">Meet Nico</Button>
+          <Button type="submit">Meet Niko</Button>
         </form>
       </section>
     );

@@ -39,7 +39,7 @@ export function Website({
           LIFE
           <LifeCoin />
         </span>
-        <small>YOUR WORLD. YOUR NEXT MOVE.</small>
+        <small>A GOOD LIFE. ONE CLEAR NEXT STEP.</small>
       </header>
       <section className="landing-body" aria-labelledby="landing-title">
         <div className="landing-orbit" aria-hidden="true">
@@ -55,8 +55,10 @@ export function Website({
           <em>Worth playing.</em>
         </h1>
         <p>
-          Places to discover. Quests to finish.
-          <br />A sidekick named Nico to help you find your next move.
+          Live the life God has for you, with less pressure.
+          <br />
+          Niko helps you choose one quest, take the next step, and learn as you
+          go.
         </p>
         {O.isSome(invitation) && (
           <p className="invitation-welcome">
@@ -77,7 +79,7 @@ export function Website({
           <ArrowUpRight size={25} aria-hidden="true" />
         </button>
         <span className="landing-caption">
-          Start small. Pick one quest. Make it happen.
+          Faith. Family. Responsibility. Room to rest.
         </span>
       </section>
       <footer className="landing-footer">

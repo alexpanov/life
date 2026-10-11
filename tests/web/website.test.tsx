@@ -27,7 +27,7 @@ it("starts the actual game from the lowercase play live button", async () => {
   const play = screen.getByRole("button", { name: "play live" });
   expect(play.querySelector("sup svg")).toHaveAttribute("aria-hidden", "true");
   await userEvent.setup().click(play);
-  expect(screen.getByRole("heading", { name: "Meet Nico." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Meet Niko." })).toBeVisible();
   expect(
     screen.getByRole("navigation", { name: "Main navigation" }),
   ).toBeVisible();

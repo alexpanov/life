@@ -1,14 +1,30 @@
 import { Link } from "react-router";
 import { useState } from "react";
-import { Effect } from "effect";
+import { browserIsOnline, useBrowserOnline } from "../connectivity";
+import {
+  useForm,
+  type Resolver,
+  type FieldValues,
+  type FieldErrors,
+} from "react-hook-form";
+import {
+  nicoChatForm,
+  nicoFeedbackForm,
+  nicoTraitForm,
+  type FormDefinition,
+} from "../../../../packages/core/src/forms";
+import * as E from "../../../../packages/foundation/src/either";
+import { Effect, type Layer } from "effect";
 import { ThumbsDown, LockKeyhole } from "lucide-react";
 import type { GameController } from "../../../../packages/application/src/controller";
 import { runNicoChatRoutine } from "../../../../packages/application/src/routine-protocol";
-import { mockNicoLayer } from "../../../../packages/application/src/nico-model";
+import {
+  mockNicoLayer,
+  type NicoModel,
+} from "../../../../packages/application/src/nico-model";
 import type {
   Player,
   NicoContentTarget,
-  NicoFeedbackReason,
 } from "../../../../packages/core/src/types";
 import {
   NICO_STORIES,
@@ -16,8 +32,24 @@ import {
 } from "../../../../packages/core/src/index";
 import * as O from "../../../../packages/foundation/src/option";
 import type { PageActions } from "../ui-types";
-import { Sender, Area } from "../components/presentation";
+import { Sender } from "../components/presentation";
 import { Button } from "../components/ui/button";
+
+function formResolver<T extends FieldValues>(
+  definition: FormDefinition<T>,
+): Resolver<T> {
+  return (values) => {
+    const result = definition.parse(values);
+    if (E.isRight(result)) return { values: result.right, errors: {} };
+    const errors = Object.fromEntries(
+      result.left.map((issue) => [
+        issue.field,
+        { type: "validation", message: issue.message },
+      ]),
+    ) as FieldErrors<T>;
+    return { values: {}, errors };
+  };
+}
 
 type Target = { kind: NicoContentTarget; id: string };
 export function NicoPage({
@@ -25,37 +57,51 @@ export function NicoPage({
   player,
   now,
   send,
+  modelLayer = mockNicoLayer,
 }: {
+  modelLayer?: Layer.Layer<NicoModel>;
   controller: GameController;
   player: Player;
   now: number;
   send: PageActions["send"];
 }) {
+  const online = useBrowserOnline();
   const energy = nicoEnergyStatus(player.energy, now);
   const [reply, setReply] = useState("Sir, yes, sir. What’s on your mind?");
   const [target, setTarget] = useState<O.Option<Target>>(O.none());
   const [feedback, setFeedback] = useState<O.Option<Target>>(O.none());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [draft, setDraft] = useState("");
+  const chatForm = useForm({
+    defaultValues: { chat: "" },
+    resolver: formResolver(nicoChatForm),
+  });
+  const feedbackForm = useForm({
+    defaultValues: { reason: "not-for-me" as const, note: "" },
+    resolver: formResolver(nicoFeedbackForm),
+  });
+  const traitForm = useForm({
+    defaultValues: { trait: "" },
+    resolver: formResolver(nicoTraitForm),
+  });
   async function chat(text: string) {
-    if (!text.trim() || busy) return;
+    if (!text.trim() || busy || !browserIsOnline()) return;
     setBusy(true);
     setError("");
     try {
       const response = await Effect.runPromise(
         runNicoChatRoutine(controller, text, target).pipe(
-          Effect.provide(mockNicoLayer),
+          Effect.provide(modelLayer),
         ),
       );
       setReply(response.text);
       setTarget(response.target);
-      setDraft("");
+      chatForm.reset();
     } catch (cause) {
       setError(
         cause instanceof Error
           ? cause.message
-          : "Nico could not respond. Please try again.",
+          : "Niko could not respond. Please try again.",
       );
     } finally {
       setBusy(false);
@@ -65,36 +111,52 @@ export function NicoPage({
     return (
       <section className="focus-screen">
         <h1>Leave this behind.</h1>
-        <p>Nico will stop bringing this up.</p>
+        <p>Niko will stop bringing this up.</p>
         <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            const data = new FormData(event.currentTarget);
+          noValidate
+          onSubmit={feedbackForm.handleSubmit((values) => {
             if (
               send({
                 type: "nico-feedback",
                 target: feedback.value.kind,
                 id: feedback.value.id,
-                reason: String(data.get("reason")) as NicoFeedbackReason,
-                text: String(data.get("note") || ""),
+                reason: values.reason,
+                text: values.note,
               })
             ) {
+              feedbackForm.reset();
               setFeedback(O.none());
               setTarget(O.none());
               setReply("Understood. I’ll leave that behind.");
             }
-          }}
+          })}
         >
           <label className="field">
             Why?
-            <select name="reason" defaultValue="not-for-me">
+            <select {...feedbackForm.register("reason")}>
               <option value="not-for-me">Not for me</option>
               <option value="not-interesting">Not interesting</option>
               <option value="repetitive">Repetitive</option>
               <option value="other">Something else</option>
             </select>
           </label>
-          <Area name="note" label="Anything else? (optional)" />
+          <label className="field">
+            Anything else? (optional)
+            <textarea
+              rows={3}
+              {...feedbackForm.register("note")}
+              aria-invalid={!!feedbackForm.formState.errors.note}
+              aria-describedby="feedback-note-error"
+            />
+          </label>
+          {feedbackForm.formState.errors.note && (
+            <p id="feedback-note-error" role="alert">
+              {feedbackForm.formState.errors.note.message}
+            </p>
+          )}
+          {feedbackForm.formState.errors.reason && (
+            <p role="alert">{feedbackForm.formState.errors.reason.message}</p>
+          )}
           <div className="focus-actions">
             <Button type="submit">Let it go</Button>
             <Button
@@ -115,15 +177,20 @@ export function NicoPage({
   );
   return (
     <section className="focus-screen nico-conversation">
-      <h1>Nico Lopez.</h1>
+      <h1>Niko Gonzalez.</h1>
       <p className="nico-energy">
         {energy.unlimited
-          ? "Nico energy · Unlimited"
-          : `Nico energy ${energy.remaining}/100`}
+          ? "Niko energy · Unlimited"
+          : `Niko energy ${energy.remaining}/100`}
+      </p>
+      <p role="status" style={{ minHeight: "3em" }}>
+        {online
+          ? "Your quests and notes stay saved on this device."
+          : "You’re offline. Niko is resting. Your quests and notes are still here."}
       </p>
       {energy.sleeping && (
         <p>
-          Nico is resting until{" "}
+          Niko is resting until{" "}
           {new Date(energy.resetsAt).toLocaleTimeString([], {
             hour: "numeric",
             minute: "2-digit",
@@ -137,7 +204,7 @@ export function NicoPage({
         {O.isSome(target) && (
           <Button
             variant="ghost"
-            aria-label="Feedback on Nico’s reply"
+            aria-label="Feedback on Niko’s reply"
             onClick={() => setFeedback(target)}
           >
             <ThumbsDown size={18} />
@@ -147,23 +214,27 @@ export function NicoPage({
       </div>
       {error && <p role="alert">{error}</p>}
       <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          void chat(draft);
-        }}
+        noValidate
+        onSubmit={chatForm.handleSubmit((values) => chat(values.chat))}
       >
         <label className="field">
-          Talk to Nico
+          Talk to Niko
           <textarea
-            name="chat"
+            {...chatForm.register("chat")}
             rows={3}
-            maxLength={2000}
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
+            readOnly={!online}
+            aria-disabled={!online}
+            aria-invalid={!!chatForm.formState.errors.chat}
+            aria-describedby="chat-error"
             placeholder="Tell me a story. Or: remember that…"
           />
         </label>
-        <Button type="submit" disabled={busy || !draft.trim()}>
+        {chatForm.formState.errors.chat && (
+          <p id="chat-error" role="alert">
+            {chatForm.formState.errors.chat.message}
+          </p>
+        )}
+        <Button type="submit" disabled={busy || !online}>
           {busy ? "Listening…" : "Send"}
         </Button>
       </form>
@@ -178,7 +249,7 @@ export function NicoPage({
             <Button
               key={story.id}
               variant="ghost"
-              disabled={busy || energy.sleeping}
+              disabled={busy || energy.sleeping || !online}
               onClick={() => void chat(`Please tell me ${story.title}`)}
             >
               {story.title}
@@ -186,7 +257,7 @@ export function NicoPage({
           ))}
           <Button
             variant="ghost"
-            disabled={busy || energy.sleeping}
+            disabled={busy || energy.sleeping || !online}
             onClick={() => void chat("Share a bit of wisdom")}
           >
             A little wisdom
@@ -228,7 +299,7 @@ export function NicoPage({
           })}
       </details>
       <details className="quiet-details">
-        <summary>What Nico remembers</summary>
+        <summary>What Niko remembers</summary>
         {player.sidekick.snippets
           .filter((item) => O.isNone(item.deletedAt))
           .map((item) => (
@@ -248,7 +319,7 @@ export function NicoPage({
         <p>{player.sidekick.reviews.length} recent quest outcomes.</p>
       </details>
       <details className="quiet-details">
-        <summary>Nico’s personality</summary>
+        <summary>Niko’s personality</summary>
         {player.sidekick.traits
           .filter((item) => O.isNone(item.deletedAt))
           .map((item) => (
@@ -272,31 +343,44 @@ export function NicoPage({
             </div>
           ))}
         <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            const text = String(
-              new FormData(event.currentTarget).get("trait") || "",
-            ).trim();
-            if (text && send({ type: "set-nico-trait", text }))
-              event.currentTarget.reset();
-          }}
+          noValidate
+          onSubmit={traitForm.handleSubmit((values) => {
+            if (send({ type: "set-nico-trait", text: values.trait }))
+              traitForm.reset();
+          })}
         >
-          <Area name="trait" label="How should Nico support you?" />
-          <Button type="submit">Tell Nico</Button>
+          <label className="field">
+            How should Niko support you?
+            <textarea
+              rows={3}
+              {...traitForm.register("trait")}
+              aria-invalid={!!traitForm.formState.errors.trait}
+              aria-describedby="trait-error"
+            />
+          </label>
+          {traitForm.formState.errors.trait && (
+            <p id="trait-error" role="alert">
+              {traitForm.formState.errors.trait.message}
+            </p>
+          )}
+          <Button type="submit">Tell Niko</Button>
         </form>
       </details>
+      <Link to="/powerups" className="back-link">
+        Power-ups
+      </Link>
       <Link to="/invite" className="back-link">
         Invite a friend
       </Link>
       <details className="quiet-details">
-        <summary>About Nico</summary>
+        <summary>About Niko</summary>
         <p>
-          Nico Lopez is a fictional veteran and your guide in life. His stories
-          belong to the character. You’re the hero.
+          Niko Gonzalez is a fictional veteran and your guide in life. His
+          stories belong to the character. You’re the hero.
         </p>
         <p>
-          His replies currently use a local simulator. Memories and choices are
-          saved in this browser.
+          Replies use a simulator until a model is configured. Memories and
+          choices are saved in this browser.
         </p>
       </details>
     </section>

@@ -20,7 +20,7 @@ import {
 } from "../../packages/application/src/controller";
 const notice: Notice = {
   id: "test",
-  title: "Nico",
+  title: "Niko",
   body: "Ready, boss.",
   route: "/nico",
 };

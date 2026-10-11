@@ -9,3 +9,14 @@ native-dist/
 apps/iphone/.expo/
 playwright-report/
 test-results/
+
+# Only ciphertext environment files and the empty template may enter source.
+!.env.example
+!.env.development
+!.env.live
+.env.keys
+.env.keys.*
+*.pem
+*.key
+*.p12
+*.pfx

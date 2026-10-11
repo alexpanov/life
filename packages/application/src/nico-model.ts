@@ -1,3 +1,5 @@
+import type { InteractionSurface } from "../../core/src/surface";
+import type { PowerupTemplate } from "../../core/src/powerups";
 import { Context, Effect, Layer } from "effect";
 import type { SidekickContext } from "../../core/src/sidekick";
 import * as O from "../../foundation/src/option";
@@ -6,6 +8,8 @@ export interface NicoTarget {
   id: string;
 }
 export interface NicoChatRequest {
+  surface: InteractionSurface;
+  powerup: O.Option<Readonly<PowerupTemplate>>;
   chat: string;
   system: { voice: string; instructions: string };
   heroName: O.Option<string>;
@@ -76,6 +80,24 @@ export function simulateNicoProposal(request: NicoChatRequest): unknown {
     return say(
       "I served in Delta Force. I’m proud of serving my country. I keep most of those days to myself.",
     );
+  if (O.isSome(request.powerup)) {
+    const boost = request.powerup.value;
+    if (boost.id === "mutual-offer")
+      return say(
+        "Make the offer clear, boss: here is what I can do, here is how it helps you, and here is my ask. What would make this worthwhile for the other person?",
+      );
+    if (boost.id === "balkan-smile")
+      return say(
+        "Zero smiles. Name the obstacle. Pick the smallest action you control and do that first. What is stopping you right now?",
+      );
+    if (boost.id === "delta-buddies")
+      return say(
+        "Three simulated perspectives. Planner: choose one next step. Checker: name the assumption that could fail. Contingency: pick a smaller fallback. Which part of your plan needs checking?",
+      );
+    return say(
+      `Focus: ${boost.name}. Your instructions: ${boost.instructions.slice(0, 450)}. What is one useful next move?`,
+    );
+  }
   return say(
     "I’m with you, boss. What’s the next small move? You can also ask me to remember something.",
   );
@@ -102,7 +124,7 @@ export const mockNicoLayer = Layer.succeed(NicoModel)({
   reply: (context, intent) =>
     Effect.succeed(
       intent === "meet"
-        ? "Hey friend, I’m Nico Lopez. I’d like to be your sidekick. What are you up to?"
+        ? "Hey friend, I’m Niko Gonzalez. I’d like to be your sidekick. What are you up to?"
         : intent === "celebrate"
           ? context.playerData.recentReviews.at(-1)?.outcome === "blocked" ||
             context.playerData.recentReviews.at(-1)?.outcome === "set-aside"

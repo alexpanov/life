@@ -19,3 +19,9 @@ Database SQL isolation tests must be run against the development Supabase projec
 128 unit, integration and React JSDOM tests passed across 17 files. Typecheck, ESLint and production web build passed; the combined local gate took 5.95 seconds. Checks cover locked canon, story history, wisdom nonrepetition, soft deletion, model routine validation, energy reservations, verified-referral boundaries, stable migrated invitation codes, notification routing and mocked Realtime transport. A reload regression caught unnecessary backup rotation caused by JSON property ordering; comparison now ignores property order while persisting actual migrations.
 
 Expo iOS export passed (928 modules); browser/device delivery remains unverified. No Supabase project, real model endpoint, phone verification or closed-app push service is connected. These checks do not establish live database security or referral enforcement. The single Playwright launch test remains unexecuted because the supported browser capability is unavailable.
+
+## Handoff release
+
+193 tests passed across 33 files: pure domain, Effect/repository integration, provider/gateway transport and React JSDOM. TypeScript, ESLint, production Vite/Worker build and encrypted-environment guard passed; combined local gate 9.46 seconds. Dotenvx round trips, missing-key rejection and source guards passed. Direct execution of the built Worker served main, starter and Telegram entries and reported unconfigured model status. No real model call ran. Browser visual QA, the single Playwright test, physical iPhone behavior and registered Telegram Mini App launch remain unverified.
+
+The final iPhone export also passed (934 modules). Native signing and App Store publication remain separate.

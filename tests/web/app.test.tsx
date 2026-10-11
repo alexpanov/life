@@ -52,17 +52,17 @@ async function addMission(controller: ReturnType<typeof createGameController>) {
   });
 }
 describe("calm mobile React journey", () => {
-  it("introduces Nico once and persists the hero's first memory", async () => {
+  it("introduces Niko once and persists the hero's first memory", async () => {
     const { user, controller, persistence, context, rendered } = await setup(
       "/",
       false,
     );
-    expect(screen.getByRole("heading", { name: "Meet Nico." })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Meet Niko." })).toBeVisible();
     await user.type(
       screen.getByLabelText("What are you up to?"),
       "Exploring a new city",
     );
-    await user.click(screen.getByRole("button", { name: "Meet Nico" }));
+    await user.click(screen.getByRole("button", { name: "Meet Niko" }));
     expect(
       screen.getByRole("heading", { name: "How are you feeling?" }),
     ).toBeVisible();
@@ -76,7 +76,7 @@ describe("calm mobile React journey", () => {
       </MemoryRouter>,
     );
     expect(
-      screen.queryByRole("heading", { name: "Meet Nico." }),
+      screen.queryByRole("heading", { name: "Meet Niko." }),
     ).not.toBeInTheDocument();
     const game = restored.getSnapshot().game;
     expect(
@@ -127,7 +127,7 @@ describe("calm mobile React journey", () => {
     ).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Continue" }));
     await user.type(screen.getByLabelText("Your name"), "Alex");
-    await user.click(screen.getByRole("button", { name: "Tell Nico" }));
+    await user.click(screen.getByRole("button", { name: "Tell Niko" }));
     await user.type(
       screen.getByLabelText("Your takeaway"),
       "Keep a glass nearby",

@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 const started = performance.now();
-const commands = ["typecheck", "lint", "test", "build"];
+const commands = ["typecheck", "lint", "test", "build", "env:check"];
 const results = await Promise.all(
   commands.map(
     (command) =>

@@ -1,0 +1,2048 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "create-powerup"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 240
+            },
+            "context": {
+              "type": "string",
+              "maxLength": 2000
+            },
+            "instructions": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": [
+            "name",
+            "description",
+            "context",
+            "instructions"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "activate-powerup"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 250
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "deactivate-powerup"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "tell-story"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "storyId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "explicitRequest": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "storyId",
+            "explicitRequest"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "share-wisdom"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "forget-memory"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "forget-trait"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "forget-story"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "forget-wisdom"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "id"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "nico-feedback"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "string",
+              "enum": [
+                "memory",
+                "trait",
+                "story",
+                "wisdom"
+              ]
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "reason": {
+              "type": "string",
+              "enum": [
+                "not-interesting",
+                "repetitive",
+                "not-for-me",
+                "other"
+              ]
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "target",
+            "id",
+            "reason",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "meet-nico"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "name-hero"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "reflect-quest"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "questId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "questId",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "quest-progress"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "questId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "text": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "questId",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "set-nico-trait"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "evolve-nico"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "check-in"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "mood": {
+              "type": "string",
+              "enum": [
+                "ready",
+                "curious",
+                "quiet",
+                "tired"
+              ]
+            }
+          },
+          "required": [
+            "mood"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "accept-offer"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "offer": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "existing"
+                    },
+                    "realmId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "questId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "realmId",
+                    "questId"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "proposal"
+                    },
+                    "realmId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "key": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "offeredAt": {
+                      "type": "number"
+                    },
+                    "quest": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "maxLength": 20000
+                        },
+                        "detail": {
+                          "type": "string",
+                          "maxLength": 20000
+                        },
+                        "nextMove": {
+                          "type": "string",
+                          "maxLength": 20000
+                        },
+                        "destination": {
+                          "type": "string",
+                          "maxLength": 20000
+                        },
+                        "category": {
+                          "type": "string",
+                          "enum": [
+                            "main",
+                            "side",
+                            "bonus"
+                          ]
+                        },
+                        "xp": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 20000
+                            }
+                          ]
+                        },
+                        "loot": {
+                          "type": "string",
+                          "maxLength": 20000
+                        },
+                        "suggestionKey": {
+                          "type": "string",
+                          "maxLength": 20000
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "realmId",
+                    "key",
+                    "offeredAt",
+                    "quest"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "required": [
+            "offer"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "dismiss-offer"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "offer": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "existing"
+                    },
+                    "realmId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "questId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "realmId",
+                    "questId"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "const": "proposal"
+                    },
+                    "realmId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "key": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "offeredAt": {
+                      "type": "number"
+                    },
+                    "quest": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "maxLength": 20000
+                        },
+                        "detail": {
+                          "type": "string",
+                          "maxLength": 20000
+                        },
+                        "nextMove": {
+                          "type": "string",
+                          "maxLength": 20000
+                        },
+                        "destination": {
+                          "type": "string",
+                          "maxLength": 20000
+                        },
+                        "category": {
+                          "type": "string",
+                          "enum": [
+                            "main",
+                            "side",
+                            "bonus"
+                          ]
+                        },
+                        "xp": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "string",
+                              "maxLength": 20000
+                            }
+                          ]
+                        },
+                        "loot": {
+                          "type": "string",
+                          "maxLength": 20000
+                        },
+                        "suggestionKey": {
+                          "type": "string",
+                          "maxLength": 20000
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "realmId",
+                    "key",
+                    "offeredAt",
+                    "quest"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "required": [
+            "offer"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "propose-mission"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "questId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "questId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "choose-mission"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "questId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "questId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "retain-mission"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "set-aside"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "finish-review"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "set-status"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "questId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "done",
+                "impossible"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "questId",
+            "status"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "add-quest"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "quest": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "detail": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "nextMove": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "destination": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "category": {
+                  "type": "string",
+                  "enum": [
+                    "main",
+                    "side",
+                    "bonus"
+                  ]
+                },
+                "xp": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "maxLength": 20000
+                    }
+                  ]
+                },
+                "loot": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "suggestionKey": {
+                  "type": "string",
+                  "maxLength": 20000
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "quest"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "edit-quest"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "questId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "quest": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "detail": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "nextMove": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "destination": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "category": {
+                  "type": "string",
+                  "enum": [
+                    "main",
+                    "side",
+                    "bonus"
+                  ]
+                },
+                "xp": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string",
+                      "maxLength": 20000
+                    }
+                  ]
+                },
+                "loot": {
+                  "type": "string",
+                  "maxLength": 20000
+                },
+                "suggestionKey": {
+                  "type": "string",
+                  "maxLength": 20000
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "questId",
+            "quest"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "enter-realm"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "realmId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "realmId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "add-realm"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 20000
+            },
+            "location": {
+              "type": "string",
+              "maxLength": 20000
+            },
+            "home": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "name",
+            "location"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "edit-realm"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "realmId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "name": {
+              "type": "string",
+              "maxLength": 20000
+            },
+            "location": {
+              "type": "string",
+              "maxLength": 20000
+            },
+            "home": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "realmId",
+            "name",
+            "location",
+            "home"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "open-dungeon"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "campaignId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "campaignId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "add-dungeon"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 20000
+            },
+            "subtitle": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "name",
+            "subtitle"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "practice"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "skillId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "note": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "skillId",
+            "note"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "undo-practice"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "skillId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "skillId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "pause-skill"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "skillId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "paused": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "skillId",
+            "paused"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "add-skill"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 20000
+            },
+            "halfLifeDays": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "name",
+            "halfLifeDays"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "edit-skill"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "skillId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "name": {
+              "type": "string",
+              "maxLength": 20000
+            },
+            "halfLifeDays": {
+              "type": "number"
+            },
+            "graceDays": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "skillId",
+            "name",
+            "halfLifeDays",
+            "graceDays"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "add-loot"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "add-player"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "switch-player"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "playerId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "playerId"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "remember"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "reset-memory"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "routine": {
+          "type": "string",
+          "const": "settings"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "settings": {
+              "type": "object",
+              "properties": {
+                "sound": {
+                  "type": "boolean"
+                },
+                "autoCalls": {
+                  "type": "boolean"
+                },
+                "callIntervalMinutes": {
+                  "type": "number"
+                },
+                "driving": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "settings"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "version",
+        "requestId",
+        "routine",
+        "parameters"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

@@ -1,3 +1,10 @@
+import { createPowerup, activatePowerup, consumePowerup } from "./powerups";
+export {
+  activeNicoPowerup,
+  DEFAULT_POWERUPS,
+  POWERUP_DURATION_MS,
+} from "./powerups";
+export type { PowerupTemplate, NicoPowerup, NicoPowerups } from "./powerups";
 import { consumeNicoEnergy, createNicoEnergy } from "./nico-energy";
 export {
   nicoEnergyStatus,
@@ -48,6 +55,21 @@ export type * from "./types";
 export { NIKO_PROMPTS } from "./sidekick";
 export type { SidekickContext } from "./sidekick";
 export type Command =
+  | {
+      type: "create-powerup";
+      name: string;
+      description: string;
+      context: string;
+      instructions: string;
+    }
+  | { type: "activate-powerup"; id: string }
+  | { type: "deactivate-powerup" }
+  | {
+      type: "consume-powerup";
+      instanceId: string;
+      requestId: string;
+      expectedActivatedAt: number;
+    }
   | { type: "consume-nico-energy"; requestId: string }
   | { type: "tell-story"; storyId: string; explicitRequest: boolean }
   | { type: "share-wisdom" }
@@ -210,6 +232,36 @@ export function transition(
   if (p.settings.driving && command.type !== "settings")
     throw Error("Park before using game controls.");
   switch (command.type) {
+    case "create-powerup":
+      createPowerup(
+        p.sidekick,
+        {
+          name: command.name,
+          description: command.description,
+          context: command.context,
+          instructions: command.instructions,
+        },
+        `powerup_${context.eventId}`,
+        now,
+      );
+      result.message = "Power-up saved.";
+      break;
+    case "activate-powerup":
+      activatePowerup(p.sidekick, command.id, now);
+      result.message = "Ready for Niko’s next reply.";
+      break;
+    case "deactivate-powerup":
+      p.sidekick.powerups.active = O.none();
+      break;
+    case "consume-powerup":
+      consumePowerup(
+        p.sidekick,
+        command.instanceId,
+        command.requestId,
+        now,
+        command.expectedActivatedAt,
+      );
+      break;
     case "consume-nico-energy":
       p.energy = consumeNicoEnergy(p.energy, command.requestId, now);
       break;
@@ -263,7 +315,7 @@ export function transition(
       break;
     case "name-hero": {
       const name = command.name.trim().slice(0, 60);
-      invariant(name, "What should Nico call you?");
+      invariant(name, "What should Niko call you?");
       p.name = name;
       p.sidekick.heroName = O.some(name);
       p.sidekick = finishNicoJob(p.sidekick, "learn-name", now);
@@ -312,14 +364,14 @@ export function transition(
     }
     case "set-nico-trait": {
       const text = command.text.trim().slice(0, 200);
-      invariant(text, "Describe how you want Nico to help.");
+      invariant(text, "Describe how you want Niko to help.");
       if (
         p.sidekick.traits.some((t) => t.source === "player" && t.text === text)
       )
         break;
       invariant(
         p.sidekick.traits.length < 30,
-        "Nico has enough traits for now.",
+        "Niko has enough traits for now.",
       );
       p.sidekick.traits.push({
         id: `trait_${context.eventId}`,
@@ -515,11 +567,11 @@ export function transition(
       break;
     case "remember":
       addSidekickSnippet(p, command.text, now);
-      result.message = "Nico will remember.";
+      result.message = "Niko will remember.";
       break;
     case "reset-memory":
       resetSidekick(p, now);
-      result.message = "Nico’s memory reset. Your progress is safe.";
+      result.message = "Niko’s memory reset. Your progress is safe.";
       break;
     case "settings":
       p.settings = {
@@ -555,6 +607,13 @@ export function transition(
                 `invite_${context.eventId}_${result.state.players.indexOf(hero)}`,
                 now,
               );
+          if (previous)
+            hero.sidekick.powerups = copy(previous.sidekick.powerups);
+          else {
+            hero.sidekick.powerups.active = O.none();
+            for (const item of hero.sidekick.powerups.instances)
+              item.charges = 0;
+          }
           if (!previous) continue;
           for (const key of ["stories", "wisdom"] as const) {
             for (const record of hero.sidekick[key]) {
@@ -683,3 +742,20 @@ export function sidekickMemory(snapshot: Snapshot, now: number): Sidekick {
 function invariant(condition: unknown, message: string): asserts condition {
   if (!condition) throw Error(message);
 }
+
+export {
+  nicoChatForm,
+  nicoFeedbackForm,
+  nicoTraitForm,
+  NICO_FORM_DEFINITIONS,
+} from "./forms";
+export type {
+  FormDefinition,
+  FormIssue,
+  NicoChatValues,
+  NicoFeedbackValues,
+  NicoTraitValues,
+} from "./forms";
+export type { PreparedLLMSnippet, LLMSnippetInput } from "./llm-snippet";
+export { NICO_THOUGHTS, simulateThought } from "./thought";
+export type { Person, Hero, ThoughtEnvironment, NicoThought } from "./thought";

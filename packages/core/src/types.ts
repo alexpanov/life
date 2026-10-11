@@ -1,3 +1,4 @@
+import type { NicoPowerups } from "./powerups";
 import type { Option } from "../../foundation/src/option";
 export type Mood = "ready" | "curious" | "quiet" | "tired";
 export type QuestStatus = "pending" | "done" | "impossible";
@@ -142,9 +143,10 @@ export interface NicoTrait {
   evidence: string[];
 }
 export interface Sidekick {
+  powerups: NicoPowerups;
   version: 1;
-  name: "Nico";
-  lastName: "Lopez";
+  name: "Niko";
+  lastName: "Gonzalez";
   id: string;
   introduced: boolean;
   heroName: Option<string>;

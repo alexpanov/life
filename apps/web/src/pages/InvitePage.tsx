@@ -29,7 +29,7 @@ export function InvitePage({ code }: { code: string }) {
   return (
     <section className="focus-screen">
       <Link to="/nico" className="back-link">
-        Back to Nico
+        Back to Niko
       </Link>
       <h1>Share life.</h1>
       <p>Invite a friend to find their next quest.</p>
@@ -46,7 +46,7 @@ export function InvitePage({ code }: { code: string }) {
       {status && <p role="status">{status}</p>}
       <details className="quiet-details">
         <summary>About referral rewards</summary>
-        <p>Verified referral: 30 days of unlimited Nico energy.</p>
+        <p>Verified referral: 30 days of unlimited Niko energy.</p>
         <p>
           Phone verification is not connected yet. Sharing currently sends an
           invitation only; it does not unlock a reward.

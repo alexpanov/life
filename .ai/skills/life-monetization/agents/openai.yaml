@@ -1,0 +1,4 @@
+interface:
+  display_name: "Life Monetization"
+  short_description: "Design useful, honest transaction paths for life"
+  default_prompt: "Use $life-monetization to evaluate a transaction path for life."

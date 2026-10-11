@@ -1,3 +1,4 @@
+import { mockNicoLayer } from "../../packages/application/src/nico-model";
 import "@testing-library/jest-dom/vitest";
 import { it, expect } from "vitest";
 import { render, screen, within } from "@testing-library/react";
@@ -22,7 +23,7 @@ async function setup() {
   await controller.load();
   render(
     <MemoryRouter initialEntries={["/nico"]}>
-      <App controller={controller} />
+      <App modelLayer={mockNicoLayer} controller={controller} />
     </MemoryRouter>,
   );
   const user = userEvent.setup();
@@ -36,17 +37,17 @@ async function setup() {
 it("chat runs the simulated model routine, remembers and soft deletes a memory", async () => {
   const { user, player, controller } = await setup();
   await user.type(
-    screen.getByLabelText("Talk to Nico"),
+    screen.getByLabelText("Talk to Niko"),
     "Remember I prefer short walks",
   );
   await user.click(screen.getByRole("button", { name: "Send" }));
-  await screen.findByRole("button", { name: "Feedback on Nico’s reply" });
+  await screen.findByRole("button", { name: "Feedback on Niko’s reply" });
   const memory = player().sidekick.snippets.find((item) =>
     item.text.includes("short walks"),
   );
   expect(memory).toBeDefined();
   await user.click(
-    screen.getByRole("button", { name: "Feedback on Nico’s reply" }),
+    screen.getByRole("button", { name: "Feedback on Niko’s reply" }),
   );
   await user.selectOptions(screen.getByLabelText("Why?"), "not-for-me");
   await user.type(
@@ -74,7 +75,7 @@ it("tells a canonical story on request and removes rejected stories from selecti
     player().sidekick.stories.find((item) => item.id === "dmz")?.tellingCount,
   ).toBe(1);
   await user.click(
-    screen.getByRole("button", { name: "Feedback on Nico’s reply" }),
+    screen.getByRole("button", { name: "Feedback on Niko’s reply" }),
   );
   await user.selectOptions(screen.getByLabelText("Why?"), "not-interesting");
   await user.click(screen.getByRole("button", { name: "Let it go" }));
@@ -93,7 +94,7 @@ it("wisdom never repeats and the service background has no forget control", asyn
   await user.click(screen.getByRole("button", { name: "A little wisdom" }));
   await screen.findByText(NICO_WISDOM[1].text);
   expect(screen.queryByText(NICO_WISDOM[0].text)).not.toBeInTheDocument();
-  await user.click(screen.getByText("Nico’s personality"));
+  await user.click(screen.getByText("Niko’s personality"));
   const trait = player().sidekick.traits.find(
     (item) => item.id === SERVICE_TRAIT_ID,
   )!;

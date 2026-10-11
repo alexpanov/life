@@ -30,6 +30,8 @@ Only development and live database environments are intended. A local browser-on
 
 On a push to `main`, after the smoke tests, the workflow applies `supabase/migrations` to the development project and then the live project. Pull requests do not touch either database. The migration creates `game_saves`, `save_game`, owner policies, and the Realtime publication. Required Actions secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DEV_PROJECT_REF`, `SUPABASE_DEV_DB_PASSWORD`, `SUPABASE_LIVE_PROJECT_REF`, `SUPABASE_LIVE_DB_PASSWORD`.
 
+The same push deploys the model Edge Function `nico` to development, then live. The function reads `LIFE_LLM_PROTOCOL`, `LIFE_LLM_ENDPOINT`, `LIFE_LLM_MODEL`, `LIFE_LLM_API_KEY`, and `LIFE_LLM_ALLOWED_USER_ID` from the Supabase project secret store. Those values are not GitHub Actions build inputs. If the access token is missing, the workflow skips the function and still publishes the site. The public page stays at `https://alexpanov.github.io/life/` and does not call the function. `save_game` stays in Postgres.
+
 ## Source of deployment truth
 
 Record actual deployment IDs, source SHAs, test outputs and Actions URLs in release reports. Never label a prepared workflow, generated bundle, simulated adapter test or proposed URL as a live deployment.

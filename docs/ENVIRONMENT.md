@@ -20,7 +20,7 @@ The gate rejects plaintext environment values, tracked private-key files and rec
 
 Use `pnpm run env:development -- <server command>` or `pnpm run env:live -- <server command>`. Dotenvx decrypts into that process environment. Configure `DOTENV_PRIVATE_KEY_DEVELOPMENT` or `DOTENV_PRIVATE_KEY_LIVE` through the deployment provider's secret settings. Do not store either key in workflow YAML or an encrypted file whose decryption requires that same key.
 
-Do not use these server secrets to build the public web app. `VITE_` and `EXPO_PUBLIC_` variables become client-visible; encrypted source does not keep a bundled value secret. No model credentials are needed for the present browser simulator. The site now packages a Worker gateway. Hosted deployments use Sites runtime secrets; the current Worker does not decrypt dotenvx files itself.
+Do not use these server secrets to build the public web app. `VITE_` and `EXPO_PUBLIC_` variables become client-visible; encrypted source does not keep a bundled value secret. No model credentials are needed for the present browser simulator. The site now packages a Worker gateway. Hosted Sites deployments use Sites runtime secrets; the current Worker does not decrypt dotenvx files itself. The main-branch workflow also deploys that gateway as the Supabase Edge Function `nico`. Set the same `LIFE_LLM_*` names as secrets on the development project, then the live project. The workflow does not copy `LIFE_LLM_API_KEY` into the page.
 
 ## Verification
 

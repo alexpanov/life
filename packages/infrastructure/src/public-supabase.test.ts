@@ -90,7 +90,25 @@ describe("public Supabase config", () => {
       SUPABASE_DB_PASSWORD: password,
       SUPABASE_SERVICE_ROLE_KEY: serviceRole,
       DATABASE_URL: `postgresql://postgres:${password}@db.example.supabase.co:5432/postgres`,
+      LIFE_LLM_API_KEY: "llm-key-sentinel-8d2a4c6e",
     });
     expect(allowed._tag).toBe("Right");
+  });
+
+  it("refuses to put the model key in a browser variable", () => {
+    const modelKey = "llm-key-sentinel-8d2a4c6e";
+    expect(
+      assertBrowserBuildEnv({
+        VITE_LIFE_LLM_API_KEY: modelKey,
+        LIFE_LLM_API_KEY: modelKey,
+      })._tag,
+    ).toBe("Left");
+    expect(
+      assertBrowserBuildEnv({
+        VITE_SUPABASE_URL: url,
+        VITE_SUPABASE_ANON_KEY: modelKey,
+        LIFE_LLM_API_KEY: modelKey,
+      })._tag,
+    ).toBe("Left");
   });
 });

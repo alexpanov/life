@@ -1,6 +1,6 @@
 # Model connection status
 
-The published client uses `mockNicoLayer` until the server reports a configured model. The server gateway can call OpenRouter chat completions when `LIFE_LLM_PROTOCOL=openrouter`, `LIFE_LLM_MODEL`, and secret `LIFE_LLM_API_KEY` are set in the hosted runtime. No API key, model, or pilot user is stored in this repository, and no live OpenRouter request has been made from here. The JSON proposal schema and Effect service are adapter boundaries, not proof of a model connection.
+The published client uses `mockNicoLayer` until the server reports a configured model. The GitHub Page does not call the model function, so play stays on that stand-in. The server gateway can call OpenRouter chat completions when `LIFE_LLM_PROTOCOL=openrouter`, `LIFE_LLM_MODEL`, and secret `LIFE_LLM_API_KEY` are set in the hosted runtime. No API key, model, or pilot user is stored in this repository, and no live OpenRouter request has been made from here. The JSON proposal schema and Effect service are adapter boundaries, not proof of a model connection.
 
 ## Low-cost candidate checked 2026-10-11 UTC
 

@@ -35,4 +35,4 @@ gh pr merge --squash --delete-branch
 
 If GitHub refuses the merge, stop and report the refusal. Do not force it.
 
-After it merges, remove the worktree and return the primary checkout to the latest `main`, as `../quest-worktrees/SKILL.md` says.
+After it merges, the pull request is not the end. Remove the worktree and return the primary checkout to the latest `main`, as `../quest-remove-worktree/SKILL.md` says. "Already merged" is not a reason to leave the worktree in place.

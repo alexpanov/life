@@ -1,0 +1,10 @@
+---
+description: After a pull request merges, remove its worktree
+alwaysApply: true
+---
+
+When a pull request merges, remove its worktree. Merged means start the removal. Merged does not mean stop.
+
+If you find the pull request already merged, the worktree is still your job. Do not report the task finished while that worktree directory exists.
+
+Read `.ai/skills/quest-remove-worktree/SKILL.md` and follow every step. Do not invent a shorter ending.

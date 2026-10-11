@@ -3,6 +3,7 @@
   "version": "0.4.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@12.11.2",
   "description": "Shared TypeScript game core with web and iPhone interfaces.",
   "scripts": {
     "build": "vite build && node --import tsx scripts/finish-web.ts && node scripts/build-worker.mjs",
@@ -17,7 +18,7 @@
     "test:integration": "vitest run --project integration",
     "test:dom": "vitest run tests/web",
     "test:browser": "playwright test",
-    "install:ci": "npm ci --no-audit --no-fund",
+    "install:ci": "pnpm install --frozen-lockfile",
     "check": "node scripts/check-release.mjs",
     "env:encrypt:development": "dotenvx encrypt -f .env.development",
     "env:encrypt:live": "dotenvx encrypt -f .env.live",

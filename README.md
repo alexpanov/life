@@ -9,11 +9,12 @@ The web interface is React, React Router and Tailwind. The iPhone interface is n
 Node 22 or newer:
 
 ```sh
-npm ci
-npm start
+corepack enable
+pnpm install
+pnpm start
 ```
 
-For iPhone, see [native setup](apps/iphone/README.md). `npm run ios:bundle` checks Metro compilation; it does not produce a signed App Store release.
+For iPhone, see [native setup](apps/iphone/README.md). `pnpm run ios:bundle` checks Metro compilation; it does not produce a signed App Store release.
 
 ## Source
 
@@ -34,13 +35,13 @@ Read [AGENTS.md](AGENTS.md) for engineering instructions. Cursor's entry point p
 ## Verify
 
 ```sh
-npm run check
-npm run test:unit
-npm run test:integration
-npm run test:dom
-npm run build
-npm run test:browser
-npm run ios:bundle
+pnpm run check
+pnpm run test:unit
+pnpm run test:integration
+pnpm run test:dom
+pnpm run build
+pnpm run test:browser
+pnpm run ios:bundle
 ```
 
 The single Playwright test requires Chrome and checks website → **play live** → game. Unit/integration tests run in Node; interactive React tests run in JSDOM. Supabase adapter contract tests use controlled transport responses and are not proof of deployed database isolation.

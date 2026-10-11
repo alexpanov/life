@@ -29,6 +29,7 @@
     "tests/infrastructure/**/*.ts",
     "tests/web/**/*.ts",
     "playwright.config.ts",
-    "tests/browser/**/*.ts"
+    "tests/browser/**/*.ts",
+    "prisma.config.ts"
   ]
 }

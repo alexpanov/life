@@ -1,4 +1,5 @@
 node_modules/
+packages/infrastructure/src/generated/
 .pnpm-store/
 .env
 .env.*

@@ -8,7 +8,8 @@
   "scripts": {
     "build": "vite build && node --import tsx scripts/finish-web.ts",
     "build:worker": "pnpm run build && node scripts/build-worker.mjs",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "prisma generate && tsc --noEmit",
+    "postinstall": "prisma generate",
     "test": "vitest run",
     "start": "vite --host 127.0.0.1",
     "ios:bundle": "cd apps/iphone && expo export --platform ios --output-dir ../../native-dist",
@@ -29,6 +30,8 @@
     "env:test": "node scripts/test-encrypted-env.mjs"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
     "@radix-ui/react-dialog": "1.2.0",
     "@radix-ui/react-slot": "1.4.0",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -39,6 +42,7 @@
     "expo": "57.0.27",
     "expo-status-bar": "57.0.1",
     "lucide-react": "1.55.0",
+    "pg": "8.23.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "react-hook-form": "7.89.0",
@@ -59,6 +63,7 @@
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.7",
     "@types/node": "26.6.5",
+    "@types/pg": "8.23.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "6.1.2",
@@ -66,6 +71,7 @@
     "eslint": "9.39.5",
     "jsdom": "30.1.2",
     "prettier": "3.9.10",
+    "prisma": "7.10.0",
     "tailwindcss": "4.3.3",
     "tsx": "4.23.15",
     "typescript": "7.0.2",

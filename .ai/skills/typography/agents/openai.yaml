@@ -1,0 +1,4 @@
+interface:
+  display_name: "Typography"
+  short_description: "Headers, reading text, and the three faces"
+  default_prompt: "Use $typography for this screen’s headers and sentences."

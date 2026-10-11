@@ -16,7 +16,7 @@ Referrals are the growth mechanism: make inviting a friend easy and explain the 
 
 Build a real-world game around the player, realms, dungeons, quests, progress and a learning sidekick named Niko Gonzalez. Keep the domain independent of pages, React, navigation, storage vendors and model vendors. Use strongly typed TypeScript throughout app code, React interfaces, Effect for application effects, and small pure domain functions. Use the repository's own Option and Either types for explicit absence and recoverable results. Read through repositories; change state through routines. Keep clocks, IDs, randomness and external services injectable. Preserve save compatibility and player progress.
 
-Use React Router and Tailwind on the web. Share rules and design tokens with the iPhone interface; use native React Native/Expo components. Support iPhone only on native platforms. Do not add Android or claim that web deployment publishes an App Store app. Treat UI compositions and pages as replaceable. Keep a coherent, accessible design system beneath them.
+Use React Router and Tailwind on the web. Share rules and design tokens with the iPhone interface; use native React Native/Expo components. Set player-facing type through the typography module: Libre Baskerville for reading, Libre Bodoni for headers, and IBM Plex Sans for controls. A page has one optional header one. The subject is header one, header two, or header three. Cards use header four and header five. Support iPhone only on native platforms. Do not add Android or claim that web deployment publishes an App Store app. Treat UI compositions and pages as replaceable. Keep a coherent, accessible design system beneath them.
 
 ## Player experience
 

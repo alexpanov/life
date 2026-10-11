@@ -30,6 +30,7 @@ import {
 } from "../../../packages/core/src/index";
 import type { GameController } from "../../../packages/application/src/controller";
 import { Sender, Field, Area } from "./components/presentation";
+import { H1, H3 } from "../../../packages/design/src/type";
 import { download } from "./download";
 import type { Modal } from "./ui-types";
 import { RealmsPage } from "./pages/RealmsPage";
@@ -48,7 +49,13 @@ export { Sender } from "./components/presentation";
 import { Button } from "./components/ui/button";
 import { Dialog } from "./components/ui/dialog";
 import { browserContext } from "./repository";
-export function App({ controller, modelLayer = liveNicoLayer }: { controller: GameController; modelLayer?: Layer.Layer<NicoModel> }) {
+export function App({
+  controller,
+  modelLayer = liveNicoLayer,
+}: {
+  controller: GameController;
+  modelLayer?: Layer.Layer<NicoModel>;
+}) {
   useEffect(() => attachBrowserInsights(controller), [controller]);
   const store = useSyncExternalStore(
       controller.subscribe,
@@ -278,7 +285,7 @@ export function App({ controller, modelLayer = liveNicoLayer }: { controller: Ga
   const menu = (
     <>
       <div className="page-heading">
-        <h1>Explore.</h1>
+        <H1>Explore.</H1>
       </div>
       <nav className="menu-links" aria-label="Your world">
         {[
@@ -332,7 +339,7 @@ export function App({ controller, modelLayer = liveNicoLayer }: { controller: Ga
     <>
       <div className="page-heading">
         <small>YOUR WORLD / YOUR RULES</small>
-        <h1>Workshop.</h1>
+        <H1>Workshop.</H1>
       </div>
       <div className="settings-list">
         <details className="quiet-details">
@@ -528,7 +535,7 @@ export function App({ controller, modelLayer = liveNicoLayer }: { controller: Ga
       {player.settings.driving && (
         <div className="drive-screen">
           <Shield size={54} />
-          <h1>Eyes on the road.</h1>
+          <H1>Eyes on the road.</H1>
           <p>Controls are paused until you are safely parked.</p>
           <Button
             onClick={() =>
@@ -546,7 +553,7 @@ export function App({ controller, modelLayer = liveNicoLayer }: { controller: Ga
       >
         <Sender />
         {mission && <p>Current mission: {mission.title}</p>}
-        <h3 className="text-xl my-4">{candidate?.title}</h3>
+        <H3 className="my-4">{candidate?.title}</H3>
         <p>{candidate?.nextMove}</p>
         <div className="actions">
           <Button
@@ -719,7 +726,7 @@ export function App({ controller, modelLayer = liveNicoLayer }: { controller: Ga
           )}
           {modal === "blocked" && (
             <>
-              <h3>{selectedQuest?.title}</h3>
+              <H3>{selectedQuest?.title}</H3>
               <p>Close a dead end without an XP penalty.</p>
               <Area name="reason" label="What blocked this quest?" />
             </>
@@ -886,7 +893,7 @@ export function App({ controller, modelLayer = liveNicoLayer }: { controller: Ga
           )}
           {modal === "about" && (
             <>
-              <h3>Your world. Your quest.</h3>
+              <H3>Your world. Your quest.</H3>
               <p>
                 Choose one real objective, act, then report. Return to realms
                 later. Impossible quests close without penalty.

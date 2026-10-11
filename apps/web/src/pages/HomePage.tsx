@@ -18,6 +18,7 @@ import type {
 import type { GameView, PageActions } from "../ui-types";
 import { Sender, Area, Field } from "../components/presentation";
 import { Button } from "../components/ui/button";
+import { Body, H1 } from "../../../../packages/design/src/type";
 
 export function HomePage({
   view,
@@ -113,13 +114,13 @@ export function HomePage({
       return (
         <section className="focus-screen">
           <Sender source="niko" />
-          <h1 className="nico-heading">
+          <H1 voice="companion">
             {lastQuest.status === "done"
               ? `Great job, ${O.getOrElse(player.sidekick.heroName, () => "boss")}.`
               : "Let’s learn from this."}
-          </h1>
+          </H1>
           <p>{lastQuest.title}</p>
-          {reply && <p className="nico-copy">{reply}</p>}
+          {reply && <Body voice="companion">{reply}</Body>}
           <Button onClick={() => setCelebrated(outcomeKey)}>Continue</Button>
         </section>
       );
@@ -131,7 +132,7 @@ export function HomePage({
       return (
         <section className="focus-screen">
           <Sender source="niko" />
-          <h1 className="nico-heading">By the way, what’s your name?</h1>
+          <H1 voice="companion">By the way, what’s your name?</H1>
           <form onSubmit={(event) => submit(event, "name")}>
             <Field name="text" label="Your name" required />
             <Button type="submit">Tell Niko</Button>
@@ -142,10 +143,10 @@ export function HomePage({
       return (
         <section className="focus-screen">
           <Sender source="niko" />
-          <h1 className="nico-heading">What did we learn?</h1>
-          <p className="nico-copy">
+          <H1 voice="companion">What did we learn?</H1>
+          <Body voice="companion">
             {reply || "A small lesson for your next quest."}
-          </p>
+          </Body>
           <form onSubmit={(event) => submit(event, "reflect")}>
             <Area name="text" label="Your takeaway" />
             <Button type="submit">Remember this</Button>
@@ -155,7 +156,7 @@ export function HomePage({
     return (
       <section className="focus-screen">
         <Sender source="niko" />
-        <h1 className="nico-heading">One good next move.</h1>
+        <H1 voice="companion">One good next move.</H1>
         <p>Ready when you are.</p>
         <Button onClick={() => send({ type: "finish-review" })}>
           Pick next quest
@@ -167,7 +168,7 @@ export function HomePage({
     return (
       <section className="focus-screen">
         <small>Your current quest</small>
-        <h1>{mission.title}</h1>
+        <H1>{mission.title}</H1>
         <p>
           {mission.nextMove ||
             mission.detail ||
@@ -191,11 +192,11 @@ export function HomePage({
     return (
       <section className="focus-screen">
         <Sender source="niko" />
-        <h1 className="nico-heading">Meet Niko.</h1>
-        <p className="nico-copy">
+        <H1 voice="companion">Meet Niko.</H1>
+        <Body voice="companion">
           {reply ||
             "Hey friend, I’m Niko Gonzalez. I’d like to be your sidekick. What are you up to?"}
-        </p>
+        </Body>
         <form onSubmit={(event) => submit(event, "meet")}>
           <Area name="text" label="What are you up to?" />
           <Button type="submit">Meet Niko</Button>
@@ -206,7 +207,7 @@ export function HomePage({
     return (
       <section className="focus-screen">
         <Sender source="niko" />
-        <h1>{offeredQuest.title}</h1>
+        <H1>{offeredQuest.title}</H1>
         <p>{offeredQuest.nextMove}</p>
         <div className="focus-actions">
           <Button onClick={() => send({ type: "accept-offer", offer })}>
@@ -224,7 +225,7 @@ export function HomePage({
   return (
     <section className="focus-screen">
       <Sender source="niko" />
-      <h1 className="nico-heading">How are you feeling?</h1>
+      <H1 voice="companion">How are you feeling?</H1>
       <form
         onSubmit={(event) => {
           event.preventDefault();

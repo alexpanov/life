@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import { Button } from "../components/ui/button";
 import { invitationUrl } from "../invitation";
+import { H1 } from "../../../../packages/design/src/type";
 export function InvitePage({ code }: { code: string }) {
   const [status, setStatus] = useState("");
   const url = invitationUrl(code);
@@ -31,7 +32,7 @@ export function InvitePage({ code }: { code: string }) {
       <Link to="/nico" className="back-link">
         Back to Niko
       </Link>
-      <h1>Share life.</h1>
+      <H1>Share life.</H1>
       <p>Invite a friend to find their next quest.</p>
       <Button onClick={() => void share()}>Share invitation</Button>
       <label className="field invite-link">

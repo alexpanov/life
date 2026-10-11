@@ -1,0 +1,149 @@
+/* Web type. Phone sizes live in typography.ts. Do not restyle headers in a page. */
+
+:root {
+  --type-display: "Libre Bodoni", Didot, "Bodoni MT", "Times New Roman", serif;
+  --type-text: "Libre Baskerville", Palatino, "Times New Roman", serif;
+  --type-sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --type-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --type-ink: #e6edf1;
+  --type-reading: #d3e0e6;
+  --type-companion: #f1dcc0;
+}
+
+h1,
+.type-h1,
+h2,
+.type-h2,
+h3,
+.type-h3,
+h4,
+.type-h4,
+h5,
+.type-h5 {
+  font-family: var(--type-display);
+  font-style: normal;
+  color: var(--type-ink);
+  text-wrap: balance;
+  text-rendering: optimizeLegibility;
+  margin: 0;
+}
+
+h1,
+.type-h1 {
+  font-size: clamp(2.125rem, 4.2vw, 3.25rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+h2,
+.type-h2 {
+  font-size: clamp(1.625rem, 2.4vw, 2rem);
+  font-weight: 600;
+  line-height: 1.16;
+  letter-spacing: -0.015em;
+}
+
+h3,
+.type-h3 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+}
+
+h4,
+.type-h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+h5,
+.type-h5 {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+p,
+.type-body {
+  font-family: var(--type-text);
+  font-size: 1.125rem;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.65;
+  letter-spacing: 0.005em;
+  color: var(--type-reading);
+  text-wrap: pretty;
+}
+
+.type-label,
+small,
+.navigation a,
+.explore-link,
+button,
+input,
+textarea,
+select {
+  font-family: var(--type-sans);
+}
+
+.type-label,
+small,
+.navigation a,
+.explore-link {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  color: #91a5af;
+}
+
+h1[data-b="true"],
+.type-h1[data-b="true"],
+h2[data-b="true"],
+.type-h2[data-b="true"],
+h3[data-b="true"],
+.type-h3[data-b="true"],
+h4[data-b="true"],
+.type-h4[data-b="true"],
+h5[data-b="true"],
+.type-h5[data-b="true"],
+p[data-b="true"],
+.type-body[data-b="true"],
+.type-label[data-b="true"],
+small[data-b="true"] {
+  font-weight: 700;
+}
+
+h1[data-i="true"],
+.type-h1[data-i="true"],
+h2[data-i="true"],
+.type-h2[data-i="true"],
+h3[data-i="true"],
+.type-h3[data-i="true"],
+h4[data-i="true"],
+.type-h4[data-i="true"],
+h5[data-i="true"],
+.type-h5[data-i="true"],
+p[data-i="true"],
+.type-body[data-i="true"],
+.type-label[data-i="true"],
+small[data-i="true"] {
+  font-style: italic;
+}
+
+.type-companion {
+  color: var(--type-companion);
+}
+
+/* The public entrance is a title card. Game pages keep the header one above. */
+.landing h1 {
+  font-size: clamp(3.25rem, 8vw, 6rem);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}

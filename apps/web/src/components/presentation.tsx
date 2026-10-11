@@ -4,6 +4,7 @@ import {
   senderLabels,
   type MessageSource,
 } from "../../../../packages/design/src/tokens";
+import { H3 } from "../../../../packages/design/src/type";
 export function Sender({
   source = "system",
   name,
@@ -37,7 +38,7 @@ export function Panel({
     <section className="panel">
       {title && (
         <header className="panel-head">
-          <h2>{title}</h2>
+          <H3>{title}</H3>
           {action}
         </header>
       )}

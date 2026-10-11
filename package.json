@@ -30,6 +30,12 @@
     "env:test": "node scripts/test-encrypted-env.mjs"
   },
   "dependencies": {
+    "@expo-google-fonts/ibm-plex-sans": "^0.4.1",
+    "@expo-google-fonts/libre-baskerville": "^0.4.3",
+    "@expo-google-fonts/libre-bodoni": "^0.4.2",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
+    "@fontsource/libre-baskerville": "^5.3.0",
+    "@fontsource/libre-bodoni": "^5.3.0",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
     "@radix-ui/react-dialog": "1.2.0",
@@ -40,6 +46,7 @@
     "clsx": "2.1.1",
     "effect": "4.0.2",
     "expo": "57.0.27",
+    "expo-font": "^57.0.4",
     "expo-status-bar": "57.0.1",
     "lucide-react": "1.55.0",
     "pg": "8.23.1",

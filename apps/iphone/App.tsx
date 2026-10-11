@@ -1,5 +1,7 @@
 import { createMemorySnippetArchive } from "../../packages/application/src/snippet-archive";
 import { Action, Panel, styles } from "./ui";
+import { Body, H1, H2, H3, H4, Label } from "./type";
+import { useGameFonts } from "./fonts";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   Alert,
@@ -49,6 +51,7 @@ function Game() {
     controller.subscribe,
     controller.getSnapshot,
   );
+  const [fontsReady, fontError] = useGameFonts();
   const [screen, setScreen] = useState<Screen>("Home");
   const [form, setForm] = useState<O.Option<Form>>(O.none());
   const [title, setTitle] = useState("");
@@ -109,7 +112,7 @@ function Game() {
       );
     }
   }
-  if (!O.isSome(store.game))
+  if ((!fontsReady && fontError == null) || !O.isSome(store.game))
     return (
       <SafeAreaView style={styles.safe}>
         <Text style={styles.label}>QUESTOS / CONNECTING</Text>
@@ -160,8 +163,8 @@ function Game() {
       </View>
       {player.settings.driving ? (
         <Panel>
-          <Text style={styles.heading}>Eyes on the road.</Text>
-          <Text style={styles.body}>Park before using game controls.</Text>
+          <H1>Eyes on the road.</H1>
+          <Body>Park before using game controls.</Body>
           <Action
             onPress={() =>
               send({ type: "settings", settings: { driving: false } })
@@ -185,10 +188,10 @@ function Game() {
           )}
           {store.storage === "recovery" && (
             <Panel>
-              <Text style={styles.body}>
+              <Body>
                 Your unreadable save is preserved. Share the original before
                 replacing it.
-              </Text>
+              </Body>
               <Action
                 onPress={() => {
                   if (O.isSome(store.original))
@@ -220,22 +223,22 @@ function Game() {
           )}
           {screen === "Home" && (
             <>
-              <Text style={styles.hero}>{"One quest.\nOne real move."}</Text>
+              <H1>{"One quest.\nOne real move."}</H1>
               <Panel companion>
-                <Text style={styles.nikoLabel}>◈ NIKO / YOUR SIDEKICK</Text>
-                <Text style={styles.niko}>{view.guidance}</Text>
+                <Label voice="companion">NIKO / YOUR SIDEKICK</Label>
+                <Body voice="companion">{view.guidance}</Body>
               </Panel>
               {player.operation.phase === "review" ? (
                 <Panel>
-                  <Text style={styles.heading}>Take a breath.</Text>
-                  <Text style={styles.body}>What matters next?</Text>
+                  <H2>Take a breath.</H2>
+                  <Body>What matters next?</Body>
                   <Action onPress={() => send({ type: "finish-review" })}>
                     Choose the next quest
                   </Action>
                 </Panel>
               ) : (
                 <Panel>
-                  <Text style={styles.heading}>How are you feeling?</Text>
+                  <H2>How are you feeling?</H2>
                   <View style={styles.wrap}>
                     {moods.map((mood) => (
                       <Action
@@ -252,7 +255,7 @@ function Game() {
               {O.isSome(offer) && (
                 <Panel>
                   <Text style={styles.label}>A POSSIBLE NEXT MOVE</Text>
-                  <Text style={styles.heading}>{offerTitle}</Text>
+                  <H4>{offerTitle}</H4>
                   <Action
                     onPress={() => {
                       if (O.isSome(offer))
@@ -275,10 +278,8 @@ function Game() {
               {O.isSome(mission) ? (
                 <Panel>
                   <Text style={styles.label}>ACTIVE QUEST</Text>
-                  <Text style={styles.heading}>{mission.value.title}</Text>
-                  <Text style={styles.body}>
-                    {mission.value.nextMove || mission.value.detail}
-                  </Text>
+                  <H4>{mission.value.title}</H4>
+                  <Body>{mission.value.nextMove || mission.value.detail}</Body>
                   <Action
                     onPress={() =>
                       send({
@@ -296,11 +297,11 @@ function Game() {
                 </Panel>
               ) : (
                 <Panel>
-                  <Text style={styles.heading}>
+                  <H2>
                     {view.quests.some((q) => q.status === "pending")
                       ? "Choose what matters."
                       : "Pray for a quest."}
-                  </Text>
+                  </H2>
                   <Action onPress={() => setScreen("Quests")}>
                     Open quest board
                   </Action>
@@ -313,14 +314,14 @@ function Game() {
           )}
           {screen === "Realms" && (
             <>
-              <Text style={styles.hero}>{"Places worth\nreturning to."}</Text>
+              <H1>{"Places worth\nreturning to."}</H1>
               {player.realms.map((realm) => (
                 <Panel key={realm.id}>
-                  <Text style={styles.heading}>
+                  <H4>
                     {realm.name}
                     {realm.home ? " · home" : ""}
-                  </Text>
-                  <Text style={styles.body}>{realm.location}</Text>
+                  </H4>
+                  <Body>{realm.location}</Body>
                   <Action
                     subdued
                     onPress={() =>
@@ -334,11 +335,11 @@ function Game() {
                 </Panel>
               ))}
               <Action onPress={() => open("realm")}>Discover a realm</Action>
-              <Text style={styles.heading}>Dungeons in {view.realm.name}</Text>
+              <H3>Dungeons in {view.realm.name}</H3>
               {view.dungeons.map((dungeon) => (
                 <Panel key={dungeon.id}>
-                  <Text style={styles.heading}>{dungeon.name}</Text>
-                  <Text style={styles.body}>{dungeon.subtitle}</Text>
+                  <H4>{dungeon.name}</H4>
+                  <Body>{dungeon.subtitle}</Body>
                   <Action
                     subdued
                     onPress={() =>
@@ -356,22 +357,20 @@ function Game() {
           )}
           {screen === "Quests" && (
             <>
-              <Text style={styles.hero}>Your next move.</Text>
+              <H1>Your next move.</H1>
               <Action onPress={() => open("quest")}>Write a quest</Action>
               {!view.quests.length && (
-                <Text style={styles.body}>
+                <Body>
                   Pray for a quest. When something matters, write it here.
-                </Text>
+                </Body>
               )}
               {view.quests.map((quest) => (
                 <Panel key={quest.id}>
                   <Text style={styles.label}>
                     {quest.status.toUpperCase()} / {quest.xp} XP
                   </Text>
-                  <Text style={styles.heading}>{quest.title}</Text>
-                  <Text style={styles.body}>
-                    {quest.nextMove || quest.detail}
-                  </Text>
+                  <H4>{quest.title}</H4>
+                  <Body>{quest.nextMove || quest.detail}</Body>
                   {quest.status === "pending" ? (
                     <>
                       <Action
@@ -442,15 +441,15 @@ function Game() {
           )}
           {screen === "Skills" && (
             <>
-              <Text style={styles.hero}>Keep showing up.</Text>
+              <H1>Keep showing up.</H1>
               {view.skills.map((skill) => (
                 <Panel key={skill.id}>
-                  <Text style={styles.heading}>{skill.name}</Text>
-                  <Text style={styles.body}>
+                  <H4>{skill.name}</H4>
+                  <Body>
                     Level {skill.currentLevel} · Potential{" "}
                     {skill.potentialLevel} · Readiness{" "}
                     {Math.round(skill.readiness)}%
-                  </Text>
+                  </Body>
                   <Action
                     onPress={() =>
                       send({
@@ -479,31 +478,31 @@ function Game() {
               <Action subdued onPress={() => open("skill")}>
                 Add a skill
               </Action>
-              <Text style={styles.heading}>Inventory</Text>
+              <H3>Inventory</H3>
               {view.inventory.map((item, index) => (
-                <Text key={`${index}_${item}`} style={styles.body}>
+                <Body key={`${index}_${item}`}>
                   {item.name} · {item.source}
-                </Text>
+                </Body>
               ))}
             </>
           )}
           {screen === "Niko" && (
             <>
               <Panel companion>
-                <Text style={styles.nikoLabel}>◈ NIKO / YOUR SIDEKICK</Text>
-                <Text style={styles.niko}>
+                <Label voice="companion">NIKO / YOUR SIDEKICK</Label>
+                <Body voice="companion">
                   I learn from the steps you take. Tell me what helps.
-                </Text>
+                </Body>
               </Panel>
-              <Text style={styles.body}>
+              <Body>
                 Learning stays on this iPhone. No language model is connected in
                 this build.
-              </Text>
+              </Body>
               {player.sidekick.snippets
                 .filter((note) => O.isNone(note.deletedAt))
                 .map((note) => (
                   <Panel key={note.id}>
-                    <Text style={styles.body}>{note.text}</Text>
+                    <Body>{note.text}</Body>
                   </Panel>
                 ))}
               <Action onPress={() => open("memory")}>
@@ -560,14 +559,14 @@ function Game() {
         <View style={styles.overlay}>
           <Panel>
             <Text style={styles.label}>CHOOSE YOUR PRIORITY</Text>
-            <Text style={styles.heading}>
+            <H2>
               {O.match(
                 candidate,
                 () => "",
                 (quest) => quest.title,
               )}
-            </Text>
-            <Text style={styles.body}>Give this quest your attention now?</Text>
+            </H2>
+            <Body>Give this quest your attention now?</Body>
             <Action
               onPress={() => {
                 if (O.isSome(candidate))
@@ -596,11 +595,11 @@ function Game() {
             <Text style={styles.label}>
               QUESTOS / NEW {formName.toUpperCase()}
             </Text>
-            <Text style={styles.heading}>
+            <H2>
               {formName === "memory"
                 ? "What should Niko remember?"
                 : `Name your ${formName}`}
-            </Text>
+            </H2>
             <TextInput
               accessibilityLabel="Name or memory"
               value={title}

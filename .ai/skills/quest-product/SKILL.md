@@ -14,7 +14,7 @@ Read `../../CONTRACT.md` relative to this file's directory. Trace the current pl
 - Keep completed and abandoned quest outcomes distinct. Let Niko learn useful, bounded context from both; feed it into later suggestions without asserting psychological diagnoses. Reset Niko's learning independently of player progress.
 - Label who speaks. Give game/system, Niko and fictional dispatch distinct presentation. Use text labels plus icon and typography differences. Keep domain process names out of player copy.
 - Preserve agency when switching priorities. Explain the proposed next step, permit declining it, and avoid nagging. Do not silently turn an optional side quest into the player's active mission.
-- Use shared tokens, accessible controls, reduced-motion support and touch-friendly layouts. Keep motion brief and purposeful. Test interactive behavior through actual rendered components.
+- Use shared tokens and the typography module for every heading and sentence. Keep accessible controls, reduced-motion support and touch-friendly layouts. Keep motion brief and purposeful. Test interactive behavior through actual rendered components.
 - Maintain a clear website entrance labeled “play live” with the original coin mark. Keep fresh-player defaults free of the creator's personal history. Preserve existing players' local saves.
 - Keep native support iPhone-only. Treat App Store distribution, web distribution and opening a URL from ChatGPT as distinct capabilities. Never imply native ChatGPT integration merely because a link opens.
 

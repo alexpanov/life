@@ -1,5 +1,6 @@
 import { Activity } from "lucide-react";
 import { Button } from "../components/ui/button";
+import { H1 } from "../../../../packages/design/src/type";
 import type { PageActions, GameView } from "../ui-types";
 export function SkillsPage({
   view,
@@ -10,7 +11,7 @@ export function SkillsPage({
     <>
       <div className="page-heading">
         <small>PRACTICE / RECOVER / RETURN</small>
-        <h1>Your skills.</h1>
+        <H1>Your skills.</H1>
         <p>Potential records practice. Readiness changes with time.</p>
         <Button onClick={() => open("skill")}>New skill</Button>
       </div>

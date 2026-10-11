@@ -11,6 +11,7 @@ import * as O from "../../../../packages/foundation/src/option";
 import * as E from "../../../../packages/foundation/src/either";
 import type { PageActions } from "../ui-types";
 import { Button } from "../components/ui/button";
+import { H1 } from "../../../../packages/design/src/type";
 
 const resolver: Resolver<PowerupFormValues> = (values) => {
   const parsed = powerupForm.parse(values);
@@ -59,7 +60,7 @@ export function PowerupsPage({
   if (view.kind === "create")
     return (
       <section className="focus-screen">
-        <h1>Make a power-up.</h1>
+        <H1>Make a power-up.</H1>
         <p>Give Niko a useful approach for one reply.</p>
         <form
           onSubmit={form.handleSubmit((values) => {
@@ -134,7 +135,7 @@ export function PowerupsPage({
     const isActive = O.isSome(active) && active.value.id === item.id;
     return (
       <section className="focus-screen">
-        <h1>{item.template.name}</h1>
+        <H1>{item.template.name}</H1>
         <p>{item.template.description}</p>
         <p>{item.template.context}</p>
         <p>
@@ -185,7 +186,7 @@ export function PowerupsPage({
       <Link className="back-link" to="/nico">
         Back to Niko
       </Link>
-      <h1>Power-ups.</h1>
+      <H1>Power-ups.</H1>
       <p>A useful change of approach. Each has one use.</p>
       {O.isSome(active) && (
         <p role="status">Ready: {active.value.template.name}</p>

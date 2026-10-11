@@ -5,6 +5,7 @@ export const tokens = {
     surface: "#0c141d",
     raised: "#132330",
     text: "#e6edf1",
+    reading: "#d3e0e6",
     muted: "#91a5af",
     border: "#263b48",
     signal: "#75e2f0",

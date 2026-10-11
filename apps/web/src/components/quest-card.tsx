@@ -1,6 +1,7 @@
 import { ArrowRight, Check } from "lucide-react";
 import type { Quest, Command } from "../../../../packages/core/src/index";
 import { Button } from "./ui/button";
+import { H4 } from "../../../../packages/design/src/type";
 export function QuestCard({
   quest: q,
   missionId,
@@ -28,7 +29,7 @@ export function QuestCard({
                   ? "CURRENT MISSION"
                   : "OPEN"}
           </small>
-          <h3>{q.title}</h3>
+          <H4>{q.title}</H4>
         </div>
         <span className="xp">{q.xp} XP</span>
       </div>

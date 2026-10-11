@@ -1,6 +1,7 @@
 import { ArrowRight, Plus } from "lucide-react";
 import { Panel } from "../components/presentation";
 import { Button } from "../components/ui/button";
+import { H1, H2, H4 } from "../../../../packages/design/src/type";
 import type { PageActions, GameView } from "../ui-types";
 export function RealmsPage({
   view,
@@ -12,7 +13,7 @@ export function RealmsPage({
     <>
       <div className="page-heading">
         <small>RETURN WHEN YOU ARE READY</small>
-        <h1>Your realms.</h1>
+        <H1>Your realms.</H1>
         <p>Places, dungeons, and unfinished business.</p>
         <Button onClick={() => open("realm")}>
           <Plus size={15} />
@@ -26,7 +27,7 @@ export function RealmsPage({
             <small>
               {r.id === realm.id ? "CURRENT" : r.home ? "HOME" : "REALM"}
             </small>
-            <h2 className="text-2xl my-3">{r.name}</h2>
+            <H2 className="my-3">{r.name}</H2>
             <p>{r.location}</p>
             <div className="actions">
               <Button
@@ -53,7 +54,7 @@ export function RealmsPage({
       >
         {view.dungeons.map((d) => (
           <div key={d.id} className="dungeon">
-            <h3>{d.name}</h3>
+            <H4>{d.name}</H4>
             <p>{d.subtitle}</p>
             <Button
               variant="secondary"

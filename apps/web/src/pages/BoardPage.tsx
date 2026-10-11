@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Button } from "../components/ui/button";
+import { H1 } from "../../../../packages/design/src/type";
 import type { PageActions, GameView } from "../ui-types";
 export function BoardPage({
   view,
@@ -11,7 +12,7 @@ export function BoardPage({
     <>
       <div className="page-heading">
         <small>{realm.name}</small>
-        <h1>Quests.</h1>
+        <H1>Quests.</H1>
         <Button onClick={() => open("quest")}>Add quest</Button>
       </div>
       <nav className="menu-links" aria-label="Quests">

@@ -150,17 +150,62 @@ describe("stable game transitions", () => {
     state = send(state, { type: "switch-player", playerId: player });
     expect(view(state).quests).toHaveLength(1);
   });
-  it("driving mode rejects game operations until parked", () => {
+  it("keeps a saved driving flag and still accepts play", () => {
     const state = send(newGame(context()), {
       type: "settings",
       settings: { driving: true },
     });
-    expect(() => add(state)).toThrow("Park");
-    const parked = send(state, {
-      type: "settings",
-      settings: { driving: false },
+    expect(view(state).player.settings.driving).toBe(true);
+    const played = add(state);
+    expect(view(played).quests).toHaveLength(1);
+    expect(view(played).player.settings.driving).toBe(true);
+  });
+  it("does not start a quest until a realm is chosen", () => {
+    const start = newGame(context());
+    const before = structuredClone(start);
+    const realmId = view(start).realm.id;
+    expect(() => send(start, { type: "start-quest" }, "early")).toThrow(
+      /what you're up to/i,
+    );
+    expect(start).toEqual(before);
+    const described = send(
+      start,
+      { type: "describe-quest", text: "  Walk the block  " },
+      "words",
+    );
+    const draft = view(described).player.draftQuest;
+    expect(O.isSome(draft) && draft.value.title).toBe("Walk the block");
+    expect(O.isSome(draft) && draft.value.realmId).toEqual(O.none());
+    expect(view(described).quests).toEqual([]);
+    expect(() => send(described, { type: "start-quest" }, "soon")).toThrow(
+      /realm/i,
+    );
+    const placed = send(described, { type: "choose-realm", realmId }, "realm");
+    const placedDraft = view(placed).player.draftQuest;
+    expect(O.isSome(placedDraft) && placedDraft.value.realmId).toEqual(
+      O.some(realmId),
+    );
+    expect(view(placed).quests).toEqual([]);
+    const restored = restoreGame(
+      JSON.parse(serializeGame(placed)),
+      context("load"),
+    );
+    expect(view(restored).player.draftQuest).toEqual(
+      view(placed).player.draftQuest,
+    );
+    const started = send(placed, { type: "start-quest" }, "start");
+    expect(view(started).player.draftQuest).toEqual(O.none());
+    expect(view(started).quests.map((quest) => quest.title)).toEqual([
+      "Walk the block",
+    ]);
+    expect(view(started).mission).toMatchObject({
+      _tag: "Some",
+      value: { title: "Walk the block" },
     });
-    expect(view(add(parked)).quests).toHaveLength(1);
+    expect(view(started).realm.id).toBe(realmId);
+    const held = structuredClone(started);
+    expect(() => send(started, { type: "start-quest" }, "again")).toThrow();
+    expect(started).toEqual(held);
   });
   it("resetting Niko preserves quests, rewards and identity", () => {
     let state = add(newGame(context()));

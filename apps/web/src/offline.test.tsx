@@ -4,7 +4,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
-import { App } from "./App";
+import { NicoScreen } from "./nico-screen";
 import * as protocol from "../../../packages/application/src/routine-protocol";
 import * as O from "../../../packages/foundation/src/option";
 import {
@@ -29,8 +29,8 @@ async function setup() {
   }));
   await controller.load();
   render(
-    <MemoryRouter initialEntries={["/nico"]}>
-      <App modelLayer={mockNicoLayer} controller={controller} />
+    <MemoryRouter>
+      <NicoScreen modelLayer={mockNicoLayer} controller={controller} />
     </MemoryRouter>,
   );
   return { controller, user: userEvent.setup() };

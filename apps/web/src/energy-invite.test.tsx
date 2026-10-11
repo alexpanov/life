@@ -3,7 +3,7 @@ import { it, expect, vi, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
-import { App } from "./App";
+import { NicoScreen } from "./nico-screen";
 import { Website } from "./Website";
 import { InvitePage } from "./pages/InvitePage";
 import { incomingInvitationRepository } from "./invitation";
@@ -50,7 +50,7 @@ it("retains invitation context across play and copies an honest invitation", asy
     screen.getByText("A friend invited you. Welcome to life."),
   ).toBeVisible();
   await user.click(screen.getByRole("button", { name: "play live" }));
-  expect(screen.getByRole("heading", { name: "Meet Niko." })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "Home" })).toBeVisible();
   window.history.replaceState({}, "", "/");
   expect(O.getOrElse(incomingInvitationRepository(), () => "missing")).toBe(
     "inv_opaque_123456",
@@ -72,8 +72,8 @@ it("shows exhausted energy while keeping memory removal available", async () => 
   for (let i = 0; i < 100; i++)
     controller.send({ type: "consume-nico-energy", requestId: `request-${i}` });
   render(
-    <MemoryRouter initialEntries={["/nico"]}>
-      <App controller={controller} />
+    <MemoryRouter>
+      <NicoScreen controller={controller} />
     </MemoryRouter>,
   );
   const user = userEvent.setup();

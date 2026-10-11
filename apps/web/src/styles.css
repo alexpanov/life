@@ -745,7 +745,7 @@ footer {
   max-width: 680px;
   padding: 24px 22px 96px;
 }
-.bottom-nav {
+.home-bar {
   position: fixed;
   z-index: 30;
   bottom: 0;
@@ -754,21 +754,21 @@ footer {
   display: flex;
   justify-content: center;
   padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
-  background: #071018;
-  border-top: 1px solid #263b48;
+  background: var(--paint-background);
+  border-top: 1px solid var(--paint-border);
 }
-.bottom-nav a {
+.home-bar a {
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 88px;
   min-height: 44px;
   padding: 8px 18px;
-  color: #e6edf1;
+  color: var(--paint-text);
   text-decoration: none;
 }
-.bottom-nav a[aria-current="page"] {
-  border-bottom: 2px solid #9ddaec;
+.home-bar a[aria-current="page"] {
+  border-bottom: 2px solid var(--paint-signal);
 }
 .focus-screen {
   padding: 28px 0;

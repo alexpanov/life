@@ -4,7 +4,7 @@ import { it, expect } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
-import { App } from "./App";
+import { NicoScreen } from "./nico-screen";
 import * as O from "../../../packages/foundation/src/option";
 import {
   NICO_WISDOM,
@@ -25,8 +25,8 @@ async function setup() {
   const controller = createGameController(persistence, context);
   await controller.load();
   render(
-    <MemoryRouter initialEntries={["/nico"]}>
-      <App modelLayer={mockNicoLayer} controller={controller} />
+    <MemoryRouter>
+      <NicoScreen modelLayer={mockNicoLayer} controller={controller} />
     </MemoryRouter>,
   );
   const user = userEvent.setup();

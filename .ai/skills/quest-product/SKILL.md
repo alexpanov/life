@@ -9,7 +9,7 @@ Apply the enduring purpose first: help the hero live a good life, the life the L
 
 Read `../../CONTRACT.md` relative to this file's directory. Trace the current player journey and save behavior before changing presentation.
 
-- Make the next action clear: mood → an appropriate quest → one chosen priority → action → outcome → the next choice. Keep suggestions rare and dismissible. Use the empty-state invitation “Pray for a quest”.
+- Make the next action clear: an open quest, or, when none is open, Niko asks what the hero is up to and the answer starts a quest after a realm is chosen. Keep suggestions rare and dismissible.
 - Keep realms persistent places the player can return to. Preserve their open quests and dungeon associations. Model discovery internally without exposing a tutorial about hidden exploration state.
 - Keep completed and abandoned quest outcomes distinct. Let Niko learn useful, bounded context from both; feed it into later suggestions without asserting psychological diagnoses. Reset Niko's learning independently of player progress.
 - Label who speaks. Give game/system, Niko and fictional dispatch distinct presentation. Use text labels plus icon and typography differences. Keep domain process names out of player copy.
@@ -25,4 +25,4 @@ Keep Niko's locked Delta Force pride, reluctant story canon, and delivery histor
 
 Design for the target audience in the always-loaded contract: driven men and young fathers who already feel pressure to perform. Use plain military warmth, never shame. Separate Niko energy and Vanguard access from hero XP. Make invitations easy; never represent a copied link as a verified signup. Keep feedback and forgetting available even when conversation energy is exhausted.
 
-Separate InteractionSurface (iPhone/web/Telegram/Instagram/WhatsApp), the in-game Port home, and commercial transaction channels. Surface hints inform Niko's relevant guidance but never grant account access or identity. Keep adapters on the periphery and preserve shared forms/routines. Support Android through web/Telegram without adding an Android native app. Reduce social-media cognitive load with sparse, voluntary actions, never claims that Niko can see unconnected feeds or contacts. Read docs/SURFACES.md before channel work.
+Separate InteractionSurface (iPhone/web/Telegram/Instagram/WhatsApp), the in-game Home, and commercial transaction channels. Surface hints inform Niko's relevant guidance but never grant account access or identity. Keep adapters on the periphery and preserve shared forms/routines. Support Android through web/Telegram without adding an Android native app. Reduce social-media cognitive load with sparse, voluntary actions, never claims that Niko can see unconnected feeds or contacts. Read docs/SURFACES.md before channel work.

@@ -1,9 +1,4 @@
-import type { Layer } from "effect";
-import type { NicoModel } from "../../../packages/application/src/nico-model";
-import { httpNicoLayer } from "../../../packages/infrastructure/src/http-nico-model";
-const liveNicoLayer = httpNicoLayer();
 import { attachBrowserInsights } from "./background-insights";
-import { PowerupsPage } from "./pages/PowerupsPage";
 import { Effect } from "effect";
 import {
   executeFrontendRoutine,
@@ -16,11 +11,10 @@ import {
   useSyncExternalStore,
   type FormEvent,
 } from "react";
-import { Link, Route, Routes, useNavigate } from "react-router";
-import { Compass, Radio, ArrowRight, Shield, Download } from "lucide-react";
+import { Link, NavLink, Route, Routes, useNavigate } from "react-router";
 import {
   Button,
-  choiceTitleSpace,
+  Compass,
   dangerText,
   formSave,
   playerSwitch,
@@ -29,39 +23,21 @@ import {
   serializeGame,
   selectGame,
   getHandoff,
-  getTemplate,
   parseImport,
   type Command,
-  type QuestOffer,
   type QuestCategory,
 } from "../../../packages/core/src/index";
 import type { GameController } from "../../../packages/application/src/controller";
 import { Sender, Field, Area } from "./components/presentation";
-import { H1, H3 } from "../../../packages/design/src/type";
+import { H3, Label } from "../../../packages/design/src/type";
 import { download } from "./download";
 import type { Modal } from "./ui-types";
-import { RealmsPage } from "./pages/RealmsPage";
-import {
-  NotificationCenter,
-  NotificationsPage,
-} from "./components/NotificationCenter";
-import { InvitePage } from "./pages/InvitePage";
-import { NicoPage } from "./pages/NicoPage";
 import { HomePage } from "./pages/HomePage";
 import { QuestPage } from "./pages/QuestPage";
-import { BoardPage } from "./pages/BoardPage";
-import { SkillsPage } from "./pages/SkillsPage";
-import { InventoryPage } from "./pages/InventoryPage";
 export { Sender } from "./components/presentation";
 import { Dialog } from "./components/ui/dialog";
 import { browserContext } from "./repository";
-export function App({
-  controller,
-  modelLayer = liveNicoLayer,
-}: {
-  controller: GameController;
-  modelLayer?: Layer.Layer<NicoModel>;
-}) {
+export function App({ controller }: { controller: GameController }) {
   useEffect(() => attachBrowserInsights(controller), [controller]);
   const store = useSyncExternalStore(
       controller.subscribe,
@@ -70,7 +46,6 @@ export function App({
     navigate = useNavigate();
   const [modal, setModal] = useState<Modal>(null),
     [selectedId, setSelectedId] = useState(""),
-    [offer, setOffer] = useState<QuestOffer | null>(null),
     [error, setError] = useState(""),
     [preview, setPreview] = useState<unknown>(null),
     [call, setCall] = useState<{ caller: string; text: string } | null>(null),
@@ -81,14 +56,7 @@ export function App({
   }, []);
   const view = O.isSome(store.game) ? selectGame(store.game.value, tick) : null;
   useEffect(() => {
-    if (view?.player.settings.driving) {
-      setModal(null);
-      setOffer(null);
-    }
-  }, [view?.player.settings.driving]);
-  useEffect(() => {
-    if (!view?.player.settings.autoCalls || view.player.settings.driving)
-      return;
+    if (!view?.player.settings.autoCalls) return;
     const timer = setInterval(() => {
       if (document.hidden || modal) return;
       if (
@@ -106,7 +74,6 @@ export function App({
   }, [
     controller,
     view?.player.settings.autoCalls,
-    view?.player.settings.driving,
     view?.player.lastCallAt,
     view?.player.settings.callIntervalMinutes,
     modal,
@@ -120,16 +87,6 @@ export function App({
     );
   const { player } = view,
     game = store.game.value;
-  const mission = O.match(
-      view.mission,
-      () => null,
-      (q) => q,
-    ),
-    candidate = O.match(
-      view.candidate,
-      () => null,
-      (q) => q,
-    );
   const selectedQuest = player.campaigns
       .flatMap((c) => c.quests)
       .find((q) => q.id === selectedId),
@@ -147,13 +104,6 @@ export function App({
               ),
             ).outcome;
       setError("");
-      setOffer(
-        O.match(
-          result.offer,
-          () => null,
-          (offer) => offer,
-        ),
-      );
       const started =
         ["choose-mission", "propose-mission", "accept-offer"].includes(
           command.type,
@@ -271,205 +221,14 @@ export function App({
     }
     if (command && send(command)) setModal(null);
   }
-  const offeredQuest =
-    offer?.kind === "existing"
-      ? player.campaigns
-          .flatMap((c) => c.quests)
-          .find((q) => q.id === offer.questId)
-      : offer?.quest;
-  const home = (
-    <HomePage
-      view={view}
-      game={game}
-      now={tick}
-      offer={offer}
-      offeredQuest={offeredQuest}
-      send={send}
-      open={open}
-    />
-  );
-  const menu = (
-    <>
-      <div className="page-heading">
-        <H1>Explore.</H1>
-      </div>
-      <nav className="menu-links" aria-label="Your world">
-        {[
-          ["/board", "Quests"],
-          ["/realms", "Realms"],
-          ["/skills", "Skills"],
-          ["/inventory", "Inventory"],
-          ["/nico", "Niko"],
-          ["/workshop", "Settings & saves"],
-          ["/notifications", "Notifications"],
-          ["/invite", "Invite a friend"],
-          ["/powerups", "Power-ups"],
-        ].map(([path, label]) => (
-          <Link key={path} to={path!}>
-            {label}
-            <ArrowRight size={18} />
-          </Link>
-        ))}
-      </nav>
-      <Button
-        variant="ghost"
-        onClick={() => send({ type: "settings", settings: { driving: true } })}
-      >
-        <Shield size={18} />
-        Driving mode
-      </Button>
-    </>
-  );
-  const nico = (
-    <NicoPage
-      modelLayer={modelLayer}
-      key={player.id}
-      controller={controller}
-      player={player}
-      now={tick}
-      send={send}
-    />
-  );
-  const realms = <RealmsPage view={view} send={send} open={open} />;
-  const board = (
-    <BoardPage
-      view={view}
-      send={send}
-      open={open}
-      missionId={mission?.id || ""}
-    />
-  );
-  const skills = <SkillsPage view={view} send={send} open={open} />;
-  const inventory = <InventoryPage view={view} send={send} open={open} />;
-  const workshop = (
-    <>
-      <div className="page-heading">
-        <small>YOUR WORLD / YOUR RULES</small>
-        <H1>Workshop.</H1>
-      </div>
-      <div className="settings-list">
-        <details className="quiet-details">
-          <summary>Niko</summary>
-          <p>Resettable memory. Your quests and rewards stay intact.</p>
-          <Button variant="secondary" onClick={() => open("memory")}>
-            Open memory
-          </Button>
-        </details>
-        <details className="quiet-details">
-          <summary>Save and restore</summary>
-          <p>
-            Progress stays in this browser. Export before switching devices.
-          </p>
-          <div className="actions">
-            <Button
-              onClick={() => download("questos-save.json", serializeGame(game))}
-            >
-              <Download size={14} />
-              Export save
-            </Button>
-            <Button variant="secondary" onClick={() => open("import")}>
-              Import JSON
-            </Button>
-          </div>
-        </details>
-        <details className="quiet-details">
-          <summary>ChatGPT bridge</summary>
-          <p>
-            Copy your current state and Niko’s context. No live model is
-            connected.
-          </p>
-          <Button variant="secondary" onClick={() => open("handoff")}>
-            Open handoff
-          </Button>
-        </details>
-        <details className="quiet-details">
-          <summary>Share a quest</summary>
-          <p>
-            Templates have fresh progress. Share the clean starter for a new
-            game.
-          </p>
-          <div className="actions">
-            <Button
-              variant="secondary"
-              onClick={() =>
-                download(
-                  "questos-campaign.json",
-                  JSON.stringify(getTemplate(game, tick), null, 2),
-                )
-              }
-            >
-              Export dungeon
-            </Button>
-            <Button variant="ghost" asChild>
-              <a
-                href={`${import.meta.env.BASE_URL}starter/`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Clean starter
-              </a>
-            </Button>
-          </div>
-        </details>
-        <details className="quiet-details">
-          <summary>Dispatch</summary>
-          <p>Optional fictional transmissions. You decide when to answer.</p>
-          <Button
-            variant="secondary"
-            onClick={() => send({ type: "transmission" })}
-          >
-            <Radio size={15} />
-            Receive transmission
-          </Button>
-          <label className="checkline">
-            <input
-              type="checkbox"
-              checked={player.settings.autoCalls}
-              onChange={(e) =>
-                send({
-                  type: "settings",
-                  settings: { autoCalls: e.target.checked },
-                })
-              }
-            />
-            Occasional transmissions while open
-          </label>
-          <label className="checkline">
-            <input
-              type="checkbox"
-              checked={player.settings.sound}
-              onChange={(e) =>
-                send({
-                  type: "settings",
-                  settings: { sound: e.target.checked },
-                })
-              }
-            />
-            Read answered transmissions aloud
-          </label>
-        </details>
-        <details className="quiet-details">
-          <summary>Players</summary>
-          <p>Independent profiles on this device.</p>
-          <Button variant="secondary" onClick={() => open("profiles")}>
-            Manage players
-          </Button>
-        </details>
-      </div>
-    </>
-  );
+  const home = <HomePage view={view} send={send} />;
   return (
     <div className="app-shell">
-      <div inert={player.settings.driving}>
+      <div>
         <header className="topbar">
           <Link className="brand" to="/">
             life
           </Link>
-          <nav aria-label="Main navigation">
-            <Link className="explore-link" to="/explore">
-              Explore <Compass size={18} />
-            </Link>
-          </nav>
         </header>
         <main className="layout">
           {store.storage !== "saved" && (
@@ -513,73 +272,21 @@ export function App({
           )}
           <Routes>
             <Route path="/" element={home} />
-            <Route path="/explore" element={menu} />
-            <Route path="/nico" element={nico} />
-            <Route
-              path="/powerups"
-              element={<PowerupsPage player={player} now={tick} send={send} />}
-            />
-            <Route
-              path="/invite"
-              element={<InvitePage code={player.energy.referralCode} />}
-            />
-            <Route path="/notifications" element={<NotificationsPage />} />
             <Route
               path="/quest/:questId"
               element={<QuestPage view={view} send={send} open={open} />}
             />
-            <Route path="/realms" element={realms} />
-            <Route path="/board" element={board} />
-            <Route path="/skills" element={skills} />
-            <Route path="/inventory" element={inventory} />
-            <Route path="/workshop" element={workshop} />
             <Route path="*" element={home} />
           </Routes>
         </main>
       </div>
-      <NotificationCenter controller={controller} />
-      {player.settings.driving && (
-        <div className="drive-screen">
-          <Shield size={54} />
-          <H1>Eyes on the road.</H1>
-          <p>Controls are paused until you are safely parked.</p>
-          <Button
-            onClick={() =>
-              send({ type: "settings", settings: { driving: false } })
-            }
-          >
-            I’m parked
-          </Button>
-        </div>
-      )}
+      <nav className="home-bar" aria-label="Main navigation">
+        <NavLink to="/" end>
+          <Label>Home</Label>
+        </NavLink>
+      </nav>
       <Dialog
-        open={!!candidate && !modal && !player.settings.driving}
-        onClose={() => send({ type: "retain-mission" })}
-        title="Choose one next move"
-      >
-        <Sender />
-        {mission && <p>Current mission: {mission.title}</p>}
-        <H3 className={choiceTitleSpace}>{candidate?.title}</H3>
-        <p>{candidate?.nextMove}</p>
-        <div className="actions">
-          <Button
-            variant="secondary"
-            onClick={() => send({ type: "retain-mission" })}
-          >
-            {mission ? "Stay on current mission" : "Leave on board"}
-          </Button>
-          <Button
-            onClick={() => {
-              if (candidate)
-                send({ type: "choose-mission", questId: candidate.id });
-            }}
-          >
-            {mission ? "Switch to this quest" : "Take this quest"}
-          </Button>
-        </div>
-      </Dialog>
-      <Dialog
-        open={modal !== null && !player.settings.driving}
+        open={modal !== null}
         onClose={() => {
           setModal(null);
           window.speechSynthesis?.cancel();

@@ -33,7 +33,7 @@ export function HomePage({
             <Link key={quest.id} to={`/quest/${quest.id}`}>
               <span>
                 <H4>{quest.title}</H4>
-                <Body>{realm}</Body>
+                {player.realms.length > 1 ? <Body>{realm}</Body> : null}
               </span>
               <span aria-hidden="true">→</span>
             </Link>

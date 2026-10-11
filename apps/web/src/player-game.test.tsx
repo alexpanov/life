@@ -56,7 +56,7 @@ describe("player game", () => {
     );
     expect(screen.getByText("Opening your game.")).toBeVisible();
     expect(
-      await screen.findByRole("heading", { name: "Meet Niko." }),
+      await screen.findByRole("heading", { name: "Home" }),
     ).toBeVisible();
     expect(screen.queryByLabelText(/email/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/password/i)).not.toBeInTheDocument();
@@ -76,7 +76,7 @@ describe("player game", () => {
         <PlayerGame session={first} />
       </MemoryRouter>,
     );
-    await screen.findByRole("heading", { name: "Meet Niko." });
+    await screen.findByRole("heading", { name: "Home" });
     await first.controller().flush();
     const firstSave = await Effect.runPromise(firstStore.repository.load());
     firstView.unmount();
@@ -85,7 +85,7 @@ describe("player game", () => {
         <PlayerGame session={second} />
       </MemoryRouter>,
     );
-    await screen.findByRole("heading", { name: "Meet Niko." });
+    await screen.findByRole("heading", { name: "Home" });
     await second.controller().flush();
     const firstAfter = await Effect.runPromise(firstStore.repository.load());
     const secondSave = await Effect.runPromise(secondStore.repository.load());

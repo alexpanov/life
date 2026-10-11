@@ -46,7 +46,16 @@ const rules = {
   },
 };
 export default [
-  { ignores: ["node_modules/**", "dist/**", "native-dist/**"] },
+  {
+    ignores: [
+      "node_modules/**",
+      "dist/**",
+      "native-dist/**",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+    ],
+  },
   {
     files: [
       "packages/**/*.ts",

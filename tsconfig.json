@@ -21,14 +21,8 @@
     "apps/**/*.ts",
     "apps/**/*.tsx",
     "scripts/**/*.ts",
-    "tests/core/**/*.ts",
-    "tests/web/**/*.tsx",
     "vite.config.ts",
     "vitest.config.ts",
-    "tests/integration/**/*.ts",
-    "tests/infrastructure/**/*.ts",
-    "tests/web/**/*.ts",
-    "playwright.config.ts",
-    "tests/browser/**/*.ts"
+    "playwright.config.ts"
   ]
 }

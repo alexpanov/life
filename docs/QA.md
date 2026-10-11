@@ -1,3 +1,9 @@
+# v0.3 verification
+
+52 Node checks passed, including outcome review, legacy learning migration, sidekick memory round trips, player-isolated persistence adapters, bounded prompt context, and reset without progress loss. Both main and starter builds passed their distributed-script checks.
+
+No fresh browser or physical iPhone visual test was available for this update.
+
 # v0.2 verification
 
 45 Node checks cover engine behavior, realm migration and return, sparse suggestions, isolated starter storage, distributed script boot, mission-switch decisions, persisted outcome review, and bounded local learning. Build completed for both distributions.

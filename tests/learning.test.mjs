@@ -11,7 +11,7 @@ test('explicit feedback changes ranking without rewards or automatic quest accep
   const next=checkIn(p,'ready',Date.now(),(q,mood)=>learnedFit(p,q,mood));
   assert.equal(next.questId,c.quests[1].id);assert.equal(p.focusQuestId,'');assert.equal(totalXP(p),0);
   for(let i=0;i<220;i++)learnFromOutcome(p,c.quests[0],'declined');
-  assert.equal(p.learning.feedback.length,200);assert.equal(p.learning.preferences['ready:errand'],-8);
+  assert.equal(p.sidekick.learning.feedback.length,200);assert.equal(p.sidekick.learning.preferences['ready:errand'],-8);
 });
 test('accepting a new lead can preserve the active mission until an explicit switch',()=>{
   const p=createPlayer('Tester'), c=activeCampaign(p);

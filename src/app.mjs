@@ -1,3 +1,5 @@
+import { nikoGuidance, sidekickContext, addSidekickSnippet } from './sidekick/model.mjs';
+import { createDocumentSidekickRepository } from './sidekick/repository.mjs';
 import { VERSION, DAY, MAX_IMPORT_BYTES, uid, clone, clamp, clean, must, dayKey, newSkill, makeQuest, makeCampaign, createPlayer, createState, activePlayer, activeCampaign, readinessAt, potentialLevel, currentLevel, totalXP, rankForXP, progress, nextQuest, inventory, record, setQuestStatus, practice, undoPractice, pauseSkill, campaignTemplate, importCampaign, parseJSON, validateSave, validateExtension, installExtension, applyPatch, agentBrief, operatorMessage, EventBus, activeRealm, realmCampaigns, realmQuests, enterRealm, addRealm, rememberQuest, focusQuest, checkIn, acceptSuggestion, dismissSuggestion, applyReportedUpdate } from './engine.mjs';
 import { currentMission, proposeMission, chooseMission, retainMission, reportMission, finishReview, setAsideMission } from './systems/prioritize.mjs';
 import { learnFromOutcome, learnedFit } from './systems/learning.mjs';
@@ -7,6 +9,7 @@ const KEY = 'questos.v1';
 const BACKUP_KEY = 'questos.v1.backup';
 const STARTER_URL = '__STARTER_URL__';
 const bus = new EventBus();
+const sidekickRepository=createDocumentSidekickRepository(()=>clone(state),doc=>{state=doc;saveState();});
 let state, storageStatus = 'local', recoveryRaw = '', recoveryMessage = '', lastSavedRaw = '';
 let feeling = '', questOffer = null;
 let tab = 'home', toastTimer, currentCall = null, previewData = null, previewOrigin = '', previousFocus = null;
@@ -85,6 +88,13 @@ function header() {
 function utility() {
   return `<div class="utility-row"><div class="command-location"><div class="dungeon-picker"><span class="eyebrow">REALM</span><select id="realm-picker" aria-label="Current realm">${p().realms.map(realm => `<option value="${esc(realm.id)}" ${realm.id === r().id ? 'selected' : ''}>${esc(realm.name)}</option>`).join('')}</select><button class="icon-btn" data-action="new-realm" aria-label="Enter a new realm">${icon('plus',14)}</button></div><div class="dungeon-picker"><span class="eyebrow">DUNGEON</span><select id="campaign-picker" aria-label="Active dungeon">${realmCampaigns(p()).map(d => `<option value="${esc(d.id)}" ${d.id === c().id ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}</select><button class="icon-btn" data-action="new-campaign" aria-label="Create dungeon">${icon('plus',14)}</button></div></div><div class="utility-actions"><span class="fine saved-text"><span class="status-dot" style="${storageStatus === 'local' ? '' : 'background:var(--amber)'}"></span>${storageStatus === 'local' ? 'LOCAL SAVE' : 'EXPORT TO SAVE'}</span><button class="text-button" data-action="driving">${icon('shield',12)} Driving mode</button></div></div>${storageStatus === 'local' ? '' : `<div class="warning">${esc(recoveryMessage || 'Browser storage is unavailable. Progress lasts only for this session. Export a save before closing.')} <button class="text-button" data-action="${storageStatus === 'recovery' ? 'recovery' : 'export-save'}">${storageStatus === 'recovery' ? 'Recovery options' : 'Export save'}</button></div>`}`;
 }
+function sidekickPanel(quest=null) {
+  return `<aside class="sidekick-panel"><div class="sidekick-avatar" aria-hidden="true">${icon('compass',23)}</div><div><div class="eyebrow green">NIKO / YOUR SIDEKICK</div><p>${esc(nikoGuidance(p(),quest))}</p></div><button class="text-button" data-action="sidekick-memory">Memory</button></aside>`;
+}
+function sidekickMemoryDialog() {
+  const m=p().sidekick;
+  showModal('Niko / memory',`<p class="detail-text">I learn from your choices and results. Tell me what helps you finish.</p><form id="sidekick-note-form"><div class="field"><label for="sidekick-note">One thing to remember</label><textarea id="sidekick-note" name="note" maxlength="600" required placeholder="Short quests work better when I am tired."></textarea></div></form>${m.snippets.length?`<h3>What you told me</h3>${m.snippets.map(n=>`<p class="fine">${esc(n.text)}</p>`).join('')}`:''}<p class="fine">${m.reviews.length} recent quest outcomes remembered. Memory stays in this browser and in exported saves. Guidance uses local rules. Notes are saved for your ChatGPT handoff.</p>`,`<button class="text-button" data-action="reset-sidekick">Reset memory</button><button class="btn secondary" data-action="close">Close</button><button class="btn primary" type="submit" form="sidekick-note-form">Remember</button>`);
+}
 function missionStrip() {
   const q=currentMission(p());
   return q ? `<section class="mission-strip"><div><div class="eyebrow">YOUR ONE MISSION</div><strong>${esc(q.title)}</strong></div><div class="button-row"><button class="btn primary small" data-action="resume-mission">Resume ${icon('arrow',13)}</button><button class="text-button" data-action="set-aside">Set aside</button></div></section>` : '';
@@ -107,7 +117,7 @@ function outcomeReview(q,outcome) {
 function homePage() {
   if (p().operation.phase === 'review') {
     const q=questById(p().operation.lastQuestId), current=currentMission(p());
-    return `<section class="panel review-panel"><div class="panel-body"><div class="eyebrow green">${q?.status==='done' ? 'MISSION COMPLETE' : 'DEAD END CLOSED'}</div><h2>${esc(q?.title || 'Report received.')}</h2><p class="next-copy">Take a breath. What matters most now?</p>${current ? `<p class="fine">Your current mission: ${esc(current.title)}</p>` : ''}<div class="button-row">${current ? '<button class="btn primary" data-action="resume-mission">Return to current mission</button>' : ''}<button class="btn ${current ? 'secondary' : 'primary'}" data-action="review-next">Pick the next quest</button><button class="text-button" data-action="stand-down">Stand down</button></div></div></section>`;
+    return `<section class="panel review-panel"><div class="panel-body"><div class="eyebrow green">${q?.status==='done' ? 'MISSION COMPLETE' : q?.status==='pending' ? 'QUEST SET ASIDE' : 'DEAD END CLOSED'}</div><h2>${esc(q?.title || 'Report received.')}</h2><p class="next-copy">Take a breath. What matters most now?</p>${current ? `<p class="fine">Your current mission: ${esc(current.title)}</p>` : ''}<div class="button-row">${current ? '<button class="btn primary" data-action="resume-mission">Return to current mission</button>' : ''}<button class="btn ${current ? 'secondary' : 'primary'}" data-action="review-next">Pick the next quest</button><button class="text-button" data-action="stand-down">Stand down</button></div></div></section>`;
   }
   const open = realmQuests(p()).filter(q => q.status === 'pending');
   const cleared = realmCampaigns(p()).find(d => progress(d).complete);
@@ -129,7 +139,7 @@ function realmForm(id = '') {
   showModal(id ? 'Realm settings' : 'Enter a new realm', `<form id="realm-form" data-id="${esc(id)}"><div class="field"><label for="realm-name">Realm name</label><input id="realm-name" name="name" required maxlength="100" value="${esc(realm?.name || '')}" placeholder="Your city, country, or home base"></div><div class="field"><label for="realm-location">Place (optional)</label><input id="realm-location" name="location" maxlength="240" value="${esc(realm?.location || '')}" placeholder="A name you will recognize when you return"></div><label class="toggle-line"><input name="home" type="checkbox" ${realm?.home ? 'checked' : ''}> This is my home realm</label></form>`, `<button class="btn secondary" data-action="close">Cancel</button><button class="btn primary" type="submit" form="realm-form">${id ? 'Save realm' : 'Enter realm'}</button>`);
 }
 function footer() {
-  return `<footer class="footer"><span>QUEST/OS v0.2.0 &nbsp; / &nbsp; LOCAL PROGRESS</span><div class="footer-actions"><button class="text-button" data-action="export-save">Export save</button><button class="text-button" data-action="about">How it works</button></div></footer>`;
+  return `<footer class="footer"><span>QUEST/OS v0.3.0 &nbsp; / &nbsp; LOCAL PROGRESS</span><div class="footer-actions"><button class="text-button" data-action="export-save">Export save</button><button class="text-button" data-action="about">How it works</button></div></footer>`;
 }
 function questRow(q) {
   return `<div class="quest-row ${q.status==='done'?'done':q.status==='impossible'?'closed':''}" data-quest="${esc(q.id)}"><button class="quest-check ${q.status==='done'?'done':q.status==='impossible'?'closed':''}" data-action="${q.status==='impossible'?'detail':q.status==='done'?'undo-quest':'complete'}" data-id="${esc(q.id)}" aria-label="${q.status==='done'?'Undo completion: ':q.status==='impossible'?'View closed objective: ':'Complete objective: '}${esc(q.title)}">${q.status==='done'?icon('check',15):q.status==='impossible'?'&ndash;':''}</button><div class="quest-main"><button class="quest-title" data-action="detail" data-id="${esc(q.id)}">${esc(q.title)}</button><div class="quest-sub">${q.status==='done'?'SECURED':q.status==='impossible'?'CLOSED / NO PENALTY':q.category==='main'?'MAIN OBJECTIVE':'SIDE QUEST'}</div></div>${q.status==='impossible'?'':`<span class="xp">+${q.xp} XP</span>`}</div>`;
@@ -165,7 +175,7 @@ function workshopPage() {
 </div>`;
 }
 function render() {
-  $('#app').innerHTML = `${header()}<main class="layout">${utility()}${missionStrip()}${tab==='home'?homePage():tab==='realms'?realmsPage():tab==='skills'?skillsPage():tab==='inventory'?inventoryPage():tab==='workshop'?workshopPage():board()}${footer()}</main>`;
+  $('#app').innerHTML = `${header()}<main class="layout">${utility()}${sidekickPanel(currentMission(p()) || (questOffer?.kind==='existing'?questById(questOffer.questId):questOffer?.quest))}${missionStrip()}${tab==='home'?homePage():tab==='realms'?realmsPage():tab==='skills'?skillsPage():tab==='inventory'?inventoryPage():tab==='workshop'?workshopPage():board()}${footer()}</main>`;
   const driving = p().settings.driving;
   $('#drive-screen').hidden = !driving;
   $('#app').inert = driving;
@@ -250,7 +260,7 @@ const exampleExtension = {
   calls:[{caller:'NIGHT SHIFT',text:'The terminal is awake. Choose one useful action. No ten-step plan. Report back when it is complete.'}]
 };
 function briefDialog() {
-  const brief=agentBrief(p());
+  const brief=`${agentBrief(p())}\n\nSIDEKICK CONTEXT\n${JSON.stringify(sidekickContext(p(),currentMission(p())),null,2)}`;
   showModal('ChatGPT handoff',`<p class="fine">Copy this into a ChatGPT conversation. It includes objective details and your current game state, but not other players.</p><div class="field" style="margin-top:17px"><label for="agent-brief">Editable before you share</label><textarea id="agent-brief" class="code" spellcheck="false">${esc(brief)}</textarea></div>`,`<button class="btn secondary" data-action="download-brief">Save text file</button><button class="btn primary" data-action="copy-brief">Copy handoff</button>`);
 }
 function callDialog() {
@@ -268,7 +278,7 @@ function answerCall() {
   }
 }
 function aboutDialog() {
-  showModal('QuestOS / field manual',`<div class="eyebrow green">PLAYABLE PROTOTYPE / v0.2.0</div><p class="detail-text">Complete real objectives to earn XP and collect loot. Create dungeons for trips, errands, work, or practice. Mark a blocked objective impossible to close it without a penalty.</p><h3>Two different records</h3><p class="detail-text">Field rank records completed work. It does not decay. Skill potential records practice. Current skill level falls as readiness decays, and rises as you practice again. This is game logic, not a scientific assessment.</p><h3>One mission at a time</h3><p class="detail-text">Choose a quest, act, then report. New quests ask whether to switch or keep your current mission. After a result, choose what matters next or stand down.</p><h3>Learning your rhythm</h3><p class="detail-text">Suggestions adapt locally to your mood, choices, and confirmed results. This is a small preference system, not generative AI or self-rewriting code. Your records stay in your save.</p><h3>Local by design</h3><p class="detail-text">Game data stays in this browser. No analytics, background location, AI request, or real phone call. Your progress is stored in this browser when possible. Export a backup before changing devices or clearing browser data.</p><h3>Reusable and extendable</h3><p class="detail-text">Share campaign templates. Add JSON modules with quests, skills, and operator scripts. The source project contains the rules engine, extension hooks, tests, and static deployment files.</p><h3>ChatGPT integration</h3><p class="detail-text">The bridge is copy/paste. A connected ChatGPT app and shared cloud saves are not implemented in this build. Use the playable game link to open the hosted app. The clean starter has separate local progress. Site access uses ChatGPT sharing settings.</p><h3>Stay grounded</h3><p class="detail-text">Campaigns can contain player-supplied shopping lists and locations. Stock, opening hours, overnight parking rules, church details, and flight times need verification outside this app. No substitutions or automatic completion.</p>`,`<button class="btn primary" data-action="close">Back to the quest</button>`);
+  showModal('QuestOS / field manual',`<div class="eyebrow green">PLAYABLE PROTOTYPE / v0.3.0</div><p class="detail-text">Complete real objectives to earn XP and collect loot. Create dungeons for trips, errands, work, or practice. Mark a blocked objective impossible to close it without a penalty.</p><h3>Two different records</h3><p class="detail-text">Field rank records completed work. It does not decay. Skill potential records practice. Current skill level falls as readiness decays, and rises as you practice again. This is game logic, not a scientific assessment.</p><h3>One mission at a time</h3><p class="detail-text">Choose a quest, act, then report. New quests ask whether to switch or keep your current mission. After a result, choose what matters next or stand down.</p><h3>Learning your rhythm</h3><p class="detail-text">Niko remembers your mood, choices, and confirmed results. You can reset his memory without losing quest progress. This is a small preference system, not generative AI or self-rewriting code. Your records stay in your save.</p><h3>Local by design</h3><p class="detail-text">Game data stays in this browser. No analytics, background location, AI request, or real phone call. Your progress is stored in this browser when possible. Export a backup before changing devices or clearing browser data.</p><h3>Reusable and extendable</h3><p class="detail-text">Share campaign templates. Add JSON modules with quests, skills, and operator scripts. The source project contains the rules engine, extension hooks, tests, and static deployment files.</p><h3>ChatGPT integration</h3><p class="detail-text">The bridge is copy/paste. A connected ChatGPT app and shared cloud saves are not implemented in this build. Use the playable game link to open the hosted app. The clean starter has separate local progress. Site access uses ChatGPT sharing settings.</p><h3>Stay grounded</h3><p class="detail-text">Campaigns can contain player-supplied shopping lists and locations. Stock, opening hours, overnight parking rules, church details, and flight times need verification outside this app. No substitutions or automatic completion.</p>`,`<button class="btn primary" data-action="close">Back to the quest</button>`);
 }
 function closeQuestDialog(id) {
   const q=questById(id); must(q,'Objective not found.');
@@ -293,9 +303,12 @@ async function act(action, element) {
     case 'choose-mission': activateMission(id);break;
     case 'retain-mission': retainMission(p());closeModal();commit();break;
     case 'resume-mission': {const current=currentMission(p());if(current)activateMission(current.id);break;}
-    case 'set-aside': {const q=setAsideMission(p());learnFromOutcome(p(),q,'set-aside');tab='home';feeling='';questOffer=null;commit('Quest stays on your board.');break;}
+    case 'set-aside': {const q=setAsideMission(p());if(q)outcomeReview(q,'set-aside');commit('Quest stays on your board.');break;}
     case 'review-next': finishReview(p());feeling='';questOffer=null;tab='home';commit();break;
     case 'stand-down': finishReview(p());tab='realms';commit('Take your time. Your quests will be here.');break;
+    case 'sidekick-memory': sidekickMemoryDialog();break;
+    case 'reset-sidekick': showModal('Reset Niko’s memory?', '<p class="detail-text">Clear learned preferences, quest observations, and your notes. Your quests, XP, skills, and inventory stay intact.</p>', '<button class="btn secondary" data-action="sidekick-memory">Keep memory</button><button class="btn primary" data-action="confirm-reset-sidekick">Reset memory</button>');break;
+    case 'confirm-reset-sidekick': await sidekickRepository.remove(p().id);questOffer=null;feeling='';closeModal();commit('Niko is starting fresh. Your progress is safe.');break;
     case 'close': closeModal(); break;
     case 'complete': {
       const q=questById(id); must(q,'Objective not found.');
@@ -348,11 +361,12 @@ document.addEventListener('click', event => {
   const target=event.target.closest('[data-action]'); if(!target)return;
   event.preventDefault(); Promise.resolve(act(target.dataset.action,target)).catch(error=>toast(error.message,true));
 });
-document.addEventListener('submit', event => {
+document.addEventListener('submit', async event => {
   event.preventDefault(); const form=event.target; const data=Object.fromEntries(new FormData(form));
   if(p().settings.driving) return;
   try {
-    if(form.id==='realm-form') {
+    if(form.id==='sidekick-note-form') {addSidekickSnippet(p(),data.note);await sidekickRepository.save(p().id,p().sidekick);closeModal();commit('Niko will remember.');}
+    else if(form.id==='realm-form') {
       let realm = form.dataset.id ? p().realms.find(x => x.id === form.dataset.id) : null;
       must(clean(data.name),'Name the realm.');
       if(form.dataset.id) { must(realm,'Realm not found.');realm.name=clean(data.name,100);realm.location=clean(data.location,240); }
@@ -407,7 +421,7 @@ setInterval(()=>{if(state&&!document.hidden&&!modal.open&&tab!=='skills'&&!p().s
 loadState();render();
 // Developer extension surface. No untrusted imported JavaScript is evaluated.
 window.QuestOS=Object.freeze({version:'0.2.0',on:(event,fn)=>bus.on(event,fn),getSnapshot:()=>clone(state),
-  getAgentBrief:()=>agentBrief(p()),previewJSON:text=>previewImport(text)});
+  getAgentBrief:()=>`${agentBrief(p())}\n\nSIDEKICK CONTEXT\n${JSON.stringify(sidekickContext(p(),currentMission(p())),null,2)}`,previewJSON:text=>previewImport(text)});
 if(location.protocol==='http:'||location.protocol==='https:') {
   const link=document.createElement('link');link.rel='manifest';link.href='./manifest.webmanifest';document.head.appendChild(link);
   if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});

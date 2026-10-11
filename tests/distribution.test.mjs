@@ -169,10 +169,25 @@ test('a result pauses for human reassessment and persists its local learning', a
   assert.equal(snapshot().operation.phase,'review');
   assert.equal(snapshot().focusQuestId,'');
   assert.match(run.nodes.get('app').innerHTML,/What matters most now/);
-  assert.equal(snapshot().learning.preferences['tired:rest'],3);
+  assert.equal(snapshot().sidekick.learning.preferences['tired:rest'],3);
   const reload=launch(game,run.storage);
   assert.match(reload.nodes.get('app').innerHTML,/What matters most now/);
   click(reload,'review-next');await Promise.resolve();
   assert.equal(reload.window.QuestOS.getSnapshot().players[0].operation.phase,'choose');
   assert.match(reload.nodes.get('app').innerHTML,/How are you feeling/);
+});
+
+test('Niko reviews a set-aside and memory reset preserves quests across reload',async()=>{
+ const run=launch(game),get=()=>run.window.QuestOS.getSnapshot().players[0];
+ assert.match(run.nodes.get('app').innerHTML,/NIKO \/ YOUR SIDEKICK/);
+ const id=get().campaigns.flatMap(c=>c.quests).find(q=>q.status==='pending').id;
+ click(run,'start-quest',{id});await Promise.resolve();click(run,'set-aside');await Promise.resolve();
+ assert.equal(get().sidekick.reviews.at(-1).outcome,'set-aside');assert.equal(get().operation.phase,'review');
+ assert.match(run.nodes.get('app').innerHTML,/QUEST SET ASIDE/);
+ const quests=JSON.stringify(get().campaigns);
+ click(run,'sidekick-memory');await Promise.resolve();click(run,'reset-sidekick');await Promise.resolve();
+ assert.equal(get().sidekick.reviews.length,1);
+ click(run,'confirm-reset-sidekick');for(let i=0;i<8;i++)await Promise.resolve();
+ assert.equal(get().sidekick.reviews.length,0);assert.equal(JSON.stringify(get().campaigns),quests);
+ assert.equal(launch(game,run.storage).window.QuestOS.getSnapshot().players[0].sidekick.reviews.length,0);
 });

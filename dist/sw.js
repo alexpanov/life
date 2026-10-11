@@ -1,5 +1,5 @@
 // Cache only this application's shell. Never intercept external or non-GET requests.
-const CACHE = 'questos-shell-v0.2.0-' + self.registration.scope;
+const CACHE = 'questos-shell-v0.3.0-' + self.registration.scope;
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', event => { event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL))); self.skipWaiting(); });
 self.addEventListener('activate', event => { event.waitUntil(caches.open(CACHE).then(() => self.clients.claim())); });

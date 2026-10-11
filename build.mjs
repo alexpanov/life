@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 const root = dirname(fileURLToPath(import.meta.url));
 const load = name => readFile(join(root, 'src', name), 'utf8');
-const [rawEngine, rawApp, baseCSS, shell, focusSystem, learningSystem, iconSystem, tokens, consoleCSS, motion] = await Promise.all(['engine.mjs','app.mjs','styles.css','shell.html','systems/prioritize.mjs','systems/learning.mjs','ui/icons.mjs','ui/tokens.css','ui/console.css','ui/motion.css'].map(load));
+const [rawEngine, rawApp, baseCSS, shell, focusSystem, learningSystem, iconSystem, sidekickModel, sidekickRepository, tokens, consoleCSS, motion] = await Promise.all(['engine.mjs','app.mjs','styles.css','shell.html','systems/prioritize.mjs','systems/learning.mjs','ui/icons.mjs','sidekick/model.mjs','sidekick/repository.mjs','ui/tokens.css','ui/console.css','ui/motion.css'].map(load));
 const css = [baseCSS,tokens,consoleCSS,motion].join('\n');
 const inlineModule = source => source.replace(/^import .* from '[^']+';\n/gm, '').replace(/^export /gm, '');
 const origin = (process.env.QUESTOS_ORIGIN || 'https://questos.mangomint-5316.chatgpt.site').replace(/\/$/, '');
@@ -23,7 +23,7 @@ if (starter) {
 // Keep the distribution self-contained: no CDN, packages, fonts, or module fetches.
 // A classic script also runs when a browser opens the HTML as a local file.
 // The static launch panel remains visible in file previews that disable scripts.
-const script = `(() => { 'use strict';\nconst launchPanel = document.getElementById('app').innerHTML;\ntry {\n${[engine,focusSystem,learningSystem,iconSystem,app].map(inlineModule).join('\n')}\n} catch (error) {\n document.getElementById('app').innerHTML = launchPanel;\n document.getElementById('boot-message').textContent = 'The game could not start here. Open the playable game in your browser.';\n console.error('QuestOS could not start', error);\n}\n})();`;
+const script = `(() => { 'use strict';\nconst launchPanel = document.getElementById('app').innerHTML;\ntry {\n${[sidekickModel,sidekickRepository,engine,focusSystem,learningSystem,iconSystem,app].map(inlineModule).join('\n')}\n} catch (error) {\n document.getElementById('app').innerHTML = launchPanel;\n document.getElementById('boot-message').textContent = 'The game could not start here. Open the playable game in your browser.';\n console.error('QuestOS could not start', error);\n}\n})();`;
 if (/<\/script/i.test(script)) throw new Error('Inline script includes an unsafe closing tag.');
 return shell.replace('/*__STYLES__*/', () => css).replace('/*__SCRIPT__*/', () => script)
   .replaceAll('__PLAY_URL__', origin + (starter ? '/starter/' : '/'))

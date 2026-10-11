@@ -1,3 +1,4 @@
+import { createSidekick, normalizeSidekick } from './sidekick/model.mjs';
 /** Pure, portable game rules. No DOM, network calls, or storage dependencies. */
 export const VERSION = 1;
 export const DAY = 86400000;
@@ -84,7 +85,7 @@ export function createPlayer(name = 'Player 1', seeded = false, now = Date.now()
     campaigns: [campaign], activeCampaignId: campaign.id,
     realms: [home], activeRealmId: home.id, homeRealmId: home.id, focusQuestId: '',
     appliedUpdates: [], checkin: null, suggestions: { lastOfferedAt: 0, dismissed: [] },
-    operation: { phase: 'choose', candidateQuestId: '', lastQuestId: '' }, learning: { preferences: {}, feedback: [] },
+    operation: { phase: 'choose', candidateQuestId: '', lastQuestId: '' }, sidekick: createSidekick(),
     skills: [newSkill('Taekwondo', 30, now), newSkill('Strength', 21, now), newSkill('Fieldcraft', 45, now)],
     bonusLoot: seeded ? ['Jocko Molk protein shake', 'Mirror'] : [],
     modules: [], events: [], settings: { sound: false, autoCalls: false, callIntervalMinutes: 20, driving: false },
@@ -317,10 +318,6 @@ export function validateSave(input, now = Date.now()) {
     const allQuests = campaigns.flatMap(c => c.quests);
     const focusQuestId = allQuests.some(q => q.id === p.focusQuestId && q.status === 'pending') ? p.focusQuestId : '';
     const reference = value => allQuests.some(q => q.id === value) ? value : '';
-    const preferences = {};
-    if (p.learning?.preferences && typeof p.learning.preferences === 'object' && !Array.isArray(p.learning.preferences)) {
-      for (const [key, value] of Object.entries(p.learning.preferences).slice(0, 100)) if (/^(ready|curious|quiet|tired):(rest|faith|training|exploration|care|work|errand|general)$/.test(key)) preferences[key] = finite(value, -8, 8, 'Invalid preference score.');
-    }
     must(Array.isArray(p.skills) && p.skills.length <= 50, 'Invalid skill list.');
     const skills = p.skills.map(s => {
       must(Array.isArray(s.sessions) && s.sessions.length <= 10000, 'Invalid practice log.');
@@ -348,11 +345,7 @@ export function validateSave(input, now = Date.now()) {
         dismissed: Array.isArray(p.suggestions?.dismissed) ? [...new Set(p.suggestions.dismissed.slice(-200).map(x => clean(x, 200)))] : [] },
       operation: { phase: ['choose','execute','review'].includes(p.operation?.phase) ? p.operation.phase : focusQuestId ? 'execute' : 'choose',
         candidateQuestId: reference(p.operation?.candidateQuestId), lastQuestId: reference(p.operation?.lastQuestId) },
-      learning: { preferences, feedback: Array.isArray(p.learning?.feedback) ? p.learning.feedback.slice(-200).map(f => ({
-        questId: reference(f.questId), mood: MOODS.includes(f.mood) ? f.mood : 'ready',
-        category: ['rest','faith','training','exploration','care','work','errand','general'].includes(f.category) ? f.category : 'general',
-        outcome: ['accepted','completed','declined','blocked','set-aside'].includes(f.outcome) ? f.outcome : 'declined', at: timestamp(f.at)
-      })) : [] },
+      sidekick: normalizeSidekick(p.sidekick,p.learning),
       skills, bonusLoot: Array.isArray(p.bonusLoot) ? p.bonusLoot.slice(0, 200).map(x => clean(x, 160)) : [],
       modules, events, settings: { sound: Boolean(p.settings?.sound), autoCalls: Boolean(p.settings?.autoCalls),
         callIntervalMinutes: clamp(Number(p.settings?.callIntervalMinutes) || 20, 5, 180), driving: Boolean(p.settings?.driving) },

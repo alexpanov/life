@@ -1,3 +1,4 @@
+import { reviewSidekickOutcome } from '../sidekick/model.mjs';
 /** Bounded preference learning from explicit choices and confirmed outcomes. No model or code execution. */
 import { clamp } from '../engine.mjs';
 export function questCategory(quest) {
@@ -16,11 +17,12 @@ export function learnFromOutcome(player, quest, outcome, now = Date.now()) {
   const mood = player.checkin?.mood || 'ready', category = questCategory(quest);
   const delta = { accepted: 1, completed: 2, declined: -2, blocked: 0, 'set-aside': -1 }[outcome];
   if (delta == null) return;
+  reviewSidekickOutcome(player,quest,outcome,category,now);
   const key = `${mood}:${category}`;
-  player.learning.preferences[key] = clamp((player.learning.preferences[key] || 0) + delta, -8, 8);
-  player.learning.feedback.push({ questId: quest.id || '', mood, category, outcome, at: now });
-  player.learning.feedback = player.learning.feedback.slice(-200);
+  player.sidekick.learning.preferences[key] = clamp((player.sidekick.learning.preferences[key] || 0) + delta, -8, 8);
+  player.sidekick.learning.feedback.push({ questId: quest.id || '', mood, category, outcome, at: now });
+  player.sidekick.learning.feedback = player.sidekick.learning.feedback.slice(-200);
 }
 export function learnedFit(player, quest, mood) {
-  return player.learning.preferences[`${mood}:${questCategory(quest)}`] || 0;
+  return player.sidekick.learning.preferences[`${mood}:${questCategory(quest)}`] || 0;
 }

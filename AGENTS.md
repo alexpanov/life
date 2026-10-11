@@ -15,7 +15,11 @@ Load the relevant task skill:
 - Monetization, entitlements and transaction paths: [.ai/skills/life-monetization/SKILL.md](.ai/skills/life-monetization/SKILL.md)
 - Background updates and offline UX: [.ai/skills/life-realtime-ux/SKILL.md](.ai/skills/life-realtime-ux/SKILL.md)
 - Parallel work: [.ai/skills/quest-legion/SKILL.md](.ai/skills/quest-legion/SKILL.md)
+- Worktree placement: [.ai/skills/quest-worktrees/SKILL.md](.ai/skills/quest-worktrees/SKILL.md)
+- Pull requests: [.ai/skills/quest-pr/SKILL.md](.ai/skills/quest-pr/SKILL.md)
+
+Keep the primary checkout on `main`. Extra worktrees belong in the sibling `worktrees` folder. Load the worktree skill and move any that sit beside the main line. When a worktree's pull request has merged, remove that worktree, check out `main`, and pull, so the next pull request can start.
 
 Inspect current source, package scripts and Git status before acting. Preserve other agents' work. Follow the user's current scope and the host's higher-priority rules. Report executed checks and observed deployment results; never turn a goal into an unverified claim.
 
-When you open a pull request, use a few emojis and one meme you choose. Weave the quest, the problem, and this change into that meme, and put it in the description.
+When you open a pull request, load the pull request skill first. Do the work from a worktree. Run the release check there. Push only after it passes, then squash-merge.

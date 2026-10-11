@@ -1,5 +1,6 @@
 name: Test and deploy life
 # About 60 seconds from workflow creation to verified live content.
+# After the smoke test passes, publish the site and apply the database together.
 # The website publish does not wait on the database.
 on:
   push:
@@ -52,7 +53,7 @@ jobs:
       - name: Smoke tests
         run: pnpm run test:browser
   site:
-    needs: check
+    needs: smoke
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -83,7 +84,7 @@ jobs:
           LIVE_URL: ${{ steps.deployment.outputs.page_url }}
         run: node scripts/verify-deployment.mjs
   database:
-    needs: check
+    needs: smoke
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5

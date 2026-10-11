@@ -31,14 +31,34 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Typecheck, lint, tests and build
         run: node scripts/check-release.mjs
-      - name: Smoke tests
-        run: npm run test:browser
-      - if: github.ref == 'refs/heads/main'
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: site
           path: dist
           retention-days: 1
+  smoke:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/cache@v4
+        id: dependencies
+        with:
+          path: node_modules
+          key: life-${{ runner.os }}-node22-${{ hashFiles('package-lock.json') }}
+      - if: steps.dependencies.outputs.cache-hit != 'true'
+        run: npm ci --no-audit --no-fund
+      - run: rm -rf dist
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: dist
+      - name: Smoke tests
+        run: npm run test:browser
   site:
     needs: check
     if: github.ref == 'refs/heads/main'

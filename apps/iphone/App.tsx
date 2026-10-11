@@ -36,9 +36,9 @@ const controller = createGameController(
     };
   },
 );
-type Screen = "Home" | "Realms" | "Quests" | "Skills" | "Niko";
+type Screen = "Home" | "Realms" | "Quests" | "Skills" | "Nico";
 type Form = "quest" | "realm" | "dungeon" | "skill" | "memory";
-const screens: Screen[] = ["Home", "Realms", "Quests", "Skills", "Niko"];
+const screens: Screen[] = ["Home", "Realms", "Quests", "Skills", "Nico"];
 const moods: Mood[] = ["ready", "curious", "quiet", "tired"];
 
 function Game() {
@@ -398,7 +398,7 @@ function Game() {
                           onPress={() =>
                             Alert.alert(
                               "Close this quest?",
-                              "Niko will learn from this. There is no penalty.",
+                              "Nico will learn from this. There is no penalty.",
                               [
                                 { text: "Keep open", style: "cancel" },
                                 {
@@ -484,7 +484,7 @@ function Game() {
               ))}
             </>
           )}
-          {screen === "Niko" && (
+          {screen === "Nico" && (
             <>
               <Panel companion>
                 <Text style={styles.nikoLabel}>◈ NIKO / YOUR SIDEKICK</Text>
@@ -496,19 +496,21 @@ function Game() {
                 Learning stays on this iPhone. No language model is connected in
                 this build.
               </Text>
-              {player.sidekick.snippets.map((note) => (
-                <Panel key={note.id}>
-                  <Text style={styles.body}>{note.text}</Text>
-                </Panel>
-              ))}
+              {player.sidekick.snippets
+                .filter((note) => O.isNone(note.deletedAt))
+                .map((note) => (
+                  <Panel key={note.id}>
+                    <Text style={styles.body}>{note.text}</Text>
+                  </Panel>
+                ))}
               <Action onPress={() => open("memory")}>
-                Tell Niko something
+                Tell Nico something
               </Action>
               <Action
                 subdued
                 onPress={() =>
                   Alert.alert(
-                    "Reset Niko’s memory?",
+                    "Reset Nico’s memory?",
                     "Your quests, XP, and skills remain.",
                     [
                       { text: "Cancel", style: "cancel" },
@@ -593,7 +595,7 @@ function Game() {
             </Text>
             <Text style={styles.heading}>
               {formName === "memory"
-                ? "What should Niko remember?"
+                ? "What should Nico remember?"
                 : `Name your ${formName}`}
             </Text>
             <TextInput

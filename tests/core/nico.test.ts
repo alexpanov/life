@@ -108,8 +108,10 @@ describe("Nico's private job queue", () => {
     );
     s = send(s, { type: "reset-memory" });
     expect(player(s).campaigns[0]!.quests[0]!.status).toBe("done");
-    expect(player(s).sidekick.jobs).toHaveLength(2);
-    expect(player(s).sidekick.snippets).toEqual([]);
+    expect(player(s).sidekick.jobs).toHaveLength(3);
+    expect(
+      player(s).sidekick.snippets.every((n) => O.isSome(n.deletedAt)),
+    ).toBe(true);
   });
   it("logs progress without completing or awarding rewards, replay safe", () => {
     let s = newGame(context());
@@ -168,6 +170,7 @@ describe("Nico's private job queue", () => {
     s = send(s, { type: "set-nico-trait", text: "Be playful" });
     expect(player(s).sidekick.traits.map((t) => t.source)).toEqual([
       "system",
+      "system",
       "player",
     ]);
     expect(send(s, { type: "set-nico-trait", text: "Be playful" })).toEqual(s);
@@ -184,6 +187,7 @@ describe("Nico's private job queue", () => {
     const failed = nicoReplyRoutine(ctx, "meet").pipe(
       Effect.provideService(NicoModel, {
         reply: () => Effect.fail(new ModelError("offline")),
+        propose: () => Effect.fail(new ModelError("offline")),
       }),
       Effect.result,
     );

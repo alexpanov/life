@@ -100,7 +100,24 @@ export interface Review {
   adjustment: string;
   source: "player-action";
 }
+export type NicoFeedbackReason =
+  "not-interesting" | "repetitive" | "not-for-me" | "other";
+export type NicoContentTarget = "memory" | "trait" | "story" | "wisdom";
+export interface NicoContentRecord {
+  id: string;
+  deletedAt: Option<number>;
+  tellingCount: number;
+  lastToldAt: Option<number>;
+}
+export interface NicoContentFeedback {
+  target: NicoContentTarget;
+  id: string;
+  reason: NicoFeedbackReason;
+  text: string;
+  at: number;
+}
 export interface Snippet {
+  deletedAt: Option<number>;
   id: string;
   text: string;
   source: "player";
@@ -116,6 +133,8 @@ export interface NicoJob {
   completedAt: Option<number>;
 }
 export interface NicoTrait {
+  locked: boolean;
+  deletedAt: Option<number>;
   id: string;
   text: string;
   source: "system" | "player" | "learned";
@@ -131,6 +150,9 @@ export interface Sidekick {
   heroName: Option<string>;
   jobs: NicoJob[];
   traits: NicoTrait[];
+  stories: NicoContentRecord[];
+  wisdom: NicoContentRecord[];
+  contentFeedback: NicoContentFeedback[];
   learning: Learning;
   reviews: Review[];
   snippets: Snippet[];
@@ -155,7 +177,23 @@ export interface GameEvent {
   skillId?: string;
   sessionId?: string;
 }
+export interface NicoEnergy {
+  day: number;
+  requestIds: string[];
+  referralCode: string;
+  accessUntil: Option<number>;
+  verifiedReceiptIds: string[];
+  creditedHeroIds: string[];
+}
+/** Trusted repository output, never player chat or an imported grant. */
+export interface VerifiedReferralReceipt {
+  receiptId: string;
+  referrerHeroId: string;
+  referredHeroId: string;
+  phoneVerifiedAt: number;
+}
 export interface Player {
+  energy: NicoEnergy;
   id: string;
   name: string;
   createdAt: number;

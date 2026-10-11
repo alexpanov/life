@@ -1,3 +1,12 @@
+import {
+  contentRecords,
+  NICO_STORIES,
+  NICO_WISDOM,
+  serviceTrait,
+  SERVICE_TRAIT_ID,
+  activeNicoTraits,
+  activeNicoMemories,
+} from "./nico-stories";
 import * as O from "../../foundation/src/option";
 import type {
   Sidekick,
@@ -27,7 +36,7 @@ const categories: readonly string[] = [
 export const NIKO_PROMPTS = Object.freeze({
   version: 1,
   voice:
-    "You are Nico Lopez, a steady, practical companion. Be warm, direct, and brief. Offer one useful next action. The player decides.",
+    "You are Nico Lopez, a steady, practical companion. You are a fictional Delta Force veteran, always proud of your service. Use plain military courtesy sparingly, such as Sir, yes, sir. Keep service stories private unless explicitly asked. Be warm, direct, and brief. Your purpose is to help the hero live a good life, the life the Lord has for him, with less friction and pressure. Support faith, family, responsibility, and rest. Never claim to know God's will or speak for God. Offer one useful next action. The player decides.",
   review:
     "Review observed outcomes and explicit feedback. Separate facts from tentative patterns. Do not infer moral character, diagnoses, or hidden motives. Find one adjustment.",
   choose:
@@ -61,9 +70,15 @@ export function createSidekick(id = "nico", now = 0): Sidekick {
         completedAt: O.none(),
       },
     ],
+    stories: contentRecords(NICO_STORIES),
+    wisdom: contentRecords(NICO_WISDOM),
+    contentFeedback: [],
     traits: [
+      serviceTrait(now),
       {
         id: "steady",
+        locked: false,
+        deletedAt: O.none(),
         text: "Warm, practical, and brief. The hero decides.",
         source: "system",
         acquiredAt: now,
@@ -84,6 +99,15 @@ export function normalizeSidekick(
 ): Sidekick {
   const result = createSidekick(id, now);
   let parsed = sidekickSchema.safeParse(input);
+  if (
+    !parsed.success &&
+    input &&
+    typeof input === "object" &&
+    ("stories" in input || "wisdom" in input)
+  )
+    throw Error(
+      "Nico’s saved history is invalid. Keep the original save for recovery.",
+    );
   if (!parsed.success) parsed = sidekickSchema.safeParse({ learning: legacy });
   if (!parsed.success) return result;
   const source = parsed.data,
@@ -116,7 +140,7 @@ export function normalizeSidekick(
     at: safeAt(r.at),
     source: "player-action",
   }));
-  result.snippets = source.snippets.slice(-30).map((n) => ({
+  result.snippets = source.snippets.map((n) => ({
     ...n,
     id: text(n.id, 100),
     text: text(n.text, 600),
@@ -141,6 +165,21 @@ export function normalizeSidekick(
       ...t,
       acquiredAt: safeAt(t.acquiredAt),
     }));
+  result.traits = result.traits.filter((t) => t.id !== SERVICE_TRAIT_ID);
+  result.traits.unshift(serviceTrait(now));
+  for (const key of ["stories", "wisdom"] as const) {
+    result[key] = result[key].map((record) => {
+      const saved = source[key].find((s) => s.id === record.id);
+      return saved
+        ? {
+            ...saved,
+            lastToldAt: O.map(saved.lastToldAt, safeAt),
+            deletedAt: O.map(saved.deletedAt, safeAt),
+          }
+        : record;
+    });
+  }
+  result.contentFeedback = source.contentFeedback;
   result.revision = source.revision;
   return result;
 }
@@ -241,17 +280,49 @@ export function addSidekickSnippet(
 ): void {
   const value = text(note, 600);
   if (!value) throw Error("Write one thing Nico should remember.");
+  if (player.sidekick.snippets.length >= 1000)
+    throw Error("Nico’s memory archive is full.");
   player.sidekick.snippets.push({
     id: `note_${now}_${player.sidekick.revision}`,
     text: value,
     source: "player",
     at: now,
+    deletedAt: O.none(),
   });
-  player.sidekick.snippets = player.sidekick.snippets.slice(-30);
+
   player.sidekick.revision++;
 }
-export function resetSidekick(player: Player): void {
-  player.sidekick = createSidekick(player.sidekick.id);
+export function resetSidekick(player: Player, now = 0): void {
+  const nico = player.sidekick;
+  for (const item of [
+    ...nico.snippets,
+    ...nico.stories,
+    ...nico.wisdom,
+    ...nico.traits.filter((t) => !t.locked),
+  ]) {
+    if (O.isNone(item.deletedAt)) item.deletedAt = O.some(now);
+  }
+  if (
+    !nico.jobs.some(
+      (job) => job.kind === "learn-name" && job.status === "pending",
+    )
+  ) {
+    if (nico.jobs.length >= 100)
+      throw Error("Nico’s job archive is full. Reset could not be saved.");
+    nico.jobs.push({
+      id: `${nico.id}:name:reset:${nico.revision}`,
+      kind: "learn-name",
+      questId: "",
+      status: "pending",
+      priority: 95,
+      createdAt: now,
+      completedAt: O.none(),
+    });
+  }
+  nico.heroName = O.none();
+  nico.learning = { preferences: {}, feedback: [] };
+  nico.reviews = [];
+  nico.revision++;
 }
 export function sidekickContext(
   player: Player,
@@ -265,7 +336,7 @@ export function sidekickContext(
       mood: O.map(player.checkin, (c) => c.mood),
       realmId: player.activeRealmId,
       heroName: player.sidekick.heroName,
-      traits: player.sidekick.traits.map((t) => ({
+      traits: activeNicoTraits(player.sidekick).map((t) => ({
         text: t.text,
         source: t.source,
       })),
@@ -275,8 +346,15 @@ export function sidekickContext(
         title: q.title,
         nextMove: q.nextMove,
       })),
-      snippets: player.sidekick.snippets,
-      recentReviews: player.sidekick.reviews.slice(-8),
+      snippets: activeNicoMemories(player.sidekick),
+      recentReviews: player.sidekick.reviews.slice(-8).map((review) => ({
+        ...review,
+        adjustment: player.sidekick.snippets.some(
+          (note) => O.isSome(note.deletedAt) && note.text === review.adjustment,
+        )
+          ? ""
+          : review.adjustment,
+      })),
       preferences: player.sidekick.learning.preferences,
     },
     dataBoundary:

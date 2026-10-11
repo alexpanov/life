@@ -83,6 +83,8 @@ export function evolveNicoTraits(player: Player, now: number): Sidekick {
   if (nico.traits.length >= 30) return nico;
   nico.traits.push({
     id: "encouraging",
+    locked: false,
+    deletedAt: O.none(),
     text: "Celebrate small wins and ask what helped.",
     source: "learned",
     acquiredAt: now,

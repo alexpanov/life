@@ -127,7 +127,22 @@ const skill = z.object({
   paused: z.boolean().optional(),
   sessions: z.array(session).max(10000),
 });
+const energySchema = z.object({
+  day: z.number().int().nonnegative(),
+  requestIds: z
+    .array(z.string().min(1).max(200))
+    .max(100)
+    .refine((ids) => new Set(ids).size === ids.length),
+  referralCode: z.string().min(1).max(200),
+  accessUntil: z.discriminatedUnion("_tag", [
+    z.object({ _tag: z.literal("None") }),
+    z.object({ _tag: z.literal("Some"), value: timestamp }),
+  ]),
+  verifiedReceiptIds: z.array(z.string().min(1).max(200)).max(1000),
+  creditedHeroIds: z.array(z.string().min(1).max(200)).max(1000).default([]),
+});
 const player = z.object({
+  energy: energySchema.optional(),
   id: text,
   name: text,
   createdAt: timestamp,
@@ -186,9 +201,40 @@ export const saveSchema = z.object({
   activePlayerId: text,
   players: z.array(player).min(1).max(25),
 });
+const optionalTime = z
+  .discriminatedUnion("_tag", [
+    z.object({ _tag: z.literal("None") }),
+    z.object({ _tag: z.literal("Some"), value: timestamp }),
+  ])
+  .default({ _tag: "None" });
+const contentRecord = z.object({
+  id: text.max(100),
+  deletedAt: optionalTime,
+  tellingCount: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+  lastToldAt: optionalTime,
+});
 export const sidekickSchema = z.object({
   id: z.string().max(200).default(""),
   introduced: z.boolean().default(false),
+  stories: z.array(contentRecord).max(100).default([]),
+  wisdom: z.array(contentRecord).max(100).default([]),
+  contentFeedback: z
+    .array(
+      z.object({
+        target: z.enum(["memory", "trait", "story", "wisdom"]),
+        id: text.max(100),
+        reason: z.enum([
+          "not-interesting",
+          "repetitive",
+          "not-for-me",
+          "other",
+        ]),
+        text: text.max(600),
+        at: timestamp,
+      }),
+    )
+    .max(100)
+    .default([]),
   heroName: z
     .discriminatedUnion("_tag", [
       z.object({ _tag: z.literal("None") }),
@@ -219,6 +265,8 @@ export const sidekickSchema = z.object({
         text: z.string().max(200),
         source: z.enum(["system", "player", "learned"]),
         acquiredAt: timestamp,
+        locked: z.boolean().default(false),
+        deletedAt: optionalTime,
         evidence: z.array(z.string().max(250)).max(100),
       }),
     )
@@ -281,7 +329,15 @@ export const sidekickSchema = z.object({
     )
     .default([]),
   snippets: z
-    .array(z.object({ id: text, text: text, at: timestamp }))
+    .array(
+      z.object({
+        id: text,
+        text: text,
+        at: timestamp,
+        deletedAt: optionalTime,
+      }),
+    )
+    .max(1000)
     .default([]),
   revision: z.number().int().nonnegative().default(0),
 });

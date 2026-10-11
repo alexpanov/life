@@ -13,3 +13,9 @@ Database SQL isolation tests must be run against the development Supabase projec
 ## Nico mobile update
 
 76 unit, integration and React JSDOM checks passed, including persisted jobs/name/traits/history, save migration, provider failure and the completion conversation. Typecheck, ESLint and production web build passed; local combined gate took 4.46 seconds. Shared-core iPhone export passed (924 modules). Browser visual QA and the single Playwright test remain unexecuted in this managed environment. Supabase projects still return an empty list; no live database test or scheduler ran.
+
+## Stories, Port and energy update
+
+128 unit, integration and React JSDOM tests passed across 17 files. Typecheck, ESLint and production web build passed; the combined local gate took 5.95 seconds. Checks cover locked canon, story history, wisdom nonrepetition, soft deletion, model routine validation, energy reservations, verified-referral boundaries, stable migrated invitation codes, notification routing and mocked Realtime transport. A reload regression caught unnecessary backup rotation caused by JSON property ordering; comparison now ignores property order while persisting actual migrations.
+
+Expo iOS export passed (928 modules); browser/device delivery remains unverified. No Supabase project, real model endpoint, phone verification or closed-app push service is connected. These checks do not establish live database security or referral enforcement. The single Playwright launch test remains unexecuted because the supported browser capability is unavailable.

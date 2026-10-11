@@ -22,6 +22,12 @@ import { Sender, Field, Area } from "./components/presentation";
 import { download } from "./download";
 import type { Modal } from "./ui-types";
 import { RealmsPage } from "./pages/RealmsPage";
+import {
+  NotificationCenter,
+  NotificationsPage,
+} from "./components/NotificationCenter";
+import { InvitePage } from "./pages/InvitePage";
+import { NicoPage } from "./pages/NicoPage";
 import { HomePage } from "./pages/HomePage";
 import { QuestPage } from "./pages/QuestPage";
 import { BoardPage } from "./pages/BoardPage";
@@ -262,6 +268,8 @@ export function App({ controller }: { controller: GameController }) {
           ["/inventory", "Inventory"],
           ["/nico", "Nico"],
           ["/workshop", "Settings & saves"],
+          ["/notifications", "Notifications"],
+          ["/invite", "Invite a friend"],
         ].map(([path, label]) => (
           <Link key={path} to={path!}>
             {label}
@@ -279,42 +287,13 @@ export function App({ controller }: { controller: GameController }) {
     </>
   );
   const nico = (
-    <>
-      <div className="page-heading">
-        <h1>Nico Lopez.</h1>
-      </div>
-      <div className="niko-quote">
-        <Sender source="niko" />
-        <p>{view.guidance}</p>
-      </div>
-      <Button onClick={() => open("memory")}>Tell Nico something</Button>
-      <details className="quiet-details">
-        <summary>What Nico remembers</summary>
-        {player.sidekick.snippets.map((note) => (
-          <p key={note.id}>{note.text}</p>
-        ))}
-        <p>{player.sidekick.reviews.length} recent quest outcomes.</p>
-      </details>
-      <details className="quiet-details">
-        <summary>Nico’s personality</summary>
-        {player.sidekick.traits.map((trait) => (
-          <p key={trait.id}>{trait.text}</p>
-        ))}
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            const text = String(
-              new FormData(event.currentTarget).get("trait") || "",
-            ).trim();
-            if (text && send({ type: "set-nico-trait", text }))
-              event.currentTarget.reset();
-          }}
-        >
-          <Field name="trait" label="How should Nico support you?" required />
-          <Button type="submit">Tell Nico</Button>
-        </form>
-      </details>
-    </>
+    <NicoPage
+      key={player.id}
+      controller={controller}
+      player={player}
+      now={tick}
+      send={send}
+    />
   );
   const realms = <RealmsPage view={view} send={send} open={open} />;
   const board = (
@@ -502,6 +481,11 @@ export function App({ controller }: { controller: GameController }) {
             <Route path="/explore" element={menu} />
             <Route path="/nico" element={nico} />
             <Route
+              path="/invite"
+              element={<InvitePage code={player.energy.referralCode} />}
+            />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route
               path="/quest/:questId"
               element={<QuestPage view={view} send={send} open={open} />}
             />
@@ -514,6 +498,7 @@ export function App({ controller }: { controller: GameController }) {
           </Routes>
         </main>
       </div>
+      <NotificationCenter controller={controller} />
       {player.settings.driving && (
         <div className="drive-screen">
           <Shield size={54} />
@@ -726,9 +711,11 @@ export function App({ controller }: { controller: GameController }) {
                 </p>
               </div>
               <Area name="note" label="One thing to remember" />
-              {player.sidekick.snippets.map((n) => (
-                <p key={n.id}>{n.text}</p>
-              ))}
+              {player.sidekick.snippets
+                .filter((n) => O.isNone(n.deletedAt))
+                .map((n) => (
+                  <p key={n.id}>{n.text}</p>
+                ))}
               <p>
                 {player.sidekick.reviews.length} recent outcomes remembered.
                 Notes are retained for your ChatGPT handoff; local rules do not

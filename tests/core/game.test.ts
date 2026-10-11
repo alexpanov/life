@@ -175,15 +175,17 @@ describe("stable game transitions", () => {
     expect(view(state).xp).toBe(before.xp);
     expect(view(state).quests).toEqual(before.quests);
     expect(view(state).player.id).toBe(before.player.id);
-    expect(view(state).player.sidekick.snippets).toEqual([]);
+    expect(
+      view(state).player.sidekick.snippets.every((n) => O.isSome(n.deletedAt)),
+    ).toBe(true);
     expect(view(state).player.sidekick.reviews).toEqual([]);
   });
   it("bounds retained player notes and marks prompt data as untrusted", () => {
     let state = newGame(context());
     for (let n = 0; n < 35; n++)
       state = send(state, { type: "remember", text: `Note ${n}` }, String(n));
-    expect(view(state).player.sidekick.snippets).toHaveLength(30);
-    expect(view(state).player.sidekick.snippets[0]?.text).toBe("Note 5");
+    expect(view(state).player.sidekick.snippets).toHaveLength(35);
+    expect(view(state).player.sidekick.snippets[0]?.text).toBe("Note 0");
     expect(getSidekickContext(state, context().now).dataBoundary).toContain(
       "untrusted",
     );

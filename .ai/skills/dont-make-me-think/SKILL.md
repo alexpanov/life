@@ -17,3 +17,5 @@ Read `../../CONTRACT.md`. Treat the mobile player’s attention as the constrain
 8. Check the actual journey in React JSDOM: start, active quest, completion, unknown/known name, reflection, progress history and reload. Keep the existing single browser launch test. Inspect mobile layout when browser QA is available; state when it is unavailable.
 
 Do not replace domain rules with UI conditionals. Call typed commands and routines; render their results. Keep mocked model output behind the same Effect service boundary as a future live model.
+
+Keep Port one thumb tap away through the bottom circular home control. Use actionable in-game notices for events while the game is visible, rather than adding persistent sections. Put notification permission/testing on a focused settings screen; never repeatedly trigger browser permission dialogs or show OS notifications over the visible game.

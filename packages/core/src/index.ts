@@ -1,3 +1,24 @@
+import { consumeNicoEnergy, createNicoEnergy } from "./nico-energy";
+export {
+  nicoEnergyStatus,
+  consumeNicoEnergy,
+  grantVerifiedReferral,
+  NICO_DAILY_ENERGY,
+  NICO_REFERRAL_DAYS,
+} from "./nico-energy";
+import {
+  forgetNicoContent,
+  tellNicoStory,
+  shareNicoWisdom,
+} from "./nico-stories";
+export {
+  NICO_STORIES,
+  NICO_WISDOM,
+  SERVICE_TRAIT_ID,
+  activeNicoTraits,
+  activeNicoMemories,
+} from "./nico-stories";
+import type { NicoContentTarget, NicoFeedbackReason } from "./types";
 import { finishNicoJob, queueReflection, evolveNicoTraits } from "./nico-jobs";
 export { nextNicoJob } from "./nico-jobs";
 export { serializeGame } from "./codec";
@@ -27,6 +48,20 @@ export type * from "./types";
 export { NIKO_PROMPTS } from "./sidekick";
 export type { SidekickContext } from "./sidekick";
 export type Command =
+  | { type: "consume-nico-energy"; requestId: string }
+  | { type: "tell-story"; storyId: string; explicitRequest: boolean }
+  | { type: "share-wisdom" }
+  | {
+      type: "forget-memory" | "forget-trait" | "forget-story" | "forget-wisdom";
+      id: string;
+    }
+  | {
+      type: "nico-feedback";
+      target: NicoContentTarget;
+      id: string;
+      reason: NicoFeedbackReason;
+      text: string;
+    }
   | { type: "meet-nico"; text: string }
   | { type: "name-hero"; name: string }
   | { type: "reflect-quest"; questId: string; text: string }
@@ -175,6 +210,50 @@ export function transition(
   if (p.settings.driving && command.type !== "settings")
     throw Error("Park before using game controls.");
   switch (command.type) {
+    case "consume-nico-energy":
+      p.energy = consumeNicoEnergy(p.energy, command.requestId, now);
+      break;
+    case "tell-story":
+      result.message = tellNicoStory(
+        p.sidekick,
+        command.storyId,
+        command.explicitRequest,
+        now,
+      );
+      break;
+    case "share-wisdom":
+      result.message = shareNicoWisdom(p.sidekick, now);
+      break;
+    case "forget-memory":
+    case "forget-trait":
+    case "forget-story":
+    case "forget-wisdom":
+      forgetNicoContent(
+        p.sidekick,
+        command.type === "forget-memory"
+          ? "memory"
+          : command.type === "forget-trait"
+            ? "trait"
+            : command.type === "forget-story"
+              ? "story"
+              : "wisdom",
+        command.id,
+        now,
+      );
+      result.message = "Understood. I will leave that out.";
+      break;
+    case "nico-feedback":
+      forgetNicoContent(p.sidekick, command.target, command.id, now);
+      p.sidekick.contentFeedback.push({
+        target: command.target,
+        id: command.id,
+        reason: command.reason,
+        text: command.text.trim().slice(0, 600),
+        at: now,
+      });
+      p.sidekick.contentFeedback = p.sidekick.contentFeedback.slice(-100);
+      result.message = "Understood, boss. I will leave that out.";
+      break;
     case "meet-nico":
       if (!p.sidekick.introduced) {
         if (command.text.trim()) addSidekickSnippet(p, command.text, now);
@@ -244,6 +323,8 @@ export function transition(
       );
       p.sidekick.traits.push({
         id: `trait_${context.eventId}`,
+        locked: false,
+        deletedAt: O.none(),
         text,
         source: "player",
         acquiredAt: now,
@@ -437,7 +518,7 @@ export function transition(
       result.message = "Nico will remember.";
       break;
     case "reset-memory":
-      resetSidekick(p);
+      resetSidekick(p, now);
       result.message = "Nico’s memory reset. Your progress is safe.";
       break;
     case "settings":
@@ -464,6 +545,54 @@ export function transition(
       );
       if (data.kind === "questos.save") {
         result.state = r.validateSave(data, now);
+        // Import cannot roll back a known hero's disclosure or retirement history.
+        for (const hero of result.state.players) {
+          const previous = state.players.find((old) => old.id === hero.id);
+          // Local imports are not proof of phone verification or unused quota.
+          hero.energy = previous
+            ? copy(previous.energy)
+            : createNicoEnergy(
+                `invite_${context.eventId}_${result.state.players.indexOf(hero)}`,
+                now,
+              );
+          if (!previous) continue;
+          for (const key of ["stories", "wisdom"] as const) {
+            for (const record of hero.sidekick[key]) {
+              const old = previous.sidekick[key].find(
+                (item) => item.id === record.id,
+              );
+              if (!old) continue;
+              if (O.isSome(old.deletedAt)) record.deletedAt = old.deletedAt;
+              if (old.tellingCount > record.tellingCount) {
+                record.tellingCount = old.tellingCount;
+                record.lastToldAt = old.lastToldAt;
+              }
+            }
+          }
+          for (const old of previous.sidekick.snippets.filter((item) =>
+            O.isSome(item.deletedAt),
+          )) {
+            const restored = hero.sidekick.snippets.find(
+              (item) => item.id === old.id,
+            );
+            if (restored) restored.deletedAt = old.deletedAt;
+            else hero.sidekick.snippets.push(old);
+          }
+          for (const old of previous.sidekick.traits.filter(
+            (item) => O.isSome(item.deletedAt) && !item.locked,
+          )) {
+            const restored = hero.sidekick.traits.find(
+              (item) => item.id === old.id,
+            );
+            if (restored) restored.deletedAt = old.deletedAt;
+            else hero.sidekick.traits.push(old);
+          }
+          invariant(
+            hero.sidekick.snippets.length <= 1000 &&
+              hero.sidekick.traits.length <= 30,
+            "Imported memory archive exceeds capacity.",
+          );
+        }
         result.destination = O.some("home");
         break;
       }

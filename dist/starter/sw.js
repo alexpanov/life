@@ -1,6 +1,7 @@
-const CACHE='life-8da89bb1442f-'+self.registration.scope;
-const ASSETS=["/","/starter/","/assets/index-BgVPCr9e.css","/assets/index-CfH8-ney.js"];
+const CACHE='life-b172655497dd-'+self.registration.scope;
+const ASSETS=["/","/starter/","/assets/index-Bfy7IVGl.js","/assets/index-CCjIkFY9.css"];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil((async()=>{for(const key of await caches.keys())if((key.startsWith('questos')||(key.startsWith('life-')&&key.endsWith(self.registration.scope)))&&key!==CACHE)await caches.delete(key);await self.clients.claim();})()));
+self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil((async()=>{let target=new URL(event.notification.data?.url||'./',self.registration.scope);if(target.origin!==self.location.origin||!target.href.startsWith(self.registration.scope))target=new URL(self.registration.scope);const windows=await self.clients.matchAll({type:'window',includeUncontrolled:true});const existing=windows.find(client=>client.url.startsWith(self.registration.scope));if(existing){await existing.navigate(target.href);await existing.focus();}else await self.clients.openWindow(target.href);})());});
 self.addEventListener('fetch',event=>{const request=event.request,url=new URL(request.url);if(request.method!=='GET'||url.origin!==self.location.origin||url.pathname.endsWith('build-info.json'))return;
  event.respondWith(fetch(request).then(response=>{if(response.ok&&url.pathname.startsWith("/")){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put(request,copy)));}return response;}).catch(async()=>{const saved=await caches.match(request);if(saved)return saved;if(request.mode==='navigate'){const home=await caches.match(self.registration.scope);if(home)return home;}return Response.error();}));});

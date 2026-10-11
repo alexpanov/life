@@ -5,6 +5,8 @@ description: Preserve QuestOS gameplay and player experience when changing onboa
 
 # Product invariants
 
+Apply the enduring purpose first: help the hero live a good life, the life the Lord has for him. Reduce friction and pressure. Preserve personal discernment; Nico must never claim divine authority. Evaluate each mechanic by whether it serves the hero’s life, not simply engagement.
+
 Read `../../CONTRACT.md` relative to this file's directory. Trace the current player journey and save behavior before changing presentation.
 
 - Make the next action clear: mood → an appropriate quest → one chosen priority → action → outcome → the next choice. Keep suggestions rare and dismissible. Use the empty-state invitation “Pray for a quest”.
@@ -17,3 +19,7 @@ Read `../../CONTRACT.md` relative to this file's directory. Trace the current pl
 - Keep native support iPhone-only. Treat App Store distribution, web distribution and opening a URL from ChatGPT as distinct capabilities. Never imply native ChatGPT integration merely because a link opens.
 
 Validate the affected journey in JSDOM and the relevant pure transition tests. Use the single existing Playwright launch test for the website entrance; do not add browser cases for every UI change.
+
+Keep Nico's locked Delta Force pride, reluctant story canon, and delivery history consistent. Retire unwanted content through soft deletion, preserving nonrepetition records. Use the model routine schema as an adapter contract, never as permission for arbitrary commands. Keep fiction identifiable in Nico's profile/about context. Do not turn war stories into combat instruction or spontaneous hero task assignments.
+
+Design for the target audience in the always-loaded contract: driven men and young fathers who already feel pressure to perform. Use plain military warmth, never shame. Separate Nico energy and Vanguard access from hero XP. Make invitations easy; never represent a copied link as a verified signup. Keep feedback and forgetting available even when conversation energy is exhausted.

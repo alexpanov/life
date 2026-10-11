@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { ArrowUpRight, Compass } from "lucide-react";
 import type { GameController } from "../../../packages/application/src/controller";
+import * as O from "../../../packages/foundation/src/option";
+import { incomingInvitationRepository } from "./invitation";
 import { App } from "./App";
 
 /** A personal coin mark, not a claim of registered trademark status. */
@@ -26,6 +28,7 @@ export function Website({
   controller: GameController;
   initiallyPlaying?: boolean;
 }) {
+  const [invitation] = useState(incomingInvitationRepository);
   const [playing, setPlaying] = useState(initiallyPlaying);
   if (playing) return <App controller={controller} />;
   return (
@@ -55,6 +58,11 @@ export function Website({
           Places to discover. Quests to finish.
           <br />A sidekick named Nico to help you find your next move.
         </p>
+        {O.isSome(invitation) && (
+          <p className="invitation-welcome">
+            A friend invited you. Welcome to life.
+          </p>
+        )}
         <button
           className="play-live"
           onClick={() => {

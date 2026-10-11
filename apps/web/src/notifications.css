@@ -1,0 +1,114 @@
+.port-dock {
+  position: fixed;
+  z-index: 30;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 12px calc(8px + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, #071018 30%);
+  pointer-events: none;
+}
+.port-home {
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 2px solid #87959c;
+  background: radial-gradient(circle at 40% 30%, #28353c, #090f14 75%);
+  box-shadow:
+    0 0 0 4px #121c23,
+    0 4px 16px #0008;
+  color: #e6edf0;
+}
+.port-home:focus-visible {
+  outline: 3px solid #9ddaec;
+  outline-offset: 5px;
+}
+.port-dock > span {
+  font-size: 12px;
+  color: #c8d7df;
+}
+body:has(.port-dock) {
+  padding-bottom: calc(105px + env(safe-area-inset-bottom));
+}
+.port-notice {
+  position: fixed;
+  z-index: 45;
+  bottom: calc(103px + env(safe-area-inset-bottom));
+  left: max(16px, calc((100vw - 520px) / 2));
+  right: max(16px, calc((100vw - 520px) / 2));
+  display: flex;
+  align-items: start;
+  background: #132b33;
+  border: 1px solid #698794;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px #0008;
+}
+.port-notice-open {
+  flex: 1;
+  padding: 15px;
+  text-align: left;
+  background: none;
+  color: #edf4f7;
+  border: 0;
+  font: inherit;
+  min-height: 48px;
+}
+.port-notice-open strong,
+.port-notice-open span {
+  display: block;
+}
+.port-notice-open span {
+  margin-top: 5px;
+  font-family: Georgia, serif;
+  font-size: 18px;
+  line-height: 1.4;
+}
+.port-notice-dismiss {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: #dae6ed;
+  display: grid;
+  place-items: center;
+}
+.notification-settings {
+  max-width: 520px;
+  margin: auto;
+  font-size: 18px;
+  line-height: 1.55;
+}
+.notification-settings .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.notification-settings button {
+  min-height: 48px;
+  margin: 8px 0;
+}
+.notification-help {
+  color: #aebec7;
+  font-size: 16px;
+}
+
+.port-alert-settings {
+  position: absolute;
+  right: max(20px, calc((100vw - 520px) / 2));
+  bottom: calc(23px + env(safe-area-inset-bottom));
+  pointer-events: auto;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: #c7dbe3;
+  background: #11232d;
+}

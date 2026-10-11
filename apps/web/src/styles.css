@@ -843,3 +843,51 @@ footer {
   color: #a6b6bf;
   margin-bottom: 20px;
 }
+
+.nico-conversation .nico-reply {
+  margin: 24px 0;
+}
+.nico-conversation textarea {
+  width: 100%;
+  font: inherit;
+}
+.nico-story-links {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.nico-story-links button {
+  text-align: left;
+  justify-content: flex-start;
+  white-space: normal;
+}
+.nico-memory {
+  padding: 16px 0;
+  border-bottom: 1px solid #263b48;
+}
+.nico-memory p {
+  overflow-wrap: anywhere;
+}
+.nico-fixed {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: #a6b6bf;
+  font-size: 14px;
+}
+.nico-energy {
+  color: #a6b6bf;
+  font-size: 14px;
+  margin: 4px 0 20px;
+}
+.invite-link {
+  margin-top: 24px;
+}
+.invite-link input {
+  min-width: 0;
+  width: 100%;
+}
+.invitation-welcome {
+  color: #bbd99c;
+}

@@ -1,3 +1,4 @@
+import { createNicoEnergy } from "./nico-energy";
 import * as O from "../../foundation/src/option";
 import type {
   GameState,
@@ -136,6 +137,7 @@ export function createRules(env: RuleEnvironment) {
     const heroId = uid("player");
     const player: Player = {
       id: heroId,
+      energy: createNicoEnergy(uid("invite"), now),
       name: clean(name, 60) || "Player 1",
       createdAt: now,
       campaigns: [campaign],
@@ -927,12 +929,8 @@ export function createRules(env: RuleEnvironment) {
           candidateQuestId: reference(p.operation?.candidateQuestId),
           lastQuestId: reference(p.operation?.lastQuestId),
         },
-        sidekick: normalizeSidekick(
-          p.sidekick,
-          p.learning,
-          now,
-          `nico_${id}`,
-        ),
+        energy: p.energy || createNicoEnergy(uid("invite"), now),
+        sidekick: normalizeSidekick(p.sidekick, p.learning, now, `nico_${id}`),
         skills,
         bonusLoot: Array.isArray(p.bonusLoot)
           ? p.bonusLoot.slice(0, 200).map((x) => clean(x, 160))

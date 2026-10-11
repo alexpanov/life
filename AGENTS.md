@@ -1,5 +1,7 @@
 # QuestOS agent entry point
 
+Our enduring purpose: help the hero live a good life, the life the Lord has for him, with less friction and pressure. Every change must serve that purpose.
+
 Read [.ai/CONTRACT.md](.ai/CONTRACT.md) before changing this repository. It is the canonical engineering and product agreement for every model and editor.
 
 Load the relevant task skill:

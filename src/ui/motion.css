@@ -1,0 +1,10 @@
+/* Motion supports a change of mission; no timers or flashing alerts. */
+@keyframes console-arrive{from{opacity:.2;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes signal-lock{0%{box-shadow:0 0 0 0 #75e2f025}100%{box-shadow:0 0 0 12px #75e2f000}}
+.layout{animation:console-arrive var(--motion-scene) var(--ease-out) both}
+.btn,.mood-button,.nav-button,.icon-btn{transition:background var(--motion-fast),border-color var(--motion-fast),color var(--motion-fast),transform 90ms var(--ease-out),filter var(--motion-fast)}
+.mission-cleared{animation:console-arrive var(--motion-scene) var(--ease-out),signal-lock 650ms var(--ease-out) 1}
+.mission-strip{display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid #526b73;border-left:3px solid var(--cyan);padding:16px 20px;background:linear-gradient(110deg,#15303b,#0a1c27);margin-bottom:24px;border-radius:var(--control-radius)}
+.mission-strip .eyebrow{font-size:9px;color:var(--cyan);margin-bottom:5px}.mission-strip strong{font:500 13px/1.6 var(--mono)}.mission-strip .button-row{flex-shrink:0}.mission-strip .text-button{font-size:10px}.review-panel{border-color:#70825c;margin-bottom:22px;max-width:900px}.review-panel h2{font:600 23px/1.4 var(--mono);margin:12px 0}.review-panel .fine{margin-bottom:18px}.decision-option{margin-top:20px;padding:17px;border:1px solid var(--line);background:#0a1822}.decision-option h3{font:600 13px/1.6 var(--mono);margin-top:8px}.decision-option .fine{font-size:10px;margin-top:6px}
+@media(max-width:720px){.mission-strip{padding:15px;align-items:flex-start;flex-wrap:wrap;gap:13px}.mission-strip>div:first-child{flex:1 1 220px}.mission-strip .btn{font-size:9px;padding:8px 11px}.review-panel h2{font-size:21px}}
+@media(prefers-reduced-motion:reduce){.layout,.mission-cleared{animation:none!important}*{transition:none!important}}

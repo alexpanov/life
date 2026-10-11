@@ -1,36 +1,22 @@
-import { VERSION, DAY, MAX_IMPORT_BYTES, uid, clone, clamp, clean, must, dayKey, newSkill, makeQuest, makeCampaign, createPlayer, createState, activePlayer, activeCampaign, readinessAt, potentialLevel, currentLevel, totalXP, rankForXP, progress, nextQuest, inventory, record, setQuestStatus, practice, undoPractice, pauseSkill, campaignTemplate, importCampaign, parseJSON, validateSave, validateExtension, installExtension, applyPatch, agentBrief, operatorMessage, EventBus } from './engine.mjs';
+import { VERSION, DAY, MAX_IMPORT_BYTES, uid, clone, clamp, clean, must, dayKey, newSkill, makeQuest, makeCampaign, createPlayer, createState, activePlayer, activeCampaign, readinessAt, potentialLevel, currentLevel, totalXP, rankForXP, progress, nextQuest, inventory, record, setQuestStatus, practice, undoPractice, pauseSkill, campaignTemplate, importCampaign, parseJSON, validateSave, validateExtension, installExtension, applyPatch, agentBrief, operatorMessage, EventBus, activeRealm, realmCampaigns, realmQuests, enterRealm, addRealm, rememberQuest, focusQuest, checkIn, acceptSuggestion, dismissSuggestion, applyReportedUpdate } from './engine.mjs';
+import { currentMission, proposeMission, chooseMission, retainMission, reportMission, finishReview, setAsideMission } from './systems/prioritize.mjs';
+import { learnFromOutcome, learnedFit } from './systems/learning.mjs';
+import { icon } from './ui/icons.mjs';
 
 const KEY = 'questos.v1';
 const BACKUP_KEY = 'questos.v1.backup';
 const STARTER_URL = '__STARTER_URL__';
 const bus = new EventBus();
 let state, storageStatus = 'local', recoveryRaw = '', recoveryMessage = '', lastSavedRaw = '';
-let tab = 'board', toastTimer, currentCall = null, previewData = null, previewOrigin = '', previousFocus = null;
+let feeling = '', questOffer = null;
+let tab = 'home', toastTimer, currentCall = null, previewData = null, previewOrigin = '', previousFocus = null;
 const modal = document.getElementById('modal');
 const $ = (selector, root = document) => root.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const icons = {
-  compass: '<path d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2Z"/><path d="m9.5 9.5 5 5m0-5-5 5"/>',
-  check: '<path d="m5 12 4 4L19 6"/>',
-  arrow: '<path d="M4 12h16m-6-6 6 6-6 6"/>',
-  pin: '<path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>',
-  box: '<path d="m3 7 9-5 9 5v10l-9 5-9-5V7Zm0 0 9 5 9-5M12 12v10M7.5 4.5l9 5"/>',
-  skill: '<path d="m14 2-9 12h6l-1 8 9-12h-6l1-8Z"/>',
-  strength: '<path d="M3 8v8m4-11v14m10-14v14m4-11v8M7 12h10"/>',
-  phone: '<path d="m7 3-4 2c0 8 8 16 16 16l2-4-5-3-2 2c-3-1-5-3-6-6l2-2-3-5Z"/>',
-  close: '<path d="m6 6 12 12M6 18 18 6"/>',
-  save: '<path d="M5 3h12l4 4v14H3V3h2Zm2 0v6h10V3M7 21v-8h10v8"/>',
-  terminal: '<path d="m5 6 5 6-5 6m8 0h6"/>',
-  shield: '<path d="m12 2 8 4v6c0 5-8 10-8 10S4 17 4 12V6l8-4Z"/><path d="m8 12 3 3 5-6"/>',
-  edit: '<path d="m15 4 5 5M3 21l5-1L21 7l-5-5L3 15v6Z"/>',
-  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-  link: '<path d="m10 13 4-4m-6 7-2 2a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m4 0 2-2a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0" transform="translate(1 0) scale(.9)"/>'
-};
-const icon = (name, size = 18) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name] || icons.compass}</svg>`;
 const signal = (active = false) => `<div class="signal ${active ? 'active' : ''}" aria-hidden="true">${[10,22,16,33,25,12,28,18,8].map((h,i) => `<i style="--h:${h}px;--d:${i * .11}s"></i>`).join('')}</div>`;
 const p = () => activePlayer(state);
 const c = () => activeCampaign(p());
+const r = () => activeRealm(p());
 const questById = id => p().campaigns.flatMap(d => d.quests).find(q => q.id === id);
 const fmtTime = value => new Intl.DateTimeFormat(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }).format(value);
 const skillIcon = skill => /strength/i.test(skill.name) ? 'strength' : /field/i.test(skill.name) ? 'compass' : 'skill';
@@ -52,6 +38,8 @@ function loadState() {
       recoveryMessage ||= 'A saved game could not be read. It has not been overwritten. Export recovery data or import a valid save.';
     } else { state = createState(); storageStatus = 'session'; }
   }
+  state.players.forEach(player => applyReportedUpdate(player));
+  if (raw && storageStatus !== 'recovery') saveState();
 }
 function saveState() {
   if (storageStatus === 'recovery') return false;
@@ -92,19 +80,62 @@ async function copyText(text, message = 'Copied.') {
   }
 }
 function header() {
-  return `<header class="topbar"><div class="top-inner"><div class="brand"><span class="brand-mark">${icon('compass',32)}</span><div><div class="wordmark">QUEST<span>/</span>OS</div><div class="brand-sub">ORBITAL COMMAND / FIELD OPERATIONS</div></div></div><nav class="top-nav" aria-label="Main navigation">${[['board','Quest board'],['skills','Skills'],['inventory','Inventory'],['workshop','Workshop']].map(([id,label]) => `<button class="nav-button ${tab===id?'active':''}" data-action="tab" data-tab="${id}" ${tab===id?'aria-current="page"':''}>${label}</button>`).join('')}</nav><button class="profile-button" data-action="profiles" aria-label="Switch player"><span class="avatar">${esc(p().name.slice(0,2).toUpperCase())}</span><span>${esc(p().name)}</span><span class="muted">&#9662;</span></button></div></header>`;
+  return `<header class="topbar"><div class="top-inner"><div class="brand"><span class="brand-mark">${icon('compass',32)}</span><div><div class="wordmark">QUEST<span>/</span>OS</div><div class="brand-sub">ORBITAL COMMAND / FIELD OPERATIONS</div></div></div><nav class="top-nav" aria-label="Main navigation">${[['home','Home'],['realms','Realms'],['board','Quest board'],['skills','Skills'],['inventory','Inventory'],['workshop','Workshop']].map(([id,label]) => `<button class="nav-button ${tab===id?'active':''}" data-action="tab" data-tab="${id}" ${tab===id?'aria-current="page"':''}>${label}</button>`).join('')}</nav><button class="profile-button" data-action="profiles" aria-label="Switch player"><span class="avatar">${esc(p().name.slice(0,2).toUpperCase())}</span><span>${esc(p().name)}</span><span class="muted">&#9662;</span></button></div></header>`;
 }
 function utility() {
-  return `<div class="utility-row"><div class="dungeon-picker"><span class="eyebrow">DUNGEON</span><select id="campaign-picker" aria-label="Active dungeon">${p().campaigns.map(d => `<option value="${esc(d.id)}" ${d.id===c().id?'selected':''}>${esc(d.name)}</option>`).join('')}</select><button class="icon-btn" data-action="new-campaign" aria-label="Create dungeon">${icon('plus',14)}</button></div><div class="utility-actions"><span class="fine saved-text"><span class="status-dot" style="${storageStatus==='local'?'':'background:var(--amber)'}"></span>${storageStatus==='local'?'LOCAL SAVE':'EXPORT TO SAVE'}</span><button class="text-button" data-action="driving">${icon('shield',12)} Driving mode</button></div></div>${storageStatus==='local'?'':`<div class="warning">${esc(recoveryMessage || 'Browser storage is unavailable. Progress lasts only for this session. Export a save before closing.')} <button class="text-button" data-action="${storageStatus==='recovery'?'recovery':'export-save'}">${storageStatus==='recovery'?'Recovery options':'Export save'}</button></div>`}`;
+  return `<div class="utility-row"><div class="command-location"><div class="dungeon-picker"><span class="eyebrow">REALM</span><select id="realm-picker" aria-label="Current realm">${p().realms.map(realm => `<option value="${esc(realm.id)}" ${realm.id === r().id ? 'selected' : ''}>${esc(realm.name)}</option>`).join('')}</select><button class="icon-btn" data-action="new-realm" aria-label="Enter a new realm">${icon('plus',14)}</button></div><div class="dungeon-picker"><span class="eyebrow">DUNGEON</span><select id="campaign-picker" aria-label="Active dungeon">${realmCampaigns(p()).map(d => `<option value="${esc(d.id)}" ${d.id === c().id ? 'selected' : ''}>${esc(d.name)}</option>`).join('')}</select><button class="icon-btn" data-action="new-campaign" aria-label="Create dungeon">${icon('plus',14)}</button></div></div><div class="utility-actions"><span class="fine saved-text"><span class="status-dot" style="${storageStatus === 'local' ? '' : 'background:var(--amber)'}"></span>${storageStatus === 'local' ? 'LOCAL SAVE' : 'EXPORT TO SAVE'}</span><button class="text-button" data-action="driving">${icon('shield',12)} Driving mode</button></div></div>${storageStatus === 'local' ? '' : `<div class="warning">${esc(recoveryMessage || 'Browser storage is unavailable. Progress lasts only for this session. Export a save before closing.')} <button class="text-button" data-action="${storageStatus === 'recovery' ? 'recovery' : 'export-save'}">${storageStatus === 'recovery' ? 'Recovery options' : 'Export save'}</button></div>`}`;
+}
+function missionStrip() {
+  const q=currentMission(p());
+  return q ? `<section class="mission-strip"><div><div class="eyebrow">YOUR ONE MISSION</div><strong>${esc(q.title)}</strong></div><div class="button-row"><button class="btn primary small" data-action="resume-mission">Resume ${icon('arrow',13)}</button><button class="text-button" data-action="set-aside">Set aside</button></div></section>` : '';
+}
+function requestMission(id, ask = false) {
+  const {current,candidate}=proposeMission(p(),id);
+  if (!ask && (!current || current.id===id)) { activateMission(id); return; }
+  commit();
+  showModal('Choose one next move',`${current ? `<div class="eyebrow">CURRENT MISSION</div><h3>${esc(current.title)}</h3>` : '<p class="fine">A new quest is on your board.</p>'}<div class="decision-option"><div class="eyebrow green">NEW QUEST</div><h3>${esc(candidate.title)}</h3><p class="fine">${esc(candidate.nextMove || 'One real action. Then report back.')}</p></div>`,`<button class="btn secondary" data-action="retain-mission">${current ? 'Stay on current mission' : 'Leave on board'}</button><button class="btn primary" data-action="choose-mission" data-id="${esc(id)}">${current ? 'Switch to this quest' : 'Take this quest'}</button>`);
+}
+function activateMission(id) {
+  const previous=currentMission(p());
+  chooseMission(p(),id);
+  if(previous?.id!==id) learnFromOutcome(p(),questById(id),'accepted');
+  questOffer=null;tab='board';if(modal.open)closeModal();commit('One mission. One next move.');
+}
+function outcomeReview(q,outcome) {
+  learnFromOutcome(p(),q,outcome);reportMission(p(),q.id);feeling='';questOffer=null;tab='home';
+}
+function homePage() {
+  if (p().operation.phase === 'review') {
+    const q=questById(p().operation.lastQuestId), current=currentMission(p());
+    return `<section class="panel review-panel"><div class="panel-body"><div class="eyebrow green">${q?.status==='done' ? 'MISSION COMPLETE' : 'DEAD END CLOSED'}</div><h2>${esc(q?.title || 'Report received.')}</h2><p class="next-copy">Take a breath. What matters most now?</p>${current ? `<p class="fine">Your current mission: ${esc(current.title)}</p>` : ''}<div class="button-row">${current ? '<button class="btn primary" data-action="resume-mission">Return to current mission</button>' : ''}<button class="btn ${current ? 'secondary' : 'primary'}" data-action="review-next">Pick the next quest</button><button class="text-button" data-action="stand-down">Stand down</button></div></div></section>`;
+  }
+  const open = realmQuests(p()).filter(q => q.status === 'pending');
+  const cleared = realmCampaigns(p()).find(d => progress(d).complete);
+  const candidate = questOffer?.kind === 'existing' ? questById(questOffer.questId) : questOffer?.quest;
+  const hasOffer = questOffer?.realmId === r().id && candidate && (questOffer.kind !== 'existing' || candidate.status === 'pending');
+  return `<section class="checkin-hero"><div class="eyebrow green">${icon('pin',12)} ${esc(r().name.toUpperCase())} / ${r().home ? 'HOME REALM' : 'FIELD OPERATIONS'}</div><h1>How are you feeling?</h1><p class="hero-description">Let's pick one quest for you.</p><div class="mood-grid" aria-label="How are you feeling?">${[['ready','Ready','A mission to get done.','shield'],['curious','Curious','Something worth noticing.','compass'],['quiet','Quiet','A little room to breathe.','clock'],['tired','Low energy','Keep the next move small.','phone']].map(([id,label,copy,mark]) => `<button class="mood-button ${feeling === id ? 'selected' : ''}" data-action="check-in" data-mood="${id}" aria-pressed="${feeling === id}">${icon(mark,23)}<strong>${label}</strong><span>${copy}</span></button>`).join('')}</div></section>
+  ${cleared ? `<div class="mission-cleared">${icon('check',17)}<span><strong>QUEST COMPLETE</strong> ${esc(cleared.subtitle || cleared.name)}</span></div>` : ''}
+  <section class="panel home-mission"><div class="panel-body">${hasOffer ? `<div class="eyebrow green">${questOffer.kind === 'existing' ? 'ONE NEXT MOVE' : 'OPTIONAL LEAD'}</div><h2>${esc(candidate.title)}</h2><p class="next-copy">${esc(candidate.nextMove || 'One real action. Then report back.')}</p><div class="button-row"><button class="btn primary" data-action="accept-quest">${questOffer.kind === 'existing' ? 'Start quest' : 'Accept quest'} ${icon('arrow',15)}</button><button class="btn secondary" data-action="dismiss-quest">Not now</button></div>` : !open.length || feeling ? `<div class="eyebrow">NO ${open.length ? 'FITTING ' : ''}QUEST RIGHT NOW</div><h2>Pray for a quest.</h2><p class="next-copy">There is no need to fill the silence.</p><div class="button-row"><button class="btn secondary" data-action="tab" data-tab="realms">Return to a realm</button><button class="text-button" data-action="new-quest">Add your own quest</button></div>` : `<div class="eyebrow">${open.length} OPEN QUEST${open.length === 1 ? '' : 'S'} / ${esc(r().name)}</div><h2>One move at a time.</h2><p class="next-copy">Choose how you feel, or return to an open quest.</p><button class="btn secondary" data-action="tab" data-tab="realms">Open realm ${icon('arrow',15)}</button>`}</div></section>
+  <div class="home-footer"><span class="fine">${esc(r().location || r().name)}</span><button class="text-button" data-action="tab" data-tab="realms">Your realms ${icon('arrow',13)}</button></div>`;
+}
+function realmsPage() {
+  return `<div class="page-heading"><div><div class="eyebrow green">RETURN WHEN YOU ARE READY</div><h1>Your realms.</h1><p>Each realm keeps its dungeons and unfinished quests.</p></div><button class="btn primary small" data-action="new-realm">${icon('plus',14)} New realm</button></div>
+  <div class="realm-grid">${p().realms.map(realm => { const dungeons = realmCampaigns(p(),realm.id); const count = realmQuests(p(),realm.id).filter(q => q.status === 'pending').length; return `<section class="panel realm-card ${realm.id === r().id ? 'active' : ''}"><div class="panel-body"><div class="realm-heading"><span class="badge ${realm.id === r().id ? 'cyan' : 'neutral'}">${realm.id === r().id ? 'CURRENT' : realm.home ? 'HOME' : 'REALM'}</span><button class="icon-btn" data-action="edit-realm" data-id="${esc(realm.id)}" aria-label="Edit ${esc(realm.name)}">${icon('edit',13)}</button></div><h2>${esc(realm.name)}</h2><p class="fine">${esc(realm.location || (realm.home ? 'Your home base' : 'Your own place'))}</p><div class="realm-count"><strong>${count}</strong><span>OPEN QUEST${count === 1 ? '' : 'S'} / ${dungeons.length} DUNGEON${dungeons.length === 1 ? '' : 'S'}</span></div><button class="btn secondary small" data-action="enter-realm" data-id="${esc(realm.id)}">${realm.id === r().id ? 'View quests' : 'Return to realm'} ${icon('arrow',14)}</button></div></section>`; }).join('')}</div>
+  <section class="panel realm-missions"><div class="panel-head"><h2>${esc(r().name)} / Dungeons</h2><button class="text-button" data-action="new-campaign">+ New dungeon</button></div><div class="panel-body">${realmCampaigns(p()).map(d => { const pending = d.quests.filter(q => q.status === 'pending'); const done = progress(d).complete; return `<section class="dungeon-summary"><div class="dungeon-heading"><div><h3>${esc(d.name)}</h3><p class="fine">${done ? 'MAIN QUEST COMPLETE: ' : ''}${esc(d.subtitle)}</p></div><button class="btn secondary small" data-action="open-dungeon" data-id="${esc(d.id)}">Open dungeon</button></div>${pending.length ? pending.map(q => `<div class="realm-quest"><div><strong>${esc(q.title)}</strong><p class="fine">${esc(q.nextMove || 'One real action, then report back.')}</p></div><button class="btn primary small" data-action="start-quest" data-id="${esc(q.id)}">Start quest</button></div>`).join('') : `<p class="fine realm-empty">Pray for a quest.</p>`}</section>`; }).join('')}</div></section>`;
+}
+function realmForm(id = '') {
+  const realm = id ? p().realms.find(x => x.id === id) : null;
+  if (id) must(realm, 'Realm not found.');
+  showModal(id ? 'Realm settings' : 'Enter a new realm', `<form id="realm-form" data-id="${esc(id)}"><div class="field"><label for="realm-name">Realm name</label><input id="realm-name" name="name" required maxlength="100" value="${esc(realm?.name || '')}" placeholder="Your city, country, or home base"></div><div class="field"><label for="realm-location">Place (optional)</label><input id="realm-location" name="location" maxlength="240" value="${esc(realm?.location || '')}" placeholder="A name you will recognize when you return"></div><label class="toggle-line"><input name="home" type="checkbox" ${realm?.home ? 'checked' : ''}> This is my home realm</label></form>`, `<button class="btn secondary" data-action="close">Cancel</button><button class="btn primary" type="submit" form="realm-form">${id ? 'Save realm' : 'Enter realm'}</button>`);
 }
 function footer() {
-  return `<footer class="footer"><span>QUEST/OS v0.1.2 &nbsp; / &nbsp; LOCAL PROGRESS</span><div class="footer-actions"><button class="text-button" data-action="export-save">Export save</button><button class="text-button" data-action="about">How it works</button></div></footer>`;
+  return `<footer class="footer"><span>QUEST/OS v0.2.0 &nbsp; / &nbsp; LOCAL PROGRESS</span><div class="footer-actions"><button class="text-button" data-action="export-save">Export save</button><button class="text-button" data-action="about">How it works</button></div></footer>`;
 }
 function questRow(q) {
   return `<div class="quest-row ${q.status==='done'?'done':q.status==='impossible'?'closed':''}" data-quest="${esc(q.id)}"><button class="quest-check ${q.status==='done'?'done':q.status==='impossible'?'closed':''}" data-action="${q.status==='impossible'?'detail':q.status==='done'?'undo-quest':'complete'}" data-id="${esc(q.id)}" aria-label="${q.status==='done'?'Undo completion: ':q.status==='impossible'?'View closed objective: ':'Complete objective: '}${esc(q.title)}">${q.status==='done'?icon('check',15):q.status==='impossible'?'&ndash;':''}</button><div class="quest-main"><button class="quest-title" data-action="detail" data-id="${esc(q.id)}">${esc(q.title)}</button><div class="quest-sub">${q.status==='done'?'SECURED':q.status==='impossible'?'CLOSED / NO PENALTY':q.category==='main'?'MAIN OBJECTIVE':'SIDE QUEST'}</div></div>${q.status==='impossible'?'':`<span class="xp">+${q.xp} XP</span>`}</div>`;
 }
 function board() {
-  const pr = progress(c()); const next = nextQuest(c()); const xp = totalXP(p()); const rank = rankForXP(xp);
+  const pr = progress(c()); const next = nextQuest(c(), p().focusQuestId); const xp = totalXP(p()); const rank = rankForXP(xp);
   const main = c().quests.filter(q => q.category==='main'); const side = c().quests.filter(q => q.category!=='main');
   return `<section class="hero"><div><div class="eyebrow green">REAL-WORLD CAMPAIGN <span class="version-tag">// ${esc(c().name.toUpperCase())}</span></div><h1>${esc(c().subtitle || c().name)}</h1><p class="hero-description">${pr.complete?'Main quest complete. Choose your next real-world objective.':'One move at a time. Real objectives. Actual loot.'}</p></div><div class="hero-metrics"><div><div class="metric-value">${pr.done}<span> / ${pr.total}</span></div><div class="stat-label">MAIN OBJECTIVES SECURED</div><div class="segments">${Array.from({length:Math.min(pr.total,20)},(_,i)=>`<span class="segment ${i<pr.done?'done':''}"></span>`).join('')}</div></div><div><div class="metric-value">${xp}<span> XP</span></div><div class="stat-label">FIELD RANK ${String(rank).padStart(2,'0')} / LIFETIME RECORD</div><div class="segments"><span class="segment done" style="max-width:${Math.min(100,((xp-(rank-1)**2*100)/((rank**2-(rank-1)**2)*100))*100)}%"></span><span class="segment"></span></div></div></div></section>
 <div class="board-grid"><div class="column"><section class="panel next-panel"><div class="panel-body"><div class="next-label"><span class="badge">${pr.complete?'MAIN QUEST COMPLETE':'NEXT MOVE'}</span><span class="eyebrow">${next?`+${next.xp} XP`:'BOARD CLEAR'}</span></div>${next?`<h2>${esc(next.title)}</h2><p class="next-copy">${esc(next.nextMove || 'Complete this objective in the real world. Then report the result.')}</p>${next.destination?`<div class="location-line">${icon('pin',15)}<div>${esc(next.destination)}<br><span class="amber">Location from handoff. Stock and hours not verified.</span></div></div>`:''}<div class="button-row"><button class="btn primary" data-action="complete" data-id="${esc(next.id)}">${icon('check',17)} ${next.loot?'Loot acquired':'Objective complete'}</button><button class="btn secondary" data-action="detail" data-id="${esc(next.id)}">Inspect ${icon('arrow',15)}</button></div>`:`<h2>${main.length?'Dungeon cleared.':'A blank map awaits.'}</h2><p class="next-copy">${main.length?'Your completed objectives stay in your record. Start another dungeon, or add the next mission.':'Add a real-world objective. Give it a name, a next move, and a reward.'}</p><button class="btn primary" data-action="new-quest">${icon('plus')} Add an objective</button>`}</div></section>
@@ -134,7 +165,7 @@ function workshopPage() {
 </div>`;
 }
 function render() {
-  $('#app').innerHTML = `${header()}<main class="layout">${utility()}${tab==='skills'?skillsPage():tab==='inventory'?inventoryPage():tab==='workshop'?workshopPage():board()}${footer()}</main>`;
+  $('#app').innerHTML = `${header()}<main class="layout">${utility()}${missionStrip()}${tab==='home'?homePage():tab==='realms'?realmsPage():tab==='skills'?skillsPage():tab==='inventory'?inventoryPage():tab==='workshop'?workshopPage():board()}${footer()}</main>`;
   const driving = p().settings.driving;
   $('#drive-screen').hidden = !driving;
   $('#app').inert = driving;
@@ -149,6 +180,7 @@ function updateSimulation() {
 }
 function detailDialog(id) {
   const q = questById(id); must(q,'Objective not found.');
+  rememberQuest(p(), id); saveState();
   showModal('Inspect objective',`<div class="button-row"><span class="badge ${q.status==='impossible'?'neutral':''}">${esc(q.category.toUpperCase())}</span><span class="fine">${q.xp} XP / ${esc(q.status.toUpperCase())}</span></div><h2 style="margin-top:19px">${esc(q.title)}</h2><p class="detail-text">${esc(q.detail || 'No additional details.')}</p>${q.blockedReason?`<div class="success-box">${esc(q.blockedReason)}</div>`:''}${q.nextMove?`<div class="eyebrow green">NEXT ACTION</div><p class="detail-text">${esc(q.nextMove)}</p>`:''}${q.destination?`<div class="warning">Destination supplied by the player. This app has not verified its address, hours, or inventory.</div><a class="btn secondary small" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q.destination)}" target="_blank" rel="noopener noreferrer">${icon('pin',15)} Search map</a>`:''}`,`<button class="btn secondary small" data-action="edit-quest" data-id="${esc(q.id)}">Edit</button>${q.status==='pending'?`<button class="btn secondary small" data-action="close-quest" data-id="${esc(q.id)}">Declare impossible</button><button class="btn primary small" data-action="complete" data-id="${esc(q.id)}">${q.loot?'Loot acquired':'Complete'}</button>`:`<button class="btn secondary small" data-action="undo-quest" data-id="${esc(q.id)}">Reopen objective</button>`}`);
 }
 function questForm(id = '') {
@@ -156,7 +188,7 @@ function questForm(id = '') {
   showModal(id?'Edit objective':'Create an objective',`<form id="quest-form" data-id="${esc(id)}"><div class="field"><label for="quest-title">Objective</label><input id="quest-title" name="title" required maxlength="160" value="${esc(q.title || '')}" placeholder="What needs to happen in the real world?"></div><div class="field"><label for="quest-next">One next move</label><input id="quest-next" name="nextMove" maxlength="400" value="${esc(q.nextMove || '')}" placeholder="A specific action, not a whole plan"></div><div class="field"><label for="quest-detail">Exact details / constraints</label><textarea id="quest-detail" name="detail" maxlength="2000" placeholder="Product, place, conditions, or what must be verified">${esc(q.detail || '')}</textarea></div><div class="form-grid"><div class="field"><label for="quest-category">Quest type</label><select id="quest-category" name="category">${['main','side','bonus'].map(v=>`<option value="${v}" ${q.category===v?'selected':''}>${v==='main'?'Main objective':v==='side'?'Side quest':'Bonus objective'}</option>`).join('')}</select></div><div class="field"><label for="quest-xp">Reward XP</label><input id="quest-xp" name="xp" type="number" min="0" max="1000" value="${q.xp??50}" required></div></div><div class="field"><label for="quest-loot">Inventory item (optional)</label><input id="quest-loot" name="loot" maxlength="160" value="${esc(q.loot || '')}" placeholder="Added only when you confirm completion"></div><div class="field"><label for="quest-destination">Map search (optional / not verified)</label><input id="quest-destination" name="destination" maxlength="240" value="${esc(q.destination || '')}"></div></form>`,`<button class="btn secondary" data-action="close">Cancel</button><button class="btn primary" type="submit" form="quest-form">${id?'Save changes':'Create objective'}</button>`);
 }
 function campaignForm() {
-  showModal('Enter a new dungeon',`<form id="campaign-form"><div class="field"><label for="dungeon-name">Dungeon name</label><input id="dungeon-name" name="name" required maxlength="100" placeholder="Home base / Tuesday / A new city"></div><div class="field"><label for="dungeon-mission">Main quest</label><input id="dungeon-mission" name="subtitle" required maxlength="160" placeholder="What are we here to accomplish?"></div></form><p class="fine" style="margin-top:18px">Your old dungeon, inventory, and XP stay intact.</p>`,`<button class="btn secondary" data-action="close">Cancel</button><button class="btn primary" type="submit" form="campaign-form">Create dungeon</button>`);
+  showModal(`New dungeon / ${r().name}`, `<form id="campaign-form"><div class="field"><label for="dungeon-name">Dungeon name</label><input id="dungeon-name" name="name" required maxlength="100" placeholder="Gift run / Sunday morning / An errand"></div><div class="field"><label for="dungeon-mission">Main quest</label><input id="dungeon-mission" name="subtitle" required maxlength="160" placeholder="What are we here to accomplish?"></div></form><p class="fine" style="margin-top:18px">Your old dungeon, inventory, and XP stay intact.</p>`,`<button class="btn secondary" data-action="close">Cancel</button><button class="btn primary" type="submit" form="campaign-form">Create dungeon</button>`);
 }
 function profileDialog() {
   showModal('Local players',`<p class="fine">Separate progress on this device. Not private accounts; anyone using this browser can switch profiles.</p>${state.players.map(player=>`<div class="profile-row"><div><strong>${esc(player.name)}</strong><div class="fine">${player.campaigns.length} dungeon(s) / ${totalXP(player)} XP</div></div>${player.id===p().id?'<span class="badge">ACTIVE</span>':`<button class="btn secondary small" data-action="switch-player" data-id="${esc(player.id)}">Switch</button>`}</div>`).join('')}<form id="player-form" style="margin-top:22px"><div class="field"><label for="player-name">New player name</label><input id="player-name" name="name" required maxlength="60" placeholder="A colleague or a fresh character"></div><button class="btn primary small" style="margin-top:15px">Create clean player</button></form>`);
@@ -190,19 +222,25 @@ function previewImport(text) {
     summary=[`Install: ${ext.name}`,`${ext.quests.length} objectives, ${ext.skills.length} skills, ${ext.calls.length} call scripts`,...ext.quests.map(q=>q.title)];
   } else if(data.kind==='questos.patch') {
     applyPatch(p(),data);
-    summary=data.operations.map(op=> op.type==='addQuest'?`Add objective: ${op.quest.title}`:op.type==='createCampaign'?`Create dungeon: ${op.name}`:op.type==='addSkill'?`Add skill: ${op.name}`:op.type==='setStatus'?`Set ${questById(op.questId)?.title || op.questId}: ${op.status}`:`Install extension: ${op.extension?.name || ''}`);
+    summary=data.operations.map(op=> op.type==='addQuest'?`Add objective: ${op.quest.title}`:op.type==='createCampaign'?`Create dungeon: ${op.name}`:op.type==='createRealm'?`Create realm: ${op.name}`:op.type==='enterRealm'?`Return to realm: ${p().realms.find(r=>r.id===op.realmId)?.name || op.realmId}`:op.type==='addSkill'?`Add skill: ${op.name}`:op.type==='setStatus'?`Set ${questById(op.questId)?.title || op.questId}: ${op.status}`:`Install extension: ${op.extension?.name || ''}`);
     warning=data.operations.some(op=>op.type==='setStatus')?'This changes completion status and may change XP. Apply only if it matches what actually happened.':'';
   } else throw new Error('Unsupported import type. Use a QuestOS campaign, extension, patch, or save.');
   previewData=data; previewOrigin=text;
   showModal('Review changes',`<span class="badge">${esc(data.kind.toUpperCase())}</span>${warning?`<div class="warning" style="margin-top:17px">${esc(warning)}</div>`:''}<div class="preview-changes">${summary.map(x=>`<div class="preview-item">${esc(x)}</div>`).join('') || 'No changes.'}</div><p class="fine">Imported text is not verified. No links are opened and no code is executed by importing.</p>`,`<button class="btn secondary" data-action="cancel-import">Back</button>${data.kind==='questos.save'?'<button class="btn secondary" data-action="export-save">Backup current save</button>':''}<button class="btn primary" data-action="apply-import">${data.kind==='questos.save'?'Replace all local saves':'Apply changes'}</button>`);
 }
 function applyImport() {
-  must(previewData,'No import is ready.'); const data=previewData;
+  must(previewData,'No import is ready.'); const data=previewData;const before=new Map(p().campaigns.flatMap(d=>d.quests).map(q=>[q.id,q.status]));
   if(data.kind==='questos.save') { state=validateSave(data); storageStatus='local'; recoveryRaw=''; recoveryMessage=''; }
   else if(data.kind==='questos.campaign') { importCampaign(p(),data); tab='board'; }
   else if(data.kind==='questos.extension') installExtension(p(),data);
   else if(data.kind==='questos.patch') { const updated=applyPatch(p(),data); state.players[state.players.findIndex(x=>x.id===p().id)]=updated; }
-  previewData=null; closeModal(); commit('Import applied.');
+  previewData=null; closeModal();
+  if(data.kind!=='questos.save') {
+    const all=p().campaigns.flatMap(d=>d.quests), results=all.filter(q=>before.get(q.id)==='pending' && q.status!=='pending');
+    if(results.length) {results.forEach(q=>learnFromOutcome(p(),q,q.status==='done'?'completed':'blocked'));reportMission(p(),results.at(-1).id);tab='home';feeling='';questOffer=null;}
+    else if(all.some(q=>!before.has(q.id))) {finishReview(p());tab='home';feeling='';questOffer=null;}
+  }
+  commit('Import applied.');
 }
 const exampleExtension = {
   kind:'questos.extension',version:1,id:'morning-signal',name:'Morning Signal',
@@ -230,7 +268,7 @@ function answerCall() {
   }
 }
 function aboutDialog() {
-  showModal('QuestOS / field manual',`<div class="eyebrow green">PLAYABLE PROTOTYPE / v0.1.2</div><p class="detail-text">Complete real objectives to earn XP and collect loot. Create dungeons for trips, errands, work, or practice. Mark a blocked objective impossible to close it without a penalty.</p><h3>Two different records</h3><p class="detail-text">Field rank records completed work. It does not decay. Skill potential records practice. Current skill level falls as readiness decays, and rises as you practice again. This is game logic, not a scientific assessment.</p><h3>Local by design</h3><p class="detail-text">Game data stays in this browser. No analytics, background location, AI request, or real phone call. Your progress is stored in this browser when possible. Export a backup before changing devices or clearing browser data.</p><h3>Reusable and extendable</h3><p class="detail-text">Share campaign templates. Add JSON modules with quests, skills, and operator scripts. The source project contains the rules engine, extension hooks, tests, and static deployment files.</p><h3>ChatGPT integration</h3><p class="detail-text">The bridge is copy/paste. A connected ChatGPT app and shared cloud saves are not implemented in this build. Use the playable game link to open the hosted app. The clean starter has separate local progress. Site access uses ChatGPT sharing settings.</p><h3>Stay grounded</h3><p class="detail-text">Campaigns can contain player-supplied shopping lists and locations. Stock, opening hours, overnight parking rules, church details, and flight times need verification outside this app. No substitutions or automatic completion.</p>`,`<button class="btn primary" data-action="close">Back to the quest</button>`);
+  showModal('QuestOS / field manual',`<div class="eyebrow green">PLAYABLE PROTOTYPE / v0.2.0</div><p class="detail-text">Complete real objectives to earn XP and collect loot. Create dungeons for trips, errands, work, or practice. Mark a blocked objective impossible to close it without a penalty.</p><h3>Two different records</h3><p class="detail-text">Field rank records completed work. It does not decay. Skill potential records practice. Current skill level falls as readiness decays, and rises as you practice again. This is game logic, not a scientific assessment.</p><h3>One mission at a time</h3><p class="detail-text">Choose a quest, act, then report. New quests ask whether to switch or keep your current mission. After a result, choose what matters next or stand down.</p><h3>Learning your rhythm</h3><p class="detail-text">Suggestions adapt locally to your mood, choices, and confirmed results. This is a small preference system, not generative AI or self-rewriting code. Your records stay in your save.</p><h3>Local by design</h3><p class="detail-text">Game data stays in this browser. No analytics, background location, AI request, or real phone call. Your progress is stored in this browser when possible. Export a backup before changing devices or clearing browser data.</p><h3>Reusable and extendable</h3><p class="detail-text">Share campaign templates. Add JSON modules with quests, skills, and operator scripts. The source project contains the rules engine, extension hooks, tests, and static deployment files.</p><h3>ChatGPT integration</h3><p class="detail-text">The bridge is copy/paste. A connected ChatGPT app and shared cloud saves are not implemented in this build. Use the playable game link to open the hosted app. The clean starter has separate local progress. Site access uses ChatGPT sharing settings.</p><h3>Stay grounded</h3><p class="detail-text">Campaigns can contain player-supplied shopping lists and locations. Stock, opening hours, overnight parking rules, church details, and flight times need verification outside this app. No substitutions or automatic completion.</p>`,`<button class="btn primary" data-action="close">Back to the quest</button>`);
 }
 function closeQuestDialog(id) {
   const q=questById(id); must(q,'Objective not found.');
@@ -244,12 +282,26 @@ async function act(action, element) {
   if(p().settings.driving && action!=='parked') return;
   switch(action) {
     case 'tab': tab=element.dataset.tab; render(); window.scrollTo(0,0); break;
+    case 'new-realm': realmForm(); break;
+    case 'edit-realm': realmForm(id); break;
+    case 'enter-realm': enterRealm(p(),id); feeling='';questOffer=null;tab='realms';commit();break;
+    case 'open-dungeon': { const dungeon = p().campaigns.find(x => x.id === id); must(dungeon,'Dungeon not found.'); enterRealm(p(),dungeon.realmId);p().activeCampaignId=id;r().lastCampaignId=id;tab='board';commit();break; }
+    case 'check-in': feeling=element.dataset.mood;questOffer=checkIn(p(),feeling,Date.now(),(q,mood)=>learnedFit(p(),q,mood));commit();break;
+    case 'accept-quest': {const chosen=acceptSuggestion(p(),questOffer,Date.now(),false);questOffer=null;requestMission(chosen);break;}
+    case 'dismiss-quest': learnFromOutcome(p(),questOffer?.kind==='existing'?questById(questOffer.questId):questOffer?.quest,'declined');dismissSuggestion(p(),questOffer);questOffer=null;commit();break;
+    case 'start-quest': requestMission(id);break;
+    case 'choose-mission': activateMission(id);break;
+    case 'retain-mission': retainMission(p());closeModal();commit();break;
+    case 'resume-mission': {const current=currentMission(p());if(current)activateMission(current.id);break;}
+    case 'set-aside': {const q=setAsideMission(p());learnFromOutcome(p(),q,'set-aside');tab='home';feeling='';questOffer=null;commit('Quest stays on your board.');break;}
+    case 'review-next': finishReview(p());feeling='';questOffer=null;tab='home';commit();break;
+    case 'stand-down': finishReview(p());tab='realms';commit('Take your time. Your quests will be here.');break;
     case 'close': closeModal(); break;
     case 'complete': {
       const q=questById(id); must(q,'Objective not found.');
       const wasComplete=progress(c()).complete;
       const changed=setQuestStatus(p(),id,'done'); if(modal.open) closeModal();
-      if(changed) { const newlyComplete=!wasComplete && progress(c()).complete; commit(newlyComplete?`MAIN QUEST COMPLETE. +${q.xp} XP.`:`${q.loot?'Loot secured':'Objective complete'}. +${q.xp} XP.`, 'quest:completed'); }
+      if(changed) { const newlyComplete=!wasComplete && progress(c()).complete; outcomeReview(q,'completed');commit(newlyComplete?`MAIN QUEST COMPLETE. +${q.xp} XP.`:`${q.loot?'Loot secured':'Objective complete'}. +${q.xp} XP.`, 'quest:completed'); }
       break;
     }
     case 'undo-quest': setQuestStatus(p(),id,'pending'); if(modal.open)closeModal(); commit('Objective reopened. Its reward was reversed.'); break;
@@ -259,7 +311,7 @@ async function act(action, element) {
     case 'close-quest': closeQuestDialog(id); break;
     case 'new-campaign': campaignForm(); break;
     case 'profiles': profileDialog(); break;
-    case 'switch-player': must(state.players.some(x=>x.id===id),'Player not found.'); state.activePlayerId=id; tab='board'; closeModal(); commit('Player switched.'); break;
+    case 'switch-player': must(state.players.some(x=>x.id===id),'Player not found.'); state.activePlayerId=id; feeling='';questOffer=null;tab='home'; closeModal(); commit('Player switched.'); break;
     case 'practice': practiceDialog(id); break;
     case 'new-skill': newSkillDialog(); break;
     case 'skill-detail': skillDetail(id); break;
@@ -300,15 +352,22 @@ document.addEventListener('submit', event => {
   event.preventDefault(); const form=event.target; const data=Object.fromEntries(new FormData(form));
   if(p().settings.driving) return;
   try {
-    if(form.id==='quest-form') {
+    if(form.id==='realm-form') {
+      let realm = form.dataset.id ? p().realms.find(x => x.id === form.dataset.id) : null;
+      must(clean(data.name),'Name the realm.');
+      if(form.dataset.id) { must(realm,'Realm not found.');realm.name=clean(data.name,100);realm.location=clean(data.location,240); }
+      else realm=addRealm(p(),data.name,data.location);
+      if(data.home==='on') {p().homeRealmId=realm.id;p().realms.forEach(x=>{x.home=x.id===realm.id;});}
+      feeling='';questOffer=null;tab='home';closeModal();commit('Realm saved.');
+    } else if(form.id==='quest-form') {
       const parsed=makeQuest(data); const old=form.dataset.id?questById(form.dataset.id):null;
       if(old) { const oldXP=old.xp;Object.assign(old,{title:parsed.title,detail:parsed.detail,nextMove:parsed.nextMove,destination:parsed.destination,category:parsed.category,xp:parsed.xp,loot:parsed.loot});record(p(),'quest:edit',`OBJECTIVE EDITED: ${old.title}${old.status==='done' && oldXP!==old.xp?' (reward adjusted)':''}`); }
       else { must(c().quests.length<200,'Maximum 200 objectives per dungeon.');c().quests.push(parsed);record(p(),'quest:add',`OBJECTIVE ADDED: ${parsed.title}`); }
-      closeModal();commit(old?'Objective updated.':'Objective created.');
+      closeModal();commit(old?'Objective updated.':'Objective created.');if(!old)requestMission(parsed.id,true);
     } else if(form.id==='campaign-form') {
-      must(p().campaigns.length<100,'Maximum 100 dungeons per player.');const d=makeCampaign(data.name,data.subtitle);p().campaigns.push(d);p().activeCampaignId=d.id;tab='board';record(p(),'campaign:create',`DUNGEON ENTERED: ${d.name}`);closeModal();commit('New dungeon created.');
+      must(p().campaigns.length<100,'Maximum 100 dungeons per player.');const d=makeCampaign(data.name,data.subtitle,Date.now(),r().id);p().campaigns.push(d);p().activeCampaignId=d.id;r().lastCampaignId=d.id;tab='board';record(p(),'campaign:create',`DUNGEON ENTERED: ${d.name}`);closeModal();commit('New dungeon created.');
     } else if(form.id==='player-form') {
-      must(state.players.length<25,'Maximum 25 local players.');const player=createPlayer(data.name);state.players.push(player);state.activePlayerId=player.id;tab='board';closeModal();commit('New player ready.');
+      must(state.players.length<25,'Maximum 25 local players.');const player=createPlayer(data.name);state.players.push(player);state.activePlayerId=player.id;feeling='';questOffer=null;tab='home';closeModal();commit('New player ready.');
     } else if(form.id==='practice-form') {
       practice(p(),form.dataset.id,data.note);closeModal();commit('Practice logged. +40 XP.','skill:practiced');
     } else if(form.id==='skill-form') {
@@ -316,7 +375,7 @@ document.addEventListener('submit', event => {
     } else if(form.id==='skill-settings-form') {
       const s=p().skills.find(x=>x.id===form.dataset.id);must(s,'Skill not found.');
       s.readiness=readinessAt(s);s.anchorAt=Date.now();s.name=clean(data.name,80);s.halfLifeDays=clamp(Number(data.halfLifeDays),1,365);s.graceDays=clamp(Number(data.graceDays),0,30);closeModal();commit('Skill settings updated.');
-    } else if(form.id==='close-quest-form') {setQuestStatus(p(),form.dataset.id,'impossible',data.reason);closeModal();commit('Dead end closed. No penalty.');}
+    } else if(form.id==='close-quest-form') {const q=questById(form.dataset.id);if(setQuestStatus(p(),form.dataset.id,'impossible',data.reason))outcomeReview(q,'blocked');closeModal();commit('Dead end closed. No penalty.');}
     else if(form.id==='loot-form') {must(p().bonusLoot.length<200,'Maximum 200 bonus items.');p().bonusLoot.push(clean(data.name,160));record(p(),'loot:add',`BONUS LOOT: ${clean(data.name,160)}`);closeModal();commit('Inventory updated.');}
     else if(form.id==='import-form') previewImport(data.json);
   } catch(error) {toast(error.message,true);}
@@ -324,7 +383,8 @@ document.addEventListener('submit', event => {
 document.addEventListener('change', async event => {
   const el=event.target;
   try {
-    if(el.id==='campaign-picker'){must(p().campaigns.some(d=>d.id===el.value),'Dungeon not found.');p().activeCampaignId=el.value;commit();}
+    if(el.id==='realm-picker'){enterRealm(p(),el.value);feeling='';questOffer=null;tab='home';commit();}
+    else if(el.id==='campaign-picker'){must(realmCampaigns(p()).some(d=>d.id===el.value),'Dungeon not found.');p().activeCampaignId=el.value;r().lastCampaignId=el.value;tab='board';commit();}
     else if(el.id==='auto-calls'){p().settings.autoCalls=el.checked;p().lastCallAt=Date.now();commit(el.checked?'Foreground transmissions enabled.':'Automatic transmissions disabled.');}
     else if(el.id==='call-interval'){p().settings.callIntervalMinutes=clamp(Number(el.value),5,180);commit();}
     else if(el.id==='call-sound'){p().settings.sound=el.value==='on';if(!p().settings.sound)window.speechSynthesis?.cancel();commit();}
@@ -346,7 +406,7 @@ setInterval(()=>{
 setInterval(()=>{if(state&&!document.hidden&&!modal.open&&tab!=='skills'&&!p().settings.driving)render();},60000);
 loadState();render();
 // Developer extension surface. No untrusted imported JavaScript is evaluated.
-window.QuestOS=Object.freeze({version:'0.1.2',on:(event,fn)=>bus.on(event,fn),getSnapshot:()=>clone(state),
+window.QuestOS=Object.freeze({version:'0.2.0',on:(event,fn)=>bus.on(event,fn),getSnapshot:()=>clone(state),
   getAgentBrief:()=>agentBrief(p()),previewJSON:text=>previewImport(text)});
 if(location.protocol==='http:'||location.protocol==='https:') {
   const link=document.createElement('link');link.rel='manifest';link.href='./manifest.webmanifest';document.head.appendChild(link);

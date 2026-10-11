@@ -2,9 +2,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import * as E from '../src/engine.mjs';
 const T = Date.UTC(2026,9,10,19,0);
-const setup = () => { const state=E.createState(T); return {state,p:E.activePlayer(state),c:E.activeCampaign(E.activePlayer(state))}; };
+// Keep the old 3/5 handoff as a fixture for objective-rule regression checks.
+const setup = () => { const state=E.createState(T); const p=E.activePlayer(state),c=E.activeCampaign(p); for(const q of c.quests.filter(q=>q.category==='main').slice(3)){q.status='pending';q.completedAt=null;} return {state,p,c}; };
 
-test('handoff starts with 3 of 5 main objectives, exact remaining loot',()=>{
+test('legacy handoff fixture has 3 of 5 main objectives, exact remaining loot',()=>{
   const {p,c}=setup();assert.deepEqual(E.progress(c),{done:3,total:5,impossible:0,complete:false});
   assert.equal(E.totalXP(p),180);assert.equal(E.inventory(p).length,5);
   assert.match(E.nextQuest(c).title,/30 - tinted/);assert.ok(c.quests.some(q=>q.status==='impossible'));

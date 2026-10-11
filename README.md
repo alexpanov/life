@@ -2,7 +2,7 @@
 
 **Your world. Your quest.** A local-first, extensible real-world RPG with terminal colors and raised retro controls.
 
-This is working application source and a self-contained browser build, not a wireframe. It has not been published, hosted, or connected as a native ChatGPT app.
+This is working application source and a self-contained browser build, not a wireframe. It is hosted as a private Site. No live model or native ChatGPT app is connected.
 
 ## Play
 
@@ -17,11 +17,14 @@ npm start
 
 Open `http://127.0.0.1:4173` in your browser. The development server binds only to localhost by default.
 
-The personal build starts with the October 10 San Bernardino handoff: three shopping objectives complete, two exact CeraVe mineral sunscreens pending, two bonus inventory items, the closed Walmart search, and the remaining side quests. No store inventory, parking rule, church address, or flight time has been verified by the application.
+The personal build starts with the October 10 San Bernardino handoff: all five shopping objectives complete following the player’s confirmation, two bonus inventory items, the closed Walmart search, and the remaining side quests. No store inventory, parking rule, church address, or flight time has been verified by the application.
 
 ## What works
 
 - Quest completion, undo, editing, custom objectives, and impossible/no-penalty closure.
+- Persistent realms → dungeons → quests, with Croatia as home and Dino as the current travel realm.
+- Mood check-in, sparse optional leads, and a single active mission with explicit switch confirmation and outcome review.
+- Bounded local preference learning from choices and results; no generative model or self-modifying code.
 - Multiple reusable dungeons and independent local player profiles.
 - Earned XP, permanent field rank, and inventory derived from confirmed completion.
 - Practice logs, skill potential, inactivity-based readiness loss, current-level loss, and recovery mode.
@@ -136,3 +139,9 @@ python tests/ui_test.py --chromium /path/to/chromium
 Python Playwright and a Chromium executable are required only for browser tests. They are not runtime dependencies of the game.
 
 For an environment that blocks browser URL navigation, `tests/inline_ui_test.py` renders the unmodified HTML inline with an explicitly mocked Storage adapter. The report distinguishes this from live browser persistence and hosting tests.
+
+## v0.2 architecture
+
+`src/engine.mjs` owns save validation, world memory, rewards and realm transitions. `src/systems/prioritize.mjs` owns the human-controlled choose/execute/review cycle. `src/systems/learning.mjs` maintains bounded mood/category preferences and the latest 200 feedback events. Suggestions adapt through a score callback; world memory prevents repeated discovery leads, with a 48-hour global new-lead cooldown.
+
+`src/ui/tokens.css`, `console.css`, and `motion.css` provide shared semantic tokens, spacecraft console components and reduced-motion-aware transitions. `src/ui/icons.mjs` provides dependency-free MIT-licensed SVG icons. Both personal and clean starter builds use these same modules, with isolated save keys and offline caches. Legacy v1 saves migrate without replacing unrelated progress.

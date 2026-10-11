@@ -45,18 +45,21 @@ function launch(html, storage = new Map(), blocked = false) {
   return { window, nodes, events, storage };
 }
 
-test('game boots, completing a quest persists after restart', async () => {
+test('game starts at Home with the reported shopping completion; a new completion persists', async () => {
   const first = launch(game);
   const player = first.window.QuestOS.getSnapshot().players[0];
   assert.equal(player.name, 'Alex');
   const main = player.campaigns[0].quests.filter(q => q.category === 'main');
-  assert.equal(main.filter(q => q.status === 'done').length, 3);
-  const pending = main.find(q => q.status === 'pending');
+  assert.equal(main.filter(q => q.status === 'done').length, 5);
+  assert.match(first.nodes.get('app').innerHTML, /How are you feeling/);
+  assert.match(first.nodes.get('app').innerHTML, /QUEST COMPLETE/);
+  const pending = player.campaigns[0].quests.find(q => q.status === 'pending');
   const target = { dataset: { action: 'complete', id: pending.id } };
   first.events.get('click')({ target: { closest: () => target }, preventDefault() {} });
   await Promise.resolve();
   const restored = launch(game, first.storage).window.QuestOS.getSnapshot().players[0];
-  assert.equal(restored.campaigns[0].quests.filter(q => q.category === 'main' && q.status === 'done').length, 4);
+  assert.equal(restored.campaigns[0].quests.find(q => q.id === pending.id).status, 'done');
+  assert.equal(restored.campaigns[0].quests.filter(q => q.category === 'main' && q.status === 'done').length, 5);
 });
 
 test('starter has clean data and cannot inherit the game save on the same origin', () => {
@@ -94,4 +97,82 @@ test('starter and game offline caches are scoped separately', () => {
   assert.match(worker, /CACHE = .*self\.registration\.scope/);
   assert.match(worker, /const cache = await caches\.open\(CACHE\)/);
   assert.match(worker, /self\.registration\.scope\)\.href/);
+});
+
+function click(runtime, action, data = {}) {
+  const target = { dataset: { action, ...data } };
+  runtime.events.get('click')({ target: { closest: () => target }, preventDefault() {} });
+}
+
+test('a check-in selects an existing local quest and Start quest focuses its next move', async () => {
+  const runtime = launch(game);
+  click(runtime,'check-in',{mood:'tired'}); await Promise.resolve();
+  assert.match(runtime.nodes.get('app').innerHTML,/Find a legal place to sleep/);
+  click(runtime,'accept-quest'); await Promise.resolve();
+  const p = runtime.window.QuestOS.getSnapshot().players[0];
+  assert.equal(p.campaigns.flatMap(c=>c.quests).find(q=>q.id===p.focusQuestId).title,'Find a legal place to sleep');
+  assert.match(runtime.nodes.get('app').innerHTML,/NEXT MOVE|MAIN QUEST COMPLETE/);
+  assert.doesNotMatch(runtime.nodes.get('app').innerHTML,/unexplored territory|explored territory|discovery score/i);
+});
+
+test('realm switching restores its own quests and leaves completed shopping intact', async () => {
+  const runtime = launch(game);
+  const before = runtime.window.QuestOS.getSnapshot().players[0];
+  const dino = before.activeRealmId, home = before.homeRealmId;
+  click(runtime,'enter-realm',{id:home}); await Promise.resolve();
+  assert.equal(runtime.window.QuestOS.getSnapshot().players[0].activeRealmId,home);
+  assert.match(runtime.nodes.get('app').innerHTML,/Pray for a quest/);
+  click(runtime,'enter-realm',{id:dino}); await Promise.resolve();
+  const after = runtime.window.QuestOS.getSnapshot().players[0];
+  assert.equal(after.activeRealmId,dino);
+  assert.match(runtime.nodes.get('app').innerHTML,/Visit Saint Andrew/);
+  assert.equal(after.campaigns[0].quests.filter(q=>q.category==='main'&&q.status==='done').length,5);
+});
+
+test('empty starter shows prayer, and an optional lead is never added before acceptance', async () => {
+  const runtime=launch(starter);
+  assert.match(runtime.nodes.get('app').innerHTML,/Pray for a quest/);
+  click(runtime,'check-in',{mood:'curious'});await Promise.resolve();
+  assert.match(runtime.nodes.get('app').innerHTML,/OPTIONAL LEAD/);
+  assert.equal(runtime.window.QuestOS.getSnapshot().players[0].campaigns[0].quests.length,0);
+  click(runtime,'dismiss-quest');await Promise.resolve();
+  const restored=launch(starter,runtime.storage);
+  click(restored,'check-in',{mood:'curious'});await Promise.resolve();
+  assert.match(restored.nodes.get('app').innerHTML,/Pray for a quest/);
+  assert.doesNotMatch(restored.nodes.get('app').innerHTML,/OPTIONAL LEAD/);
+});
+
+test('switching mission requires a choice; browsing realms preserves global focus', async () => {
+  const run=launch(game), snapshot=()=>run.window.QuestOS.getSnapshot().players[0];
+  const quests=snapshot().campaigns.flatMap(c=>c.quests).filter(q=>q.status==='pending');
+  click(run,'start-quest',{id:quests[0].id});await Promise.resolve();
+  click(run,'start-quest',{id:quests[1].id});await Promise.resolve();
+  assert.equal(snapshot().focusQuestId,quests[0].id);
+  assert.match(run.nodes.get('modal').innerHTML,/Choose one next move/);
+  click(run,'retain-mission');await Promise.resolve();
+  assert.equal(snapshot().focusQuestId,quests[0].id);
+  click(run,'start-quest',{id:quests[1].id});await Promise.resolve();
+  click(run,'choose-mission',{id:quests[1].id});await Promise.resolve();
+  assert.equal(snapshot().focusQuestId,quests[1].id);
+  click(run,'enter-realm',{id:snapshot().homeRealmId});await Promise.resolve();
+  assert.equal(snapshot().focusQuestId,quests[1].id);
+  const restored=launch(game,run.storage);
+  assert.equal(restored.window.QuestOS.getSnapshot().players[0].focusQuestId,quests[1].id);
+});
+
+test('a result pauses for human reassessment and persists its local learning', async () => {
+  const run=launch(game), snapshot=()=>run.window.QuestOS.getSnapshot().players[0];
+  click(run,'check-in',{mood:'tired'});await Promise.resolve();
+  click(run,'accept-quest');await Promise.resolve();
+  const id=snapshot().focusQuestId;
+  click(run,'complete',{id});await Promise.resolve();
+  assert.equal(snapshot().operation.phase,'review');
+  assert.equal(snapshot().focusQuestId,'');
+  assert.match(run.nodes.get('app').innerHTML,/What matters most now/);
+  assert.equal(snapshot().learning.preferences['tired:rest'],3);
+  const reload=launch(game,run.storage);
+  assert.match(reload.nodes.get('app').innerHTML,/What matters most now/);
+  click(reload,'review-next');await Promise.resolve();
+  assert.equal(reload.window.QuestOS.getSnapshot().players[0].operation.phase,'choose');
+  assert.match(reload.nodes.get('app').innerHTML,/How are you feeling/);
 });

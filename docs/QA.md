@@ -1,6 +1,12 @@
+# v0.2 verification
+
+45 Node checks cover engine behavior, realm migration and return, sparse suggestions, isolated starter storage, distributed script boot, mission-switch decisions, persisted outcome review, and bounded local learning. Build completed for both distributions.
+
+No browser or physical iPhone verification was performed for this update because the supported browser QA capability was unavailable. The earlier browser checks below describe the previous build only.
+
 # QA scope
 
-## Passed
+## Historical checks (before v0.2) 
 
 - 25 Node rule tests: seeded objectives, exact remaining loot, completion idempotency, undo, impossible closure, zero-XP rewards, daily practice caps, two-month level loss, grace periods, recovery mode, return practice, templates, save validation, import limits, data-only extensions, atomic patches, isolated players, and hooks.
 - 15 inline Chromium interaction checks: desktop layout, completion and restored state, dialogs and editing, escaped user text, new players and dungeons, practice controls, recovery, simulator isolation, extension installation, reviewed ChatGPT patches, save download/import, simulated call flow, driving lock, mobile layouts, blocked storage, and corrupt-save preservation.

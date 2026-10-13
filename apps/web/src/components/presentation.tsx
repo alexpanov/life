@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { Cpu, Radio, UserRound } from "../../../../packages/design/src/index";
 import {
   senderLabels,
@@ -76,19 +76,41 @@ export function Area({
   name,
   label,
   value = "",
+  submitOnEnter = false,
+  labelledBy,
+  required = false,
+  maxLength,
+  rows = 4,
 }: {
   name: string;
   label: string;
   value?: string;
+  submitOnEnter?: boolean;
+  labelledBy?: string;
+  required?: boolean;
+  maxLength?: number;
+  rows?: number;
 }) {
+  function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (!submitOnEnter) return;
+    const native = event.nativeEvent;
+    if (native.isComposing || native.keyCode === 229) return;
+    if (event.key !== "Enter" || event.shiftKey) return;
+    event.preventDefault();
+    if (event.repeat) return;
+    event.currentTarget.form?.requestSubmit();
+  }
   return (
     <label className="field">
-      {label}
+      {labelledBy ? null : label}
       <textarea
         name={name}
         defaultValue={value}
-        maxLength={name === "json" ? 2000000 : 2000}
-        rows={4}
+        maxLength={maxLength ?? (name === "json" ? 2000000 : 2000)}
+        rows={rows}
+        required={required}
+        aria-labelledby={labelledBy}
+        onKeyDown={submitOnEnter ? onKeyDown : undefined}
       />
     </label>
   );

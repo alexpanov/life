@@ -15,9 +15,17 @@ export type Modal =
   | "blocked"
   | null;
 
-import type { Command, selectGame } from "../../../packages/core/src/index";
+import type {
+  Command,
+  QuestOffer,
+  selectGame,
+} from "../../../packages/core/src/index";
 export type GameView = ReturnType<typeof selectGame>;
 export interface PageActions {
   send: (command: Command) => boolean;
   open: (kind: Modal, id?: string) => void;
 }
+export type PrayStep =
+  | { readonly step: "mood" }
+  | { readonly step: "offer"; readonly offer: QuestOffer }
+  | { readonly step: "prayer" };

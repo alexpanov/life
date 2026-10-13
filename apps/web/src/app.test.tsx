@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import { describe, it, expect } from "vitest";
-import { render, screen, cleanup, act } from "@testing-library/react";
+import { render, screen, cleanup, act, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { App } from "./App";
@@ -20,13 +20,29 @@ async function setup(route = "/") {
   const controller = createGameController(persistence, context);
   await controller.load();
   await controller.flush();
-  render(
+  const rendered = render(
     <MemoryRouter initialEntries={[route]}>
       <App controller={controller} />
     </MemoryRouter>,
   );
-  return { controller, user: userEvent.setup() };
+  return {
+    controller,
+    user: userEvent.setup(),
+    persistence,
+    context,
+    rendered,
+  };
 }
+function questTitles(controller: ReturnType<typeof createGameController>) {
+  const game = controller.getSnapshot().game;
+  if (O.isNone(game)) return [];
+  return game.value.players.flatMap((player) =>
+    player.campaigns.flatMap((campaign) =>
+      campaign.quests.map((quest) => quest.title),
+    ),
+  );
+}
+const upTo = "What's up, boss? What are we up to?";
 describe("home navigation", () => {
   it("lists open quests and keeps removed screens closed", async () => {
     const { controller, user } = await setup();
@@ -162,6 +178,159 @@ describe("home navigation", () => {
               quest.title === "Call home" &&
               quest.lines.some((line) => line.text === "Call home"),
           ),
+        ),
+    ).toBe(true);
+  });
+});
+describe("quest interactions", () => {
+  it("submits onboarding with Enter and keeps the answer after reload", async () => {
+    const { user, controller, persistence, context, rendered } = await setup();
+    await user.type(screen.getByRole("textbox", { name: upTo }), "Walk the block");
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("heading", { name: "Walk the block" })).toBeVisible();
+    await controller.flush();
+    rendered.unmount();
+    const restored = createGameController(persistence, context);
+    await restored.load();
+    render(
+      <MemoryRouter>
+        <App controller={restored} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole("heading", { name: "Walk the block" })).toBeVisible();
+  });
+  it("inserts a newline for Shift+Enter and ignores IME and held Enter", async () => {
+    const { user } = await setup();
+    const field = screen.getByRole("textbox", { name: upTo });
+    await user.type(field, "Line");
+    await user.keyboard("{Shift>}{Enter}{/Shift}");
+    expect(field).toHaveValue("Line\n");
+    expect(screen.getByRole("heading", { name: "Home" })).toBeVisible();
+    fireEvent.keyDown(field, { key: "Enter", keyCode: 229 });
+    fireEvent.keyDown(field, { key: "Enter", isComposing: true });
+    fireEvent.keyDown(field, { key: "Enter", repeat: true });
+    expect(screen.getByRole("heading", { name: "Home" })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Line" })).not.toBeInTheDocument();
+  });
+  it("keeps an empty answer off the board", async () => {
+    const { user } = await setup();
+    const field = screen.getByRole("textbox", { name: upTo });
+    field.focus();
+    await user.keyboard("{Enter}");
+    expect(field).toBeInvalid();
+    expect(screen.getByRole("heading", { name: "Home" })).toBeVisible();
+  });
+  it("shows the prayer when check-in has no offer and opens quest creation", async () => {
+    const { user, controller } = await setup();
+    await user.click(screen.getByRole("button", { name: "Pray for a quest" }));
+    await user.selectOptions(screen.getByLabelText("Today I feel"), "ready");
+    await user.click(screen.getByRole("button", { name: "Pray for a quest" }));
+    expect(
+      screen.getByRole("heading", { name: "One good next step." }),
+    ).toBeVisible();
+    expect(
+      screen.getByText(/Lord Jesus Christ, guide me toward what is good/),
+    ).toBeVisible();
+    expect(
+      screen.getByText(/What is one good thing you can do next/),
+    ).toBeVisible();
+    expect(questTitles(controller)).toEqual([]);
+    await user.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByLabelText("Today I feel")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Pray for a quest" }));
+    await user.click(screen.getByRole("button", { name: "Add my own quest" }));
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toBeVisible();
+    expect(screen.getByLabelText("Objective")).toBeVisible();
+    expect(questTitles(controller)).toEqual([]);
+  });
+  it("shows a new offer and an existing quest offer until he takes one", async () => {
+    const { user, controller } = await setup();
+    await user.click(screen.getByRole("button", { name: "Pray for a quest" }));
+    await user.selectOptions(screen.getByLabelText("Today I feel"), "curious");
+    await user.click(screen.getByRole("button", { name: "Pray for a quest" }));
+    expect(
+      screen.getByRole("heading", { name: "Find one place worth returning to" }),
+    ).toBeVisible();
+    expect(screen.getByText(/note one nearby place/)).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Complete quest" }),
+    ).not.toBeInTheDocument();
+    expect(questTitles(controller)).not.toContain(
+      "Find one place worth returning to",
+    );
+    await user.click(screen.getByRole("button", { name: "Not now" }));
+    expect(screen.getByLabelText("Today I feel")).toBeVisible();
+    expect(questTitles(controller)).not.toContain(
+      "Find one place worth returning to",
+    );
+    cleanup();
+    const next = await setup();
+    await next.user.click(screen.getByRole("button", { name: "Pray for a quest" }));
+    await act(async () => {
+      next.controller.send({
+        type: "add-quest",
+        quest: { title: "Drink water", nextMove: "Fill a glass", xp: 10 },
+      });
+      await next.controller.flush();
+    });
+    await next.user.selectOptions(screen.getByLabelText("Today I feel"), "ready");
+    await next.user.click(screen.getByRole("button", { name: "Pray for a quest" }));
+    expect(screen.getByRole("heading", { name: "Drink water" })).toBeVisible();
+    expect(screen.getByText("Fill a glass")).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Complete quest" }),
+    ).not.toBeInTheDocument();
+    await next.user.click(screen.getByRole("button", { name: "Take quest" }));
+    expect(screen.getByRole("button", { name: "Complete quest" })).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Take quest" }),
+    ).not.toBeInTheDocument();
+  });
+  it("keeps check-in on the player who started it", async () => {
+    const { user, controller } = await setup();
+    await user.click(screen.getByRole("button", { name: "Pray for a quest" }));
+    const game = controller.getSnapshot().game;
+    if (O.isNone(game)) throw new Error("No game");
+    const first = game.value.activePlayerId;
+    await act(async () => {
+      controller.send({ type: "add-player", name: "Other" });
+      await controller.flush();
+    });
+    expect(screen.getByText(upTo)).toBeVisible();
+    expect(screen.queryByLabelText("Today I feel")).not.toBeInTheDocument();
+    await act(async () => {
+      controller.send({ type: "switch-player", playerId: first });
+      await controller.flush();
+    });
+    expect(screen.getByLabelText("Today I feel")).toBeVisible();
+  });
+  it("submits a takeaway with Enter and leaves other notes alone", async () => {
+    const { user, controller } = await setup();
+    await act(async () => {
+      controller.send({
+        type: "add-quest",
+        quest: { title: "Drink water", nextMove: "Fill a glass", xp: 10 },
+      });
+      await controller.flush();
+    });
+    await user.click(screen.getByRole("link", { name: "Make progress" }));
+    const note = screen.getByLabelText("What progress did you make?");
+    await user.type(note, "Filled");
+    await user.keyboard("{Enter}");
+    expect(note).toHaveValue("Filled\n");
+    expect(screen.queryByText("Filled")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("link", { name: "Back home" }));
+    await user.click(screen.getByRole("button", { name: "Complete quest" }));
+    const takeaway = screen.getByLabelText("Your takeaway");
+    await user.type(takeaway, "Keep a glass nearby");
+    await user.keyboard("{Enter}");
+    expect(screen.getByText(upTo)).toBeVisible();
+    const game = controller.getSnapshot().game;
+    expect(
+      O.isSome(game) &&
+        game.value.players[0]!.sidekick.snippets.some((snippet) =>
+          snippet.text.includes("Keep a glass nearby"),
         ),
     ).toBe(true);
   });

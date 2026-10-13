@@ -31,7 +31,7 @@ import type { GameController } from "../../../packages/application/src/controlle
 import { Sender, Field, Area } from "./components/presentation";
 import { H3, Label } from "../../../packages/design/src/type";
 import { download } from "./download";
-import type { Modal } from "./ui-types";
+import type { Modal, PrayStep } from "./ui-types";
 import { HomePage } from "./pages/HomePage";
 import { QuestPage } from "./pages/QuestPage";
 export { Sender } from "./components/presentation";
@@ -44,7 +44,10 @@ export function App({ controller }: { controller: GameController }) {
       controller.getSnapshot,
     ),
     navigate = useNavigate();
-  const [modal, setModal] = useState<Modal>(null),
+  const [prayByPlayer, setPrayByPlayer] = useState<Record<string, PrayStep>>(
+      {},
+    ),
+    [modal, setModal] = useState<Modal>(null),
     [selectedId, setSelectedId] = useState(""),
     [error, setError] = useState(""),
     [preview, setPreview] = useState<unknown>(null),
@@ -92,6 +95,17 @@ export function App({ controller }: { controller: GameController }) {
       .find((q) => q.id === selectedId),
     selectedRealm = player.realms.find((r) => r.id === selectedId),
     selectedSkill = player.skills.find((s) => s.id === selectedId);
+  function setPray(playerId: string, step: PrayStep | undefined) {
+    setPrayByPlayer((current) => {
+      if (step === undefined) {
+        if (!(playerId in current)) return current;
+        const next = { ...current };
+        delete next[playerId];
+        return next;
+      }
+      return { ...current, [playerId]: step };
+    });
+  }
   function send(command: Command) {
     try {
       const result =
@@ -121,6 +135,21 @@ export function App({ controller }: { controller: GameController }) {
         setCall(result.transmission.value);
         setModal("call");
       }
+      if (command.type === "check-in")
+        setPray(
+          player.id,
+          O.isSome(result.offer)
+            ? { step: "offer", offer: result.offer.value }
+            : { step: "prayer" },
+        );
+      else if (command.type === "dismiss-offer")
+        setPray(player.id, { step: "mood" });
+      else if (
+        command.type === "accept-offer" ||
+        command.type === "add-quest" ||
+        command.type === "start-quest"
+      )
+        setPray(player.id, undefined);
       return true;
     } catch (e) {
       setError(
@@ -221,7 +250,16 @@ export function App({ controller }: { controller: GameController }) {
     }
     if (command && send(command)) setModal(null);
   }
-  const home = <HomePage view={view} send={send} />;
+  const home = (
+    <HomePage
+      view={view}
+      send={send}
+      open={open}
+      pray={prayByPlayer[player.id]}
+      showMood={() => setPray(player.id, { step: "mood" })}
+      leavePray={() => setPray(player.id, undefined)}
+    />
+  );
   return (
     <div className="app-shell">
       <div>
